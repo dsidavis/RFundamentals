@@ -1,0 +1,1510 @@
+
+R Under development (unstable) (2016-06-30 r70858) -- "Unsuffered Consequences"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.2.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+PID = 44453 
+Time = 2017-07-11 08:56:39 
+Dir = /Users/duncan/DSI/Workshops/RFundamentals 
+1> 
+3> 1
+[1] 1
+4> e = parse(text = "1")
+6> e
+expression(1)
+7> e[[1]]
+[1] 1
+8> class(e[[1]])
+[1] "numeric"
+10> e = parse(text = 'pi')
+11> e
+expression(pi)
+12> e[[1]]
+pi
+13> class(e[[1]])
+[1] "name"
+15> 1+2
+[1] 3
+16> pi
+[1] 3.141593
+17> ls()
+[1] "bigfiles"     "e"            "getFunctions" "mostRecent"  
+[5] "Open"         "quartz"      
+18> base::pi
+[1] 3.141593
+19> pi = 3
+20> pi
+[1] 3
+21> rm(pi)
+23> search()
+ [1] ".GlobalEnv"        "ESSR"              "package:stats"    
+ [4] "package:graphics"  "package:grDevices" "package:datasets" 
+ [7] "package:utils"     "package:methods"   "Autoloads"        
+[10] "package:base"     
+24> globalenv()
+<environment: R_GlobalEnv>
+25> find("pi")
+[1] "package:base"
+27> parent.env(globalenv())
+<environment: 0x7ff07944ff10>
+attr(,"name")
+[1] "ESSR"
+29> parente.env(parent.env(globalenv()))
+Error: could not find function "parente.env"
+No suitable frames for recover()
+31> parent.env(parent.env(globalenv()))
+<environment: package:stats>
+attr(,"name")
+[1] "package:stats"
+attr(,"path")
+[1] "/Users/duncan/Projects/R-3.3-devel/library/stats"
+32> search()
+ [1] ".GlobalEnv"        "ESSR"              "package:stats"    
+ [4] "package:graphics"  "package:grDevices" "package:datasets" 
+ [7] "package:utils"     "package:methods"   "Autoloads"        
+[10] "package:base"     
+33> library(stats4)
+35> search()
+ [1] ".GlobalEnv"        "package:stats4"    "ESSR"             
+ [4] "package:stats"     "package:graphics"  "package:grDevices"
+ [7] "package:datasets"  "package:utils"     "package:methods"  
+[10] "Autoloads"         "package:base"     
+36> library(rpart, 10)
+37> search()
+ [1] ".GlobalEnv"        "package:rpart"     "package:stats4"   
+ [4] "ESSR"              "package:stats"     "package:graphics" 
+ [7] "package:grDevices" "package:datasets"  "package:utils"    
+[10] "package:methods"   "Autoloads"         "package:base"     
+38> library(ReadPDF, pos = 10)
+39> search()
+ [1] ".GlobalEnv"        "package:rpart"     "package:stats4"   
+ [4] "ESSR"              "package:stats"     "package:graphics" 
+ [7] "package:grDevices" "package:datasets"  "package:utils"    
+[10] "package:ReadPDF"   "package:methods"   "Autoloads"        
+[13] "package:base"     
+40> XML::xmlParse
+*** output flushed ***
+41> search()
+ [1] ".GlobalEnv"        "package:rpart"     "package:stats4"   
+ [4] "ESSR"              "package:stats"     "package:graphics" 
+ [7] "package:grDevices" "package:datasets"  "package:utils"    
+[10] "package:ReadPDF"   "package:methods"   "Autoloads"        
+[13] "package:base"     
+44> XML::trim
+Error: 'trim' is not an exported object from 'namespace:XML'
+
+Enter a frame number, or 0 to exit   
+
+1: XML::trim
+2: getExportedValue(pkg, name)
+
+Selection: 0
+44> 
+44> XML:::trim
+function (x) 
+gsub("(^[[:space:]]+|[[:space:]]+$)", "", x)
+<environment: namespace:XML>
+45> e = parse(text = "1+2")
+46> class(e)
+[1] "expression"
+48> e
+expression(1+2)
+49> e[[1]]
+1 + 2
+50> class(e[[1]])
+[1] "call"
+52> e[[1][[1]]
+Error: unexpected '[[' in "e[[1][["
+No suitable frames for recover()
+52> e[[1]][[1]
++   C-c C-c
+No suitable frames for recover()
+52> e[[1]][[1]]
+`+`
+53> e = parse(text = "1:10")
+54> e[[1]][[1]]
+`:`
+55> XML::xmlParse
+*** output flushed ***
+56> +
++ +
++ 1
+[1] 1
+57> `+`
+function (e1, e2)  .Primitive("+")
+58> while
++   C-c C-c
+No suitable frames for recover()
+58> `while`
+.Primitive("while")
+59> e
+expression(1:10)
+60> e[[1]]
+1:10
+61> e = parse(text = "T; TRUE")
+62> e
+expression(T, TRUE)
+63> length(e)
+[1] 2
+65> e[[1]]
+T
+66> e[[2]]
+[1] TRUE
+67> sapply(e, class)
+[1] "name"    "logical"
+69> T = 0
+70> e = parse(text = "'T'; T; TRUE")
+71> length(e)
+[1] 3
+73> sapply(e, class)
+[1] "character" "name"      "logical"  
+74> plot.default
+function (x, y = NULL, type = "p", xlim = NULL, ylim = NULL, 
+    log = "", main = NULL, sub = NULL, xlab = NULL, ylab = NULL, 
+    ann = par("ann"), axes = TRUE, frame.plot = axes, panel.first = NULL, 
+    panel.last = NULL, asp = NA, ...) 
+{
+    localAxis <- function(..., col, bg, pch, cex, lty, lwd) Axis(...)
+    localBox <- function(..., col, bg, pch, cex, lty, lwd) box(...)
+    localWindow <- function(..., col, bg, pch, cex, lty, lwd) plot.window(...)
+    localTitle <- function(..., col, bg, pch, cex, lty, lwd) title(...)
+    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+    xy <- xy.coords(x, y, xlabel, ylabel, log)
+    xlab <- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab <- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    xlim <- if (is.null(xlim)) 
+        range(xy$x[is.finite(xy$x)])
+    else xlim
+    ylim <- if (is.null(ylim)) 
+        range(xy$y[is.finite(xy$y)])
+    else ylim
+    dev.hold()
+    on.exit(dev.flush())
+    plot.new()
+    localWindow(xlim, ylim, log, asp, ...)
+    panel.first
+    plot.xy(xy, type, ...)
+    panel.last
+    if (axes) {
+        localAxis(if (is.null(y)) 
+            xy$x
+        else x, side = 1, ...)
+        localAxis(if (is.null(y)) 
+            x
+        else y, side = 2, ...)
+    }
+    if (frame.plot) 
+        localBox(...)
+    if (ann) 
+        localTitle(main = main, sub = sub, xlab = xlab, ylab = ylab, 
+            ...)
+    invisible()
+}
+<bytecode: 0x7ff07ac0f878>
+<environment: namespace:graphics>
+75> scatter.smooth
+function (x, y = NULL, span = 2/3, degree = 1, family = c("symmetric", 
+    "gaussian"), xlab = NULL, ylab = NULL, ylim = range(y, pred$y, 
+    na.rm = TRUE), evaluation = 50, ..., lpars = list()) 
+{
+    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+    xy <- xy.coords(x, y, xlabel, ylabel)
+    x <- xy$x
+    y <- xy$y
+    xlab <- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab <- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    pred <- loess.smooth(x, y, span, degree, family, evaluation)
+    plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    do.call(lines, c(list(pred), lpars))
+    invisible()
+}
+<bytecode: 0x7ff07d09ae60>
+<environment: namespace:stats>
+81> formals(scatter.smooth)
+$x
+
+
+$y
+NULL
+
+$span
+2/3
+
+$degree
+[1] 1
+
+$family
+c("symmetric", "gaussian")
+
+$xlab
+NULL
+
+$ylab
+NULL
+
+$ylim
+range(y, pred$y, na.rm = TRUE)
+
+$evaluation
+[1] 50
+
+$...
+
+
+$lpars
+list()
+
+86> sum
+*** output flushed ***
+94> match.call(scatter.smooth, quote(scatter.smooth(mtcars[, c("mpg", "wt")], fam = "gaussian",
+               xl = "Weight of car", yla = "Miles per Gallon",
+               lpars = list(lwd = 2, col = "red"),
+               main = "Motor Trends Data")))
+match.call(scatter.smooth, quote(scatter.smooth(mtcars[, c("mpg", "wt")], fam = "gaussian",
++                xl = "Weight of car", yla = "Miles per Gallon",
++                lpars = list(lwd = 2, col = "red"),
++                main = "Motor Trends Data")))
+scatter.smooth(x = mtcars[, c("mpg", "wt")], family = "gaussian", 
+    xlab = "Weight of car", ylab = "Miles per Gallon", main = "Motor Trends Data", 
+    lpars = list(lwd = 2, col = "red"))
+97> match.call(scatter.smooth, scatter.smooth(mtcars[, c("mpg", "wt")], fam = "gaussian",
+               xl = "Weight of car", yla = "Miles per Gallon",
+               lpars = list(lwd = 2, col = "red"),
+               main = "Motor Trends Data"))
+match.call(scatter.smooth, scatter.smooth(mtcars[, c("mpg", "wt")], fam = "gaussian",
++                xl = "Weight of car", yla = "Miles per Gallon",
++                lpars = list(lwd = 2, col = "red"),
++                main = "Motor Trends Data"))
+Error in match.call(scatter.smooth, scatter.smooth(mtcars[, c("mpg", "wt")],  : 
+  invalid 'call' argument
+
+Enter a frame number, or 0 to exit   
+
+1: match.call(scatter.smooth, scatter.smooth(mtcars[, c("mpg", "wt")
+
+Selection: 0
+98> match.call(scatter.smooth, quote(scatter.smooth(mtcars[, c("mpg", "wt")], fam = "gaussian",
+               xl = "Weight of car", yla = "Miles per Gallon",
+               lpars = list(lwd = 2, col = "red"),
+               main = "Motor Trends Data")))
+match.call(scatter.smooth, quote(scatter.smooth(mtcars[, c("mpg", "wt")], fam = "gaussian",
++                xl = "Weight of car", yla = "Miles per Gallon",
++                lpars = list(lwd = 2, col = "red"),
++                main = "Motor Trends Data")))
+scatter.smooth(x = mtcars[, c("mpg", "wt")], family = "gaussian", 
+    xlab = "Weight of car", ylab = "Miles per Gallon", main = "Motor Trends Data", 
+    lpars = list(lwd = 2, col = "red"))
+99> sum
+function (..., na.rm = FALSE)  .Primitive("sum")
+101> sum(1, 2, NA, na.rm = TRUE)
+[1] 3
+103> sum(1, 2, na.rm = TRUE)
+[1] 3
+105> sum(1, 2, na.r = TRUE)
+[1] 4
+107> 1L
+[1] 1
+108> scatter.smooth
+function (x, y = NULL, span = 2/3, degree = 1, family = c("symmetric", 
+    "gaussian"), xlab = NULL, ylab = NULL, ylim = range(y, pred$y, 
+    na.rm = TRUE), evaluation = 50, ..., lpars = list()) 
+{
+>    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+    xy <- xy.coords(x, y, xlabel, ylabel)
+    x <- xy$x
+    y <- xy$y
+    xlab <- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab <- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    pred <- loess.smooth(x, y, span, degree, family, evaluation)
+    plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    do.call(lines, c(list(pred), lpars))
+    invisible()
+}
+<bytecode: 0x7ff07d09ae60>
+<environment: namespace:stats>
+109> [
+Error: unexpected '[' in "["
+No suitable frames for recover()
+109> `[`
+.Primitive("[")
+110> ?`[`
+112> 
+112> ?"["
+113> xy.coords
+function (x, y = NULL, xlab = NULL, ylab = NULL, log = NULL, 
+    recycle = FALSE, setLab = TRUE) 
+{
+    if (is.null(y)) {
+        if (is.null(ylab)) 
+            ylab <- xlab
+        if (is.language(x)) {
+            if (inherits(x, "formula") && length(x) == 3) {
+                if (setLab) {
+                  ylab <- deparse(x[[2L]])
+                  xlab <- deparse(x[[3L]])
+                }
+                y <- eval(x[[2L]], environment(x))
+                x <- eval(x[[3L]], environment(x))
+            }
+            else stop("invalid first argument")
+        }
+        else if (inherits(x, "ts")) {
+            y <- if (is.matrix(x)) 
+                x[, 1]
+            else x
+            x <- stats::time(x)
+            if (setLab) 
+                xlab <- "Time"
+        }
+        else if (is.complex(x)) {
+            y <- Im(x)
+            x <- Re(x)
+            if (setLab) {
+                xlab <- paste0("Re(", ylab, ")")
+                ylab <- paste0("Im(", ylab, ")")
+            }
+        }
+        else if (is.matrix(x) || is.data.frame(x)) {
+            x <- data.matrix(x)
+            if (ncol(x) == 1) {
+                if (setLab) 
+                  xlab <- "Index"
+                y <- x[, 1]
+                x <- seq_along(y)
+            }
+            else {
+                colnames <- dimnames(x)[[2L]]
+                if (setLab) {
+                  if (is.null(colnames)) {
+                    xlab <- paste0(ylab, "[,1]")
+                    ylab <- paste0(ylab, "[,2]")
+                  }
+                  else {
+                    xlab <- colnames[1L]
+                    ylab <- colnames[2L]
+                  }
+                }
+                y <- x[, 2]
+                x <- x[, 1]
+            }
+        }
+        else if (is.list(x)) {
+            if (all(c("x", "y") %in% names(x))) {
+                if (setLab) {
+                  xlab <- paste0(ylab, "$x")
+                  ylab <- paste0(ylab, "$y")
+                }
+                y <- x[["y"]]
+                x <- x[["x"]]
+            }
+            else stop("'x' is a list, but does not have components 'x' and 'y'")
+        }
+        else {
+            if (is.factor(x)) 
+                x <- as.numeric(x)
+            if (setLab) 
+                xlab <- "Index"
+            y <- x
+            x <- seq_along(x)
+        }
+    }
+    if (inherits(x, "POSIXt")) 
+        x <- as.POSIXct(x)
+    if (length(x) != length(y)) {
+        if (recycle) {
+            if ((nx <- length(x)) < (ny <- length(y))) 
+                x <- rep_len(x, ny)
+            else y <- rep_len(y, nx)
+        }
+        else stop("'x' and 'y' lengths differ")
+    }
+    if (length(log) && log != "") {
+        log <- strsplit(log, NULL)[[1L]]
+        if ("x" %in% log && any(ii <- x <= 0 & !is.na(x))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d x value <= 0 omitted from logarithmic plot", 
+                "%d x values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            x[ii] <- NA
+        }
+        if ("y" %in% log && any(ii <- y <= 0 & !is.na(y))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d y value <= 0 omitted from logarithmic plot", 
+                "%d y values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            y[ii] <- NA
+        }
+    }
+    list(x = as.double(x), y = as.double(y), xlab = xlab, ylab = ylab)
+}
+<bytecode: 0x7ff07d3dbf40>
+<environment: namespace:grDevices>
+114> environment(scatter.smooth)
+<environment: namespace:stats>
+117> parent.env(environment(scatter.smooth))
+<environment: 0x7ff078ead1b8>
+attr(,"name")
+[1] "imports:stats"
+118> parent.env(parent.env(environment(scatter.smooth)))
+<environment: namespace:base>
+119> parent.env(parent.env(parent.env(environment(scatter.smooth))))
+<environment: R_GlobalEnv>
+120> f = function(a, b)  a + b
+121> environment(f)
+<environment: R_GlobalEnv>
+122> debug(f)
+124> f(1, 2)
+debugging in: f(1, 2)
+debug: a + b
+Browse[2]> ls()
+[1] "a" "b"
+Browse[2]>   C-c C-c
+
+Enter a frame number, or 0 to exit   
+
+1: f(1, 2)
+
+Selection: 0
+Browse[2]> 
+exiting from: f(1, 2)
+[1] 3
+127> f(1, 2 + 6)
+debugging in: f(1, 2 + 6)
+debug: a + b
+Browse[2]> sys.frames()
+[[1]]
+<environment: 0x7ff07d603920>
+
+Browse[2]> ls(sys.frames()[[1]])
+[1] "a" "b"
+Browse[2]> parent.env(sys.frames()[[1]])
+<environment: R_GlobalEnv>
+Browse[2]> c
+exiting from: f(1, 2 + 6)
+[1] 9
+133> debug(scatter.smooth)
+134> debug(rnorm)
+140> debug(rpois)
+141> scatter.smooth(rnorm(10), rpois(10), fam = "gaussian",
+               xl = "Weight of car", yla = "Miles per Gallon",
+               lpars = list(lwd = 2, col = "red"),
+               main = "Motor Trends Data")
+scatter.smooth(rnorm(10), rpois(10), fam = "gaussian",
++                xl = "Weight of car", yla = "Miles per Gallon",
++                lpars = list(lwd = 2, col = "red"),
++                main = "Motor Trends Data")
+debugging in: scatter.smooth(rnorm(10), rpois(10), fam = "gaussian", xl = "Weight of car", 
+    yla = "Miles per Gallon", lpars = list(lwd = 2, col = "red"), 
+    main = "Motor Trends Data")
+debug: {
+    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+    xy <- xy.coords(x, y, xlabel, ylabel)
+    x <- xy$x
+    y <- xy$y
+    xlab <- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab <- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    pred <- loess.smooth(x, y, span, degree, family, evaluation)
+    plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    do.call(lines, c(list(pred), lpars))
+    invisible()
+}
+Browse[2]> n
+debug: xlabel <- if (!missing(x)) deparse(substitute(x))
+Browse[2]> n
+debug: deparse(substitute(x))
+Browse[2]> n
+debug: ylabel <- if (!missing(y)) deparse(substitute(y))
+Browse[2]> n
+debug: deparse(substitute(y))
+Browse[2]> n
+debug: xy <- xy.coords(x, y, xlabel, ylabel)
+Browse[2]> sys.calls()
+[[1]]
+scatter.smooth(rnorm(10), rpois(10), fam = "gaussian", xl = "Weight of car", 
+    yla = "Miles per Gallon", lpars = list(lwd = 2, col = "red"), 
+    main = "Motor Trends Data")
+
+Browse[2]> n
+debugging in: rpois(10)
+debug: .Call(C_rpois, n, lambda)
+Browse[3]> c
+Error in rpois(10) : argument "lambda" is missing, with no default
+
+Enter a frame number, or 0 to exit   
+
+1: scatter.smooth(rnorm(10), rpois(10), fam = "gaussian", xl = "Weig
+2: xy.coords(x, y, xlabel, ylabel)
+3: rpois(10)
+
+Selection: 0
+143> 
+143> debug(xy.coords)
+144> scatter.smooth(rnorm(10), rpois(10), fam = "gaussian",
+               xl = "Weight of car", yla = "Miles per Gallon",
+               lpars = list(lwd = 2, col = "red"),
+               main = "Motor Trends Data")
+scatter.smooth(rnorm(10), rpois(10), fam = "gaussian",
++                xl = "Weight of car", yla = "Miles per Gallon",
++                lpars = list(lwd = 2, col = "red"),
++                main = "Motor Trends Data")
+debugging in: scatter.smooth(rnorm(10), rpois(10), fam = "gaussian", xl = "Weight of car", 
+    yla = "Miles per Gallon", lpars = list(lwd = 2, col = "red"), 
+    main = "Motor Trends Data")
+debug: {
+    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+    xy <- xy.coords(x, y, xlabel, ylabel)
+    x <- xy$x
+    y <- xy$y
+    xlab <- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab <- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    pred <- loess.smooth(x, y, span, degree, family, evaluation)
+    plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    do.call(lines, c(list(pred), lpars))
+    invisible()
+}
+Browse[2]> n
+debug: xlabel <- if (!missing(x)) deparse(substitute(x))
+Browse[2]> 
+debug: deparse(substitute(x))
+Browse[2]> 
+debug: ylabel <- if (!missing(y)) deparse(substitute(y))
+Browse[2]> 
+debug: deparse(substitute(y))
+Browse[2]> 
+debug: xy <- xy.coords(x, y, xlabel, ylabel)
+Browse[2]> 
+debugging in: xy.coords(x, y, xlabel, ylabel)
+debug: {
+    if (is.null(y)) {
+        if (is.null(ylab)) 
+            ylab <- xlab
+        if (is.language(x)) {
+            if (inherits(x, "formula") && length(x) == 3) {
+                if (setLab) {
+                  ylab <- deparse(x[[2L]])
+                  xlab <- deparse(x[[3L]])
+                }
+                y <- eval(x[[2L]], environment(x))
+                x <- eval(x[[3L]], environment(x))
+            }
+            else stop("invalid first argument")
+        }
+        else if (inherits(x, "ts")) {
+            y <- if (is.matrix(x)) 
+                x[, 1]
+            else x
+            x <- stats::time(x)
+            if (setLab) 
+                xlab <- "Time"
+        }
+        else if (is.complex(x)) {
+            y <- Im(x)
+            x <- Re(x)
+            if (setLab) {
+                xlab <- paste0("Re(", ylab, ")")
+                ylab <- paste0("Im(", ylab, ")")
+            }
+        }
+        else if (is.matrix(x) || is.data.frame(x)) {
+            x <- data.matrix(x)
+            if (ncol(x) == 1) {
+                if (setLab) 
+                  xlab <- "Index"
+                y <- x[, 1]
+                x <- seq_along(y)
+            }
+            else {
+                colnames <- dimnames(x)[[2L]]
+                if (setLab) {
+                  if (is.null(colnames)) {
+                    xlab <- paste0(ylab, "[,1]")
+                    ylab <- paste0(ylab, "[,2]")
+                  }
+                  else {
+                    xlab <- colnames[1L]
+                    ylab <- colnames[2L]
+                  }
+                }
+                y <- x[, 2]
+                x <- x[, 1]
+            }
+        }
+        else if (is.list(x)) {
+            if (all(c("x", "y") %in% names(x))) {
+                if (setLab) {
+                  xlab <- paste0(ylab, "$x")
+                  ylab <- paste0(ylab, "$y")
+                }
+                y <- x[["y"]]
+                x <- x[["x"]]
+            }
+            else stop("'x' is a list, but does not have components 'x' and 'y'")
+        }
+        else {
+            if (is.factor(x)) 
+                x <- as.numeric(x)
+            if (setLab) 
+                xlab <- "Index"
+            y <- x
+            x <- seq_along(x)
+        }
+    }
+    if (inherits(x, "POSIXt")) 
+        x <- as.POSIXct(x)
+    if (length(x) != length(y)) {
+        if (recycle) {
+            if ((nx <- length(x)) < (ny <- length(y))) 
+                x <- rep_len(x, ny)
+            else y <- rep_len(y, nx)
+        }
+        else stop("'x' and 'y' lengths differ")
+    }
+    if (length(log) && log != "") {
+        log <- strsplit(log, NULL)[[1L]]
+        if ("x" %in% log && any(ii <- x <= 0 & !is.na(x))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d x value <= 0 omitted from logarithmic plot", 
+                "%d x values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            x[ii] <- NA
+        }
+        if ("y" %in% log && any(ii <- y <= 0 & !is.na(y))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d y value <= 0 omitted from logarithmic plot", 
+                "%d y values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            y[ii] <- NA
+        }
+    }
+    list(x = as.double(x), y = as.double(y), xlab = xlab, ylab = ylab)
+}
+Browse[3]> sys.calls()
+[[1]]
+scatter.smooth(rnorm(10), rpois(10), fam = "gaussian", xl = "Weight of car", 
+    yla = "Miles per Gallon", lpars = list(lwd = 2, col = "red"), 
+    main = "Motor Trends Data")
+
+[[2]]
+xy.coords(x, y, xlabel, ylabel)
+
+Browse[3]> n
+debug: if (is.null(y)) {
+    if (is.null(ylab)) 
+        ylab <- xlab
+    if (is.language(x)) {
+        if (inherits(x, "formula") && length(x) == 3) {
+            if (setLab) {
+                ylab <- deparse(x[[2L]])
+                xlab <- deparse(x[[3L]])
+            }
+            y <- eval(x[[2L]], environment(x))
+            x <- eval(x[[3L]], environment(x))
+        }
+        else stop("invalid first argument")
+    }
+    else if (inherits(x, "ts")) {
+        y <- if (is.matrix(x)) 
+            x[, 1]
+        else x
+        x <- stats::time(x)
+        if (setLab) 
+            xlab <- "Time"
+    }
+    else if (is.complex(x)) {
+        y <- Im(x)
+        x <- Re(x)
+        if (setLab) {
+            xlab <- paste0("Re(", ylab, ")")
+            ylab <- paste0("Im(", ylab, ")")
+        }
+    }
+    else if (is.matrix(x) || is.data.frame(x)) {
+        x <- data.matrix(x)
+        if (ncol(x) == 1) {
+            if (setLab) 
+                xlab <- "Index"
+            y <- x[, 1]
+            x <- seq_along(y)
+        }
+        else {
+            colnames <- dimnames(x)[[2L]]
+            if (setLab) {
+                if (is.null(colnames)) {
+                  xlab <- paste0(ylab, "[,1]")
+                  ylab <- paste0(ylab, "[,2]")
+                }
+                else {
+                  xlab <- colnames[1L]
+                  ylab <- colnames[2L]
+                }
+            }
+            y <- x[, 2]
+            x <- x[, 1]
+        }
+    }
+    else if (is.list(x)) {
+        if (all(c("x", "y") %in% names(x))) {
+            if (setLab) {
+                xlab <- paste0(ylab, "$x")
+                ylab <- paste0(ylab, "$y")
+            }
+            y <- x[["y"]]
+            x <- x[["x"]]
+        }
+        else stop("'x' is a list, but does not have components 'x' and 'y'")
+    }
+    else {
+        if (is.factor(x)) 
+            x <- as.numeric(x)
+        if (setLab) 
+            xlab <- "Index"
+        y <- x
+        x <- seq_along(x)
+    }
+}
+Browse[3]> 
+debugging in: rpois(10)
+debug: .Call(C_rpois, n, lambda)
+Browse[4]> sys.calls()
+[[1]]
+scatter.smooth(rnorm(10), rpois(10), fam = "gaussian", xl = "Weight of car", 
+    yla = "Miles per Gallon", lpars = list(lwd = 2, col = "red"), 
+    main = "Motor Trends Data")
+
+[[2]]
+xy.coords(x, y, xlabel, ylabel)
+
+[[3]]
+rpois(10)
+
+Browse[4]> 
+Error in rpois(10) : argument "lambda" is missing, with no default
+
+Enter a frame number, or 0 to exit   
+
+1: scatter.smooth(rnorm(10), rpois(10), fam = "gaussian", xl = "Weig
+2: xy.coords(x, y, xlabel, ylabel)
+3: rpois(10)
+
+Selection: c
+Enter an item from the menu, or 0 to exit
+Selection: 0
+146> 
+146> scatter.smooth(rnorm(10), rpois(10, 1), fam = "gaussian",
+               xl = "Weight of car", yla = "Miles per Gallon",
+               lpars = list(lwd = 2, col = "red"),
+               main = "Motor Trends Data")
+scatter.smooth(rnorm(10), rpois(10, 1), fam = "gaussian",
++                xl = "Weight of car", yla = "Miles per Gallon",
++                lpars = list(lwd = 2, col = "red"),
++                main = "Motor Trends Data")
+debugging in: scatter.smooth(rnorm(10), rpois(10, 1), fam = "gaussian", xl = "Weight of car", 
+    yla = "Miles per Gallon", lpars = list(lwd = 2, col = "red"), 
+    main = "Motor Trends Data")
+debug: {
+    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+    xy <- xy.coords(x, y, xlabel, ylabel)
+    x <- xy$x
+    y <- xy$y
+    xlab <- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab <- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    pred <- loess.smooth(x, y, span, degree, family, evaluation)
+    plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    do.call(lines, c(list(pred), lpars))
+    invisible()
+}
+Browse[2]> n
+debug: xlabel <- if (!missing(x)) deparse(substitute(x))
+Browse[2]> 
+debug: deparse(substitute(x))
+Browse[2]> 
+debug: ylabel <- if (!missing(y)) deparse(substitute(y))
+Browse[2]> 
+debug: deparse(substitute(y))
+Browse[2]> 
+debug: xy <- xy.coords(x, y, xlabel, ylabel)
+Browse[2]> 
+debugging in: xy.coords(x, y, xlabel, ylabel)
+debug: {
+    if (is.null(y)) {
+        if (is.null(ylab)) 
+            ylab <- xlab
+        if (is.language(x)) {
+            if (inherits(x, "formula") && length(x) == 3) {
+                if (setLab) {
+                  ylab <- deparse(x[[2L]])
+                  xlab <- deparse(x[[3L]])
+                }
+                y <- eval(x[[2L]], environment(x))
+                x <- eval(x[[3L]], environment(x))
+            }
+            else stop("invalid first argument")
+        }
+        else if (inherits(x, "ts")) {
+            y <- if (is.matrix(x)) 
+                x[, 1]
+            else x
+            x <- stats::time(x)
+            if (setLab) 
+                xlab <- "Time"
+        }
+        else if (is.complex(x)) {
+            y <- Im(x)
+            x <- Re(x)
+            if (setLab) {
+                xlab <- paste0("Re(", ylab, ")")
+                ylab <- paste0("Im(", ylab, ")")
+            }
+        }
+        else if (is.matrix(x) || is.data.frame(x)) {
+            x <- data.matrix(x)
+            if (ncol(x) == 1) {
+                if (setLab) 
+                  xlab <- "Index"
+                y <- x[, 1]
+                x <- seq_along(y)
+            }
+            else {
+                colnames <- dimnames(x)[[2L]]
+                if (setLab) {
+                  if (is.null(colnames)) {
+                    xlab <- paste0(ylab, "[,1]")
+                    ylab <- paste0(ylab, "[,2]")
+                  }
+                  else {
+                    xlab <- colnames[1L]
+                    ylab <- colnames[2L]
+                  }
+                }
+                y <- x[, 2]
+                x <- x[, 1]
+            }
+        }
+        else if (is.list(x)) {
+            if (all(c("x", "y") %in% names(x))) {
+                if (setLab) {
+                  xlab <- paste0(ylab, "$x")
+                  ylab <- paste0(ylab, "$y")
+                }
+                y <- x[["y"]]
+                x <- x[["x"]]
+            }
+            else stop("'x' is a list, but does not have components 'x' and 'y'")
+        }
+        else {
+            if (is.factor(x)) 
+                x <- as.numeric(x)
+            if (setLab) 
+                xlab <- "Index"
+            y <- x
+            x <- seq_along(x)
+        }
+    }
+    if (inherits(x, "POSIXt")) 
+        x <- as.POSIXct(x)
+    if (length(x) != length(y)) {
+        if (recycle) {
+            if ((nx <- length(x)) < (ny <- length(y))) 
+                x <- rep_len(x, ny)
+            else y <- rep_len(y, nx)
+        }
+        else stop("'x' and 'y' lengths differ")
+    }
+    if (length(log) && log != "") {
+        log <- strsplit(log, NULL)[[1L]]
+        if ("x" %in% log && any(ii <- x <= 0 & !is.na(x))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d x value <= 0 omitted from logarithmic plot", 
+                "%d x values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            x[ii] <- NA
+        }
+        if ("y" %in% log && any(ii <- y <= 0 & !is.na(y))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d y value <= 0 omitted from logarithmic plot", 
+                "%d y values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            y[ii] <- NA
+        }
+    }
+    list(x = as.double(x), y = as.double(y), xlab = xlab, ylab = ylab)
+}
+Browse[3]> n
+debug: if (is.null(y)) {
+    if (is.null(ylab)) 
+        ylab <- xlab
+    if (is.language(x)) {
+        if (inherits(x, "formula") && length(x) == 3) {
+            if (setLab) {
+                ylab <- deparse(x[[2L]])
+                xlab <- deparse(x[[3L]])
+            }
+            y <- eval(x[[2L]], environment(x))
+            x <- eval(x[[3L]], environment(x))
+        }
+        else stop("invalid first argument")
+    }
+    else if (inherits(x, "ts")) {
+        y <- if (is.matrix(x)) 
+            x[, 1]
+        else x
+        x <- stats::time(x)
+        if (setLab) 
+            xlab <- "Time"
+    }
+    else if (is.complex(x)) {
+        y <- Im(x)
+        x <- Re(x)
+        if (setLab) {
+            xlab <- paste0("Re(", ylab, ")")
+            ylab <- paste0("Im(", ylab, ")")
+        }
+    }
+    else if (is.matrix(x) || is.data.frame(x)) {
+        x <- data.matrix(x)
+        if (ncol(x) == 1) {
+            if (setLab) 
+                xlab <- "Index"
+            y <- x[, 1]
+            x <- seq_along(y)
+        }
+        else {
+            colnames <- dimnames(x)[[2L]]
+            if (setLab) {
+                if (is.null(colnames)) {
+                  xlab <- paste0(ylab, "[,1]")
+                  ylab <- paste0(ylab, "[,2]")
+                }
+                else {
+                  xlab <- colnames[1L]
+                  ylab <- colnames[2L]
+                }
+            }
+            y <- x[, 2]
+            x <- x[, 1]
+        }
+    }
+    else if (is.list(x)) {
+        if (all(c("x", "y") %in% names(x))) {
+            if (setLab) {
+                xlab <- paste0(ylab, "$x")
+                ylab <- paste0(ylab, "$y")
+            }
+            y <- x[["y"]]
+            x <- x[["x"]]
+        }
+        else stop("'x' is a list, but does not have components 'x' and 'y'")
+    }
+    else {
+        if (is.factor(x)) 
+            x <- as.numeric(x)
+        if (setLab) 
+            xlab <- "Index"
+        y <- x
+        x <- seq_along(x)
+    }
+}
+Browse[3]> n
+debugging in: rpois(10, 1)
+debug: .Call(C_rpois, n, lambda)
+Browse[4]> c
+exiting from: rpois(10, 1)
+debug: if (inherits(x, "POSIXt")) x <- as.POSIXct(x)
+Browse[3]> sys.calls()
+[[1]]
+scatter.smooth(rnorm(10), rpois(10, 1), fam = "gaussian", xl = "Weight of car", 
+    yla = "Miles per Gallon", lpars = list(lwd = 2, col = "red"), 
+    main = "Motor Trends Data")
+
+[[2]]
+xy.coords(x, y, xlabel, ylabel)
+
+Browse[3]> n
+debugging in: rnorm(10)
+debug: .Call(C_rnorm, n, mean, sd)
+Browse[4]> sys.calls()
+[[1]]
+scatter.smooth(rnorm(10), rpois(10, 1), fam = "gaussian", xl = "Weight of car", 
+    yla = "Miles per Gallon", lpars = list(lwd = 2, col = "red"), 
+    main = "Motor Trends Data")
+
+[[2]]
+xy.coords(x, y, xlabel, ylabel)
+
+[[3]]
+inherits(x, "POSIXt")
+
+[[4]]
+rnorm(10)
+
+Browse[4]> n
+exiting from: rnorm(10)
+debug: if (length(x) != length(y)) {
+    if (recycle) {
+        if ((nx <- length(x)) < (ny <- length(y))) 
+            x <- rep_len(x, ny)
+        else y <- rep_len(y, nx)
+    }
+    else stop("'x' and 'y' lengths differ")
+}
+Browse[3]> 
+debug: if (length(log) && log != "") {
+    log <- strsplit(log, NULL)[[1L]]
+    if ("x" %in% log && any(ii <- x <= 0 & !is.na(x))) {
+        n <- as.integer(sum(ii))
+        warning(sprintf(ngettext(n, "%d x value <= 0 omitted from logarithmic plot", 
+            "%d x values <= 0 omitted from logarithmic plot"), 
+            n), domain = NA)
+        x[ii] <- NA
+    }
+    if ("y" %in% log && any(ii <- y <= 0 & !is.na(y))) {
+        n <- as.integer(sum(ii))
+        warning(sprintf(ngettext(n, "%d y value <= 0 omitted from logarithmic plot", 
+            "%d y values <= 0 omitted from logarithmic plot"), 
+            n), domain = NA)
+        y[ii] <- NA
+    }
+}
+Browse[3]> 
+debug: list(x = as.double(x), y = as.double(y), xlab = xlab, ylab = ylab)
+Browse[3]> 
+exiting from: xy.coords(x, y, xlabel, ylabel)
+debug: x <- xy$x
+Browse[2]> 
+debug: y <- xy$y
+Browse[2]> c
+debugging in: xy.coords(x, y, xlabel, ylabel, log)
+debug: {
+    if (is.null(y)) {
+        if (is.null(ylab)) 
+            ylab <- xlab
+        if (is.language(x)) {
+            if (inherits(x, "formula") && length(x) == 3) {
+                if (setLab) {
+                  ylab <- deparse(x[[2L]])
+                  xlab <- deparse(x[[3L]])
+                }
+                y <- eval(x[[2L]], environment(x))
+                x <- eval(x[[3L]], environment(x))
+            }
+            else stop("invalid first argument")
+        }
+        else if (inherits(x, "ts")) {
+            y <- if (is.matrix(x)) 
+                x[, 1]
+            else x
+            x <- stats::time(x)
+            if (setLab) 
+                xlab <- "Time"
+        }
+        else if (is.complex(x)) {
+            y <- Im(x)
+            x <- Re(x)
+            if (setLab) {
+                xlab <- paste0("Re(", ylab, ")")
+                ylab <- paste0("Im(", ylab, ")")
+            }
+        }
+        else if (is.matrix(x) || is.data.frame(x)) {
+            x <- data.matrix(x)
+            if (ncol(x) == 1) {
+                if (setLab) 
+                  xlab <- "Index"
+                y <- x[, 1]
+                x <- seq_along(y)
+            }
+            else {
+                colnames <- dimnames(x)[[2L]]
+                if (setLab) {
+                  if (is.null(colnames)) {
+                    xlab <- paste0(ylab, "[,1]")
+                    ylab <- paste0(ylab, "[,2]")
+                  }
+                  else {
+                    xlab <- colnames[1L]
+                    ylab <- colnames[2L]
+                  }
+                }
+                y <- x[, 2]
+                x <- x[, 1]
+            }
+        }
+        else if (is.list(x)) {
+            if (all(c("x", "y") %in% names(x))) {
+                if (setLab) {
+                  xlab <- paste0(ylab, "$x")
+                  ylab <- paste0(ylab, "$y")
+                }
+                y <- x[["y"]]
+                x <- x[["x"]]
+            }
+            else stop("'x' is a list, but does not have components 'x' and 'y'")
+        }
+        else {
+            if (is.factor(x)) 
+                x <- as.numeric(x)
+            if (setLab) 
+                xlab <- "Index"
+            y <- x
+            x <- seq_along(x)
+        }
+    }
+    if (inherits(x, "POSIXt")) 
+        x <- as.POSIXct(x)
+    if (length(x) != length(y)) {
+        if (recycle) {
+            if ((nx <- length(x)) < (ny <- length(y))) 
+                x <- rep_len(x, ny)
+            else y <- rep_len(y, nx)
+        }
+        else stop("'x' and 'y' lengths differ")
+    }
+    if (length(log) && log != "") {
+        log <- strsplit(log, NULL)[[1L]]
+        if ("x" %in% log && any(ii <- x <= 0 & !is.na(x))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d x value <= 0 omitted from logarithmic plot", 
+                "%d x values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            x[ii] <- NA
+        }
+        if ("y" %in% log && any(ii <- y <= 0 & !is.na(y))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d y value <= 0 omitted from logarithmic plot", 
+                "%d y values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            y[ii] <- NA
+        }
+    }
+    list(x = as.double(x), y = as.double(y), xlab = xlab, ylab = ylab)
+}
+Browse[2]> Q
+151> n = 10
+scatter.smooth(rnorm(n), rpois(n, lambda), fam = "gaussian",
+               xl = "Weight of car", yla = "Miles per Gallon",
+               lpars = list(lwd = 2, col = "red"),
+               main = "Motor Trends Data")
+n = 10
+152> scatter.smooth(rnorm(n), rpois(n, lambda), fam = "gaussian",
++                xl = "Weight of car", yla = "Miles per Gallon",
++                lpars = list(lwd = 2, col = "red"),
++                main = "Motor Trends Data")
+debugging in: scatter.smooth(rnorm(n), rpois(n, lambda), fam = "gaussian", 
+    xl = "Weight of car", yla = "Miles per Gallon", lpars = list(lwd = 2, 
+        col = "red"), main = "Motor Trends Data")
+debug: {
+    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+    xy <- xy.coords(x, y, xlabel, ylabel)
+    x <- xy$x
+    y <- xy$y
+    xlab <- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab <- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    pred <- loess.smooth(x, y, span, degree, family, evaluation)
+    plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    do.call(lines, c(list(pred), lpars))
+    invisible()
+}
+Browse[2]> n
+debug: xlabel <- if (!missing(x)) deparse(substitute(x))
+Browse[2]> 
+debug: deparse(substitute(x))
+Browse[2]> 
+debug: ylabel <- if (!missing(y)) deparse(substitute(y))
+Browse[2]> 
+debug: deparse(substitute(y))
+Browse[2]> 
+debug: xy <- xy.coords(x, y, xlabel, ylabel)
+Browse[2]> 
+debugging in: xy.coords(x, y, xlabel, ylabel)
+debug: {
+    if (is.null(y)) {
+        if (is.null(ylab)) 
+            ylab <- xlab
+        if (is.language(x)) {
+            if (inherits(x, "formula") && length(x) == 3) {
+                if (setLab) {
+                  ylab <- deparse(x[[2L]])
+                  xlab <- deparse(x[[3L]])
+                }
+                y <- eval(x[[2L]], environment(x))
+                x <- eval(x[[3L]], environment(x))
+            }
+            else stop("invalid first argument")
+        }
+        else if (inherits(x, "ts")) {
+            y <- if (is.matrix(x)) 
+                x[, 1]
+            else x
+            x <- stats::time(x)
+            if (setLab) 
+                xlab <- "Time"
+        }
+        else if (is.complex(x)) {
+            y <- Im(x)
+            x <- Re(x)
+            if (setLab) {
+                xlab <- paste0("Re(", ylab, ")")
+                ylab <- paste0("Im(", ylab, ")")
+            }
+        }
+        else if (is.matrix(x) || is.data.frame(x)) {
+            x <- data.matrix(x)
+            if (ncol(x) == 1) {
+                if (setLab) 
+                  xlab <- "Index"
+                y <- x[, 1]
+                x <- seq_along(y)
+            }
+            else {
+                colnames <- dimnames(x)[[2L]]
+                if (setLab) {
+                  if (is.null(colnames)) {
+                    xlab <- paste0(ylab, "[,1]")
+                    ylab <- paste0(ylab, "[,2]")
+                  }
+                  else {
+                    xlab <- colnames[1L]
+                    ylab <- colnames[2L]
+                  }
+                }
+                y <- x[, 2]
+                x <- x[, 1]
+            }
+        }
+        else if (is.list(x)) {
+            if (all(c("x", "y") %in% names(x))) {
+                if (setLab) {
+                  xlab <- paste0(ylab, "$x")
+                  ylab <- paste0(ylab, "$y")
+                }
+                y <- x[["y"]]
+                x <- x[["x"]]
+            }
+            else stop("'x' is a list, but does not have components 'x' and 'y'")
+        }
+        else {
+            if (is.factor(x)) 
+                x <- as.numeric(x)
+            if (setLab) 
+                xlab <- "Index"
+            y <- x
+            x <- seq_along(x)
+        }
+    }
+    if (inherits(x, "POSIXt")) 
+        x <- as.POSIXct(x)
+    if (length(x) != length(y)) {
+        if (recycle) {
+            if ((nx <- length(x)) < (ny <- length(y))) 
+                x <- rep_len(x, ny)
+            else y <- rep_len(y, nx)
+        }
+        else stop("'x' and 'y' lengths differ")
+    }
+    if (length(log) && log != "") {
+        log <- strsplit(log, NULL)[[1L]]
+        if ("x" %in% log && any(ii <- x <= 0 & !is.na(x))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d x value <= 0 omitted from logarithmic plot", 
+                "%d x values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            x[ii] <- NA
+        }
+        if ("y" %in% log && any(ii <- y <= 0 & !is.na(y))) {
+            n <- as.integer(sum(ii))
+            warning(sprintf(ngettext(n, "%d y value <= 0 omitted from logarithmic plot", 
+                "%d y values <= 0 omitted from logarithmic plot"), 
+                n), domain = NA)
+            y[ii] <- NA
+        }
+    }
+    list(x = as.double(x), y = as.double(y), xlab = xlab, ylab = ylab)
+}
+Browse[3]> n
+debug: if (is.null(y)) {
+    if (is.null(ylab)) 
+        ylab <- xlab
+    if (is.language(x)) {
+        if (inherits(x, "formula") && length(x) == 3) {
+            if (setLab) {
+                ylab <- deparse(x[[2L]])
+                xlab <- deparse(x[[3L]])
+            }
+            y <- eval(x[[2L]], environment(x))
+            x <- eval(x[[3L]], environment(x))
+        }
+        else stop("invalid first argument")
+    }
+    else if (inherits(x, "ts")) {
+        y <- if (is.matrix(x)) 
+            x[, 1]
+        else x
+        x <- stats::time(x)
+        if (setLab) 
+            xlab <- "Time"
+    }
+    else if (is.complex(x)) {
+        y <- Im(x)
+        x <- Re(x)
+        if (setLab) {
+            xlab <- paste0("Re(", ylab, ")")
+            ylab <- paste0("Im(", ylab, ")")
+        }
+    }
+    else if (is.matrix(x) || is.data.frame(x)) {
+        x <- data.matrix(x)
+        if (ncol(x) == 1) {
+            if (setLab) 
+                xlab <- "Index"
+            y <- x[, 1]
+            x <- seq_along(y)
+        }
+        else {
+            colnames <- dimnames(x)[[2L]]
+            if (setLab) {
+                if (is.null(colnames)) {
+                  xlab <- paste0(ylab, "[,1]")
+                  ylab <- paste0(ylab, "[,2]")
+                }
+                else {
+                  xlab <- colnames[1L]
+                  ylab <- colnames[2L]
+                }
+            }
+            y <- x[, 2]
+            x <- x[, 1]
+        }
+    }
+    else if (is.list(x)) {
+        if (all(c("x", "y") %in% names(x))) {
+            if (setLab) {
+                xlab <- paste0(ylab, "$x")
+                ylab <- paste0(ylab, "$y")
+            }
+            y <- x[["y"]]
+            x <- x[["x"]]
+        }
+        else stop("'x' is a list, but does not have components 'x' and 'y'")
+    }
+    else {
+        if (is.factor(x)) 
+            x <- as.numeric(x)
+        if (setLab) 
+            xlab <- "Index"
+        y <- x
+        x <- seq_along(x)
+    }
+}
+Browse[3]> c
+debugging in: rpois(n, lambda)
+debug: .Call(C_rpois, n, lambda)
+Browse[3]> Q
+152> source("long.R")
+156> f()
+[1] "cleanup"
+157> f()
+  C-c C-c
+
+Enter a frame number, or 0 to exit   
+
+1: f()
+2: long.R#6: Sys.sleep(2)
+
+Selection: 0
+[1] "cleanup"
+157> 
+157> f()
+[1] "cleanup"
+160> f()
+  C-c C-c
+
+Enter a frame number, or 0 to exit   
+
+1: f()
+2: long.R#6: Sys.sleep(2)
+
+Selection: 0
+[1] "cleanup"
+160> options(error = NULL)
+162> f()
+  C-c C-c
+[1] "cleanup"
+162> f =
+function()
+{
+  on.exit(print("cleanup"))
+  danielle
+}
+f =
++ function()
++ {
++   on.exit(print("cleanup"))
++   danielle
++ }
+166> f()
+Error in f() (from #5) : object 'danielle' not found
+[1] "cleanup"
+166> 
