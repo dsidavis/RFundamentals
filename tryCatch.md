@@ -1,3 +1,23 @@
+# Warnings
+
+First rule about warnings - they are almost always errors.
+
+There are only 2 warnings that *might* **NOT** be errors.
++ `Incomplete final line found on`
++ `closing unused connection`
+
+
+The first means that the last line of a file did not have a new line
+at the end and maybe the content of that last line was truncated.
+Check the result. 
+
+The second means that somebody forgot to close a connection.  While it is a lot better (and on
+occassion crucial) to close connections (e.g. using on.exit()), this is not an error and R will
+close the connection retroactively.
+
+
+
+
 # Handling Errors
 
 Some functions raise errors while others return a value that indicates an error.

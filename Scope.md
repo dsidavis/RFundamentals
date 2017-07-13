@@ -9,6 +9,9 @@ For example, if we have the R command
 ```r
 d = data.frame(a = x, b = y)
 ```
-what does this actually mean?  Let's consider this as a sentence and understand what the "nouns"
+what does this actually mean?  
+<!-- 
+Let's consider this as a sentence and understand what the "nouns"
 refer to.
+-->
 

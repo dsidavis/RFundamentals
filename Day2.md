@@ -10,7 +10,7 @@
 
 ## Data Types/Structures
 
-1. [Basic data types - vectors](BasicTypes.html)
+1. [Basic data types - vectors]   <!-- (BasicTypes.html) -->
     + [Hierarchy of data types](VectorHierarchy.html) and implicit coercion
     + [Class, typeof, length](Attributes.html)
     + [dim, names](Attributes.html)
@@ -32,7 +32,7 @@
 	1.  by matrix
 1. [Categorical data - factors](Factors.html)	
 1. [Lists](Lists.html)
-1. Making Lists - c() and list()
+1. Making Lists - c() and list()()
 1. [Subsetting Lists -\[, \[\[, $](Subsetting.html)
 1. [Data Frames](DataFrames.html)	
 1. [Subsetting in 2-Dimensions](Subsetting2D.html)
