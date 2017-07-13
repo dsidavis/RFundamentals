@@ -1,0 +1,98 @@
+search() path
+library(A)
+a
+library(B)  # B provides a. So a now changes.
+
+Finding functions versus variables/symbols.
+find()
+
+attach() - NOT UNDER ANY CIRCUMSTANCES (unless *never* change)
+
+Define - parameters/formal arguments,  arguments, variables, symbols
+Later:  Call frames and navigating the call stacks and evaluating in the parent frame.
+F != FALSE .   Can change T but not TRUE
+
++ Everything is a function call
+ 1 + 2
+ e = quote(1 + 2)
+ typeof(e)
+ e[[1]]
+ e[[2]]
+ e[[3]]
+
+
++ Difference between myList$var and myList[[ "var" ]] and myList [[ var ]] 
+x = list(abc = 1, axy = 2)
+x$a
+NULL
+x$ab
+[1] 1
+x$ax
+[1] 2
+x[["ab"]]
+NULL
+ [[  - no partial matching
+ $ - literal name  or partial name.
+
+
++ myVector[idx] and myVector[[ ]]
+
++ What does [ return (assuming no methods)?
+
++ Partial matching - see above
+
++ How arguments are matched to parameters in a call.
+
+myList[[ c(1, 2) ]] and myList[ c(1, 2) ]
+a = list(abc = data.frame(x = 1:10, y = rnorm(10)), xyz = 20:29)
+19> a[[1, 2]]
+Error in a[[1, 2]] : incorrect number of subscripts
+No suitable frames for recover()
+19> a[[c(1, 2)]]
+ [1] -0.54027727  0.70919693 -0.86538271  0.02580137 -1.57977740
+ [6] -1.41737952 -0.43792000 -0.13447595 -0.26713443  1.06184319
+20> a[c(1, 2)]
+$abc
+    x            y
+1   1  1.026409341
+2   2  1.398747184
+3   3  1.363570447
+4   4 -0.084175654
+5   5  0.430476969
+6   6 -0.518491540
+7   7 -1.016935599
+8   8  0.008144095
+9   9  0.003179592
+10 10 -0.712805619
+
+$xyz
+ [1] 20 21 22 23 24 25 26 27 28 29
+
+
+
+c(x, y, z) and list(x, y, z)
+x = 1:10
+y = TRUE
+z = seq(1.5, length = 20, by = 2)
+a = list(x, y, z)
+b = c(x, y, z)
+class(a)
+class(b)
+length(b)
+
+
+lapply() when you know you want a list.
+sapply() when you expect it to collapse to  a vector/matrix reliably.
+vapply
+sapply()
+See lapply_versus_sapply.R.  Come up with an example.
+
+sapply() with 2 dimensions always seems to be the wrong orientation so t()
+
+
+
+
+Computing on the language
+
+
++ force()
