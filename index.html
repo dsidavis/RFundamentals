@@ -1,0 +1,126 @@
+<html>
+
+<head>
+<title></title>
+<link rel="stylesheet" href="OmegaTech.css"></link>
+<style>
+</style>
+</head>
+
+
+<body>
+<h1>R Fundamentals Workshop</h1>
+<p>
+
+<p>
+<table>
+<tr>
+<td><a href="https://github.com/dsidavis/RFundamentals">Git Repository</a></td>
+<td><a href="#Day1">Day 1</a></td> 
+<td><a href="#Day2">Day 2</a></td>
+</tr>
+</table>
+
+
+<p>
+This brief mini-course focuses on explaining the computational model that underlies R.  I believe
+that if you understand this, you can <b>reason</b> about the R code and the language and can more
+rapidly solve (and avoid) problems with your code.  This approach is different from learning by
+examples close to your needs and adapting existing code.  Both approaches are valuable, but the
+fundamentals provide the foundation to grow.
+<p>
+This mini-course does not attempt to teach you lots of functions and packages that you
+use on a daily basis. Instead, it is focused on R's language and computational model.
+<p>
+This mini-course will not explore the tidyverse. This is because these packages
+use non-standard evaluation and insulate the user from the the core language for basic
+data manipulation. We are not saying you shouldn't use these packages. Rather we
+are saying that is important to learn the fundamentals and then leverage these when
+they improve your programming and productivity.  With a strong foundation in the language,
+you can learn anything related to it. If you know only a particular set of packages or particular
+functions and idioms, you are limited to those.
+
+<p>
+
+<h1> <a name="Day1" href="Day1.html">Day 1</a></h1>
+<ul>
+
+<h2 id="readingnotes">Reading/Notes</h2>
+<ul>
+<li><a href="REPL.html">REPL</a></li>
+<li><a href="GlobalEnvironment.html">Environments</a></li>
+<li><a href="Computing3.html">Evaluation</a></li>
+<li><a href="Variables.html">Assignments and Variables</a></li>
+<li><a href="SearchPath.html">Search Path</a></li>
+<li><a href="EverythingIsACall.html">Everything is a Call</a></li>
+<li><a href="FunctionCalls.html">Function Calls</a></li>
+</ul>
+
+<h2>R Session</h2>
+<ul>
+<li> <a href="Day1.Rsession">Day 1 R session transcript</a>
+</ul>
+
+<h2>Exercises</h2>
+  <ol>
+   <li> <a href="Exercise1.html">Exercise 1</a>
+   <li> <a href="Exercise2.html">Exercise 2</a>
+   <li> <a href="Exercise3.html">Exercise 3</a>
+  </ol>
+</ul>
+</p>
+
+<hr width="50%" height="10px">
+
+<h1><a name="Day2" href="Day2.html">Day 2</a></h1>
+
+<h2 id="questions-review">Questions &amp; Review</h2>
+<ul>
+<li>attach() - NOT UNDER ANY CIRCUMSTANCES (unless <em>never</em> change)</li>
+</ul>
+<h2 id="data-typesstructures">Data Types/Structures</h2>
+<ol style="list-style-type: decimal">
+<li> Basic data types - vectors
+<ul>
+<li><a href="VectorHierarchy.html">Hierarchy of data types</a> and implicit coercion</li>
+<li><a href="Attributes.html">Class, typeof, length</a></li>
+<li><a href="Attributes.html">dim, names</a></li>
+<li><a href="Sequences.html">Sequences</a></li>
+<li><a href="NA.html">NAs and is.na()</a></li>
+</ul></li>
+<li><a href="RecyclingRule.html">Vectorized/Element-wise Functions &amp; the Recycling Rule</a>
+<ul>
+<li>The family of apply functions.<br /></li>
+</ul></li>
+<li><a href="Subsetting.html">Subsetting rules</a>
+<ol style="list-style-type: decimal">
+<li>index/position – <code>x[ c(10, 2) ]</code>
+<ol style="list-style-type: decimal">
+<li>Subset with 0</li>
+</ol></li>
+<li>logical indexing – <code>x[ c(FALSE, FALSE, TRUE, TRUE, FALSE) ]</code></li>
+<li>name – <code>x[ c(&quot;a&quot;, &quot;xyz&quot;) ]</code></li>
+<li>exclusion via negative position/index – <code>x[ - c(1, 3, 9) ]</code></li>
+<li>empty – <code>x[]</code></li>
+<li>Subsetting outside the length of a vector<br /></li>
+<li>drop = TRUE/FALSE - factors and<br /></li>
+<li>2-dimensional subsetting</li>
+<li>by two column matrix</li>
+<li>by matrix</li>
+</ol></li>
+<li><a href="Factors.html">Categorical data - factors</a><br /></li>
+<li><a href="Lists.html">Lists</a></li>
+<li><a href="ListAndC.html">Making Lists - c() and list()</a></li>
+<li><a href="Subsetting.html">Subsetting Lists -[, [[, $</a></li>
+<li><a href="DataFrames.html">Data Frames</a><br /></li>
+<li><p><a href="Subsetting2D.html">Subsetting in 2-Dimensions</a></p></li>
+<li><a href="Matrices.html">Matrices</a>
+<ul>
+<li><a href="MatrixSubsettting.html">Subsetting a matrix by matrix</a></li>
+</ul></li>
+<li><p><a href="Attributes2.html">Attributes Generally</a></p></li>
+</ol>
+
+
+</body>
+</html>

@@ -32,7 +32,7 @@
 	1.  by matrix
 1. [Categorical data - factors](Factors.html)	
 1. [Lists](Lists.html)
-1. Making Lists - c() and list()()
+1. [Making Lists - c() and list()](ListAndC.html)
 1. [Subsetting Lists -\[, \[\[, $](Subsetting.html)
 1. [Data Frames](DataFrames.html)	
 1. [Subsetting in 2-Dimensions](Subsetting2D.html)
