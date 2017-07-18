@@ -1,12 +1,11 @@
 Day 2
 
 Writeup 
+ elementwise operations & recycling rule
  logical operators
  subsetting with logicals
- elementwise operations & recycling rule
 
- c() versus list()
+See ListAndC.md:  c() versus list()
 
 [finish] factors
-
 [done] NAs

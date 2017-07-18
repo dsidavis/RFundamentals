@@ -62,7 +62,7 @@ functions and idioms, you are limited to those.
 1. [Data Frames](DataFrames.md)	
 1. [Subsetting in 2-Dimensions](Subsetting2D.md)
 1. [Matrices](Matrices.md)
-    + [Subsetting a matrix by matrix](MatrixSubsettting.md)
+    + [Subsetting a matrix by matrix](MatrixSubsetting.md)
 
 1. [try() and tryCatch()](tryCatch.md)
 1. [Defining Functions](WritingFunctions.md)

@@ -15,7 +15,7 @@ DAY2= Day2 VectorHierarchy Attributes Sequences NA RecyclingRule Subsetting Fact
 DAY2.HTML=$(patsubst %,%.html,$(DAY2))
 
 
-DAY3= Apply WritingFunctions Day3 tryCatch rnormVec WritingPackages Day4
+DAY3= Apply WritingFunctions Day3 tryCatch rnormVec WritingPackages Day4 Debugging
 DAY3.HTML=$(patsubst %,%.html,$(DAY3))
 
 
