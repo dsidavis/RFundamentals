@@ -449,3 +449,35 @@ See the help page for ?sys.parent to see what else we can explore on the call st
 
 # Warnings and Errors
 
+Your functions should verify the type and contents of the arguments
+and also any intermediate values that may cause problems.
+When you find a problem, you should raise either a warning
+or an error.
+The two basic functions for these are 
+warning() and stop().
+Both can be called with just an error message.
+Make the error message as informative as possible. Remember 
+how you responded when reading cryptic error messages.
+R will tell the caller (which could be you) where the error took place.
+But you can provide much more contextual information about what
+was expected, what differed from this and possible explanations and 
+common causes.
+
+
+## Classes on Errors and Warnings
+
+While the warning and error messages are very useful,
+they are not easy to programmatically use.
+For one, they may be translated to a different language.
+Secondly, they are free form text and we have to make sense of that.
+
+The R "condition" mechanism - warnings and errors - allows us
+to create warnings and errors that have classes.
+Specifically, we can set a class vector on the warning or error.
+Importantly, callers can then identify these types/classes of errors
+and react differently to different classes.
+This is done best via [tryCatch()](tryCatch.html).
+Adding classes to your errors and warnings is really a good thing to do.
+
+
+
