@@ -1,10 +1,9 @@
 # Subsetting in R
 
 Subsetting starts with vectors.
-As we explored, there is a [hierarchy](VectorHierarchy.md) of  vector types in R.
+As we explored, there is a [hierarchy](VectorHierarchy.html) of  vector types in R.
 
-There are several ways to subset a vector
-
+There are several ways to subset a vector.
 
 
 General rule of thumb.
@@ -21,7 +20,35 @@ The most "obvious" way to subset is to specify the positions/indices of the elem
 
 
 ## Subsetting By Index/Position
+```r
+x[ c(1, 3, 6) ]
+```
 
+```r
+i = match(a, b)
+x[ i ] 
+```
+
+### Subsetting position 0
+For any position that is 0 in our set of indices, R ignores that.
+So 
+```r
+x[ c(1, 0, 5) ]
+```
+will return a vector of length 2 containing (a copy of) the 1st and 5th element of x.
+
+This is useful, especially in conjunction with match().
+When we call match(a, b), we find the position of the first element in b for each of the elements in
+a.
+If an element of a is not in b, match() gives an NA for the position of this element of a.
+However, the third parameter of match() allows us to specify an alternative value for this
+situation.
+We often use 0 for this so that when we use the result from match() to subset a vector,
+we ignore the values that were not found.
+In other words,
+```r
+x[  match(a, b, 0) ]
+```
 
 
 ### Subsetting By Empty Position Vector

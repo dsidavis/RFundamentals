@@ -20,8 +20,26 @@ We can look at the levels of the factor with
 levels(x)
 ```
 In this case, it is just A, B, C.
-However, if we wanted to allow
 
+Similarly, if we had sample 20 items from the full set of 26 LETTERS,
+the levels of the factor would only reflect those that were observed in the sample.
+```r
+set.seed(123123)
+x = factor(sample(LETTERS, 20, replace = TRUE))
+table(x)
+x
+C D E G K L N O P T Z 
+1 1 1 1 3 3 4 1 1 2 2 
+```
+However, we often want to include all the potential possible levels - be they observed or not.
+We can do this with 
+```r
+factor(x, levels = LETTERS)
+[1] P O K N K T N L T K N E Z C Z D G L L N
+Levels: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+```
+
+**(Repeat of above.)**
 Sometimes we need to be able to indicate that there are additional categories that
 were not observed in our sample. A factor allows us do this by specifying
 the possible values in the levels and the observed values in the vector,

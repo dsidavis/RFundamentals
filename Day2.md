@@ -38,6 +38,6 @@
 1. [Subsetting in 2-Dimensions](Subsetting2D.html)
 
 1. [Matrices](Matrices.html)
-    + [Subsetting a matrix by matrix](MatrixSubsettting.html)
+    + [Subsetting a matrix by matrix](MatrixSubsetting.html)
 
 1. [Attributes Generally](Attributes2.html)

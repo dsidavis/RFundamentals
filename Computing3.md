@@ -5,7 +5,7 @@ First, let's consider the even simpler command
 pi
 ```
 
-The R [REPL](REPL.md) consists of the following 3 steps done in order and repeated indefinitely:
+The R [REPL](REPL.html) consists of the following 3 steps done in order and repeated indefinitely:
 Read, Eval, Print.
 
 ## Step 1: Parse
@@ -47,7 +47,7 @@ But how and where does it search?
 For a top-level command (i.e. at the R prompt),
 R searches for a variable by looking first in the global environment.
 
-[See Environments](GlobalEnvironment.md)
+[See Environments](GlobalEnvironment.html)
 
 
 Since `pi` is not in the global environment, R searches
@@ -244,7 +244,7 @@ Because if we type + and hit return in R,
 the parser considers this an incomplete command.
 So it emits the continuation prompt, coincidentally also the + character.
 So we cannot tell R to evaluate the command +. Instead, we need to say
-evaluate the symbol named + and we do this with `+`
+evaluate the symbol named + and we do this with \`+\`
 </div>
 
 

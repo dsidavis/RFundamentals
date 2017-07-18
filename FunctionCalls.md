@@ -286,8 +286,74 @@ R evaluates the call `xy.coords(x, y, xlabel, ylabel)`
 in the same way we described in the REPL
 but uses a different starting  environment
 for finding variables.
-R first finds the 
+R first finds the function xy.coords by searching
+in the call frame for this call to scatter.smooth.
+xy.coords is not in the call frame.
+So it searches the parent environment of the call frame.
+This is the environment of the definition of the function scatter.smooth.
+This is the namespace:stats that we see in the display of the scatter.smooth function.
 
+xy.coords is not in the stats package (either exported or or not).
+In fact, it is in grDevices package. So how does R find it from the 
+call frame of scatter.smooth()?
+The parent environment of the namespace:stats is an environment named
+"imports:stats"
+```r
+parent.env(getNamespace("stats"))
+<environment: 0x7fca18b6f9b8>
+attr(,"name")
+[1] "imports:stats"
+```
+We can list all the variables in this with
+```r
+ls(parent.env(getNamespace("stats")), all = TRUE)
+  [1] ".filled.contour"  "abline"           "arrows"          
+  [4] "as.graphicsAnnot" "assocplot"        "axis"            
+  [7] "Axis"             "axis.Date"        "axis.POSIXct"    
+ [10] "axTicks"          "barplot"          "barplot.default" 
+ [13] "box"              "boxplot"          "boxplot.default" 
+ [16] "boxplot.matrix"   "bxp"              "cdplot"          
+ [19] "clip"             "close.screen"     "co.intervals"    
+ [22] "contour"          "contour.default"  "coplot"          
+ [25] "count.fields"     "curve"            "dev.cur"         
+ [28] "dev.flush"        "dev.hold"         "dev.interactive" 
+ [31] "dev.new"          "dev.set"          "devAskNewPage"   
+ [34] "dotchart"         "erase.screen"     "extendrange"     
+ [37] "filled.contour"   "flush.console"    "fourfoldplot"    
+ [40] "frame"            "grconvertX"       "grconvertY"      
+ [43] "grid"             "hist"             "hist.default"    
+ [46] "identify"         "image"            "image.default"   
+ [49] "layout"           "layout.show"      "lcm"             
+ [52] "legend"           "lines"            "lines.default"   
+ [55] "locator"          "matlines"         "matplot"         
+ [58] "matpoints"        "mosaicplot"       "mtext"           
+ [61] "n2mfrow"          "pairs"            "pairs.default"   
+ [64] "palette"          "panel.smooth"     "par"             
+ [67] "persp"            "pie"              "plot"            
+ [70] "plot.default"     "plot.design"      "plot.function"   
+ [73] "plot.new"         "plot.window"      "plot.xy"         
+ [76] "points"           "points.default"   "polygon"         
+ [79] "polypath"         "rasterImage"      "rect"            
+ [82] "rug"              "screen"           "segments"        
+ [85] "smoothScatter"    "spineplot"        "split.screen"    
+ [88] "stars"            "stem"             "str"             
+ [91] "strheight"        "stripchart"       "strwidth"        
+ [94] "sunflowerplot"    "symbols"          "tail"            
+ [97] "text"             "text.default"     "title"           
+[100] "xinch"            "xspline"          "xy.coords"       
+[103] "xyinch"           "yinch"           
+```
+We see xy.coords is there as an imported variable.
+We can also directly query whether that environment has a variable named xy.coords with
+```r
+exists("xy.coords", parent.env(e))
+```
+or better, look for a function,
+```r
+exists("xy.coords", parent.env(e), mode = "function")
+```
+So R will find xy.coords() by searching the call frame of scatter.smooth, its parent environment,
+its parent and will then find it.
 
 
 Let's explore the computations and environments.
@@ -328,7 +394,7 @@ But note that the computational model is still the same.
 We look in the call frame, then its parent environment, then its parent's parent environment and so
 on.
 In this case, the parent environment of the call frame is a package's environment.
-In our function ???, the parent environment is the global environment.
+<!-- In our function ???, the parent environment is the global environment. -->
 
 So R finds xy.coords in the stats package via the parent environment of the call frame.  It then
 creates the call frame and matches the arguments to the paremeters.  The arguments are x, y,
@@ -481,4 +547,60 @@ There are times we want to ensure code is run just before we
 return from a function.
 For example, we may want to reset global graphics parameters that we 
 set via par(), or arrange to close a connection that we opened within the function.
-If
+We can do this before the call to return (i.e. the last expression of the function).
+However, there may be multiple places where the function might call return(),
+e.g. in different if()-else blocks.
+So this gets messy. We don't want to repeat the clean up code.
+
+Furthermore, what if there is an error or the user interrupts the computation
+and the R function doesn't get to the cleanup  code.
+
+We can deal with this using the on.exit() function.
+At some point in the function (early typically),
+we add a call to on.exit() giving it the command we want to run when we return from
+the function.
+```r
+f =
+function()
+{
+  opar = par(no.readonly = TRUE)
+  on.exit(par(opar))
+  par(mar = c(0, 0, 0, 0), pty = "s")
+  plot(1:10)
+}
+```
+Examine the value of par()[c("mar", "pty")] before and after the call.
+They should be the same.
+However, if we had omitted the on.exit(), the values set in the function f would 
+be in effect.
+
+As a second example, consider the function
+```r
+f =
+function()
+{
+  Sys.sleep(2)
+  print("cleanup")
+  TRUE
+}
+```
+We use print("cleanup") to illustrate doing something important to cleanup
+after the computations.
+
+Run this function and we see cleanup printed on the console after 2 seconds.
+
+Now, run the function again and immediately stop it (via Ctrl-C or the Stop button on the GUI).
+We do not see the cleanup printed.
+
+So  let's change this to use on.exit()
+```r
+f =
+function()
+{
+  on.exit(print("cleanup"))
+  Sys.sleep(2)
+  TRUE
+}
+```
+Now run this and interrupt it immediately. We do see cleanup printed. However, the function did not
+complete.

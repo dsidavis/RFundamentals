@@ -42,7 +42,7 @@ lapply(x mean na.rm = TRUE)
 If the command is syntatically complete and legitimate, i.e., makes sense syntactically, R tries to
 evaluate the **expression**.
 The rules for evaluation are somewhat involved, but 
-basically we find variables along the [search path](SearchPath.md),
+basically we find variables along the [search path](SearchPath.html),
 and we make function calls.
 That's pretty much all there is to the R language.
 

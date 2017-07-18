@@ -16,6 +16,18 @@ occassion crucial) to close connections (e.g. using on.exit()), this is not an e
 close the connection retroactively.
 
 
+# Reasons for Errors
+
+When we evaluate a command in R, we might get an error.
+There are so many possible causes for such errors, including common ones such as
++ a programming error with the wrong variable name, 
++ the wrong variable that is the wrong type for a call, 
++ the dimension of a matrix is incorrect,
++ not having loaded a package,
++ the package failing to load eventhough it is installed,
++ not finding a file because the path is incorrect or it doesn't exist
++ no internet connection,
++ a Web server is down and the URL request fails.
 
 
 # Handling Errors
@@ -52,6 +64,60 @@ we can use the tryCatch() function to specify errors
 for one or more classes of errors.
 
 
+Unfortunately, not enough functions raise errors with specific classes describing
+the errors. (You should make functions in the packages you write raise errors with 
+informative classes.) <!-- SHOW HOW -->
+The RCurl  package is one that does, so we'll use it as an example
+```r
+library(RCurl)
+```
+
+We'll deliberately request a bad URL and get an error
+
+```r
+u = getURLContent("http://www.nytime.org")
+```
+Instead, we'll catch the error with try()
+```r
+u = try(getURLContent("http://www.nytime.org"))
+```
+We can find the attributes of the error object
+```r
+attributes(u)
+$class
+[1] "try-error"
+
+$condition
+<COULDNT_RESOLVE_HOST in function (type, msg, asError = TRUE) {    if (!is.character(type)) {        i = match(type, CURLcodeValues)        typeName = if (is.na(i))             character()        else names(CURLcodeValues)[i]    }    typeName = gsub("^CURLE_", "", typeName)    fun = (if (asError)         stop    else warning)    fun(structure(list(message = msg, call = sys.call()), class = c(typeName,         "GenericCurlError", if (asError) "error" else "warning",         "condition")))}(6L, "Couldn't resolve host 'www.nytime.org'", TRUE): Couldn't resolve host 'www.nytime.org'>
+```
+Within the error is a condition and that has a lot more information.
+To deal with this better, we will use tryCatch().
+
+tryCatch() allows us to specify an R expression to evaluate and
+then a collection of error and warning handler functions.
+We specify these hander functions by the name of the class corresponding to 
+the type of error to which we want the function to be called in response.
+In our case, we had an error with an S3 class  vector with 4 elements:
+```r
+class(attr(u, "condition"))
+[1] "COULDNT_RESOLVE_HOST" "GenericCurlError"    
+[3] "error"                "condition"           
+```
+So we want to handle a COULDNT_RESOLVE_HOST error by perhaps 
+going to a different Web site.
+We may also want to handle a GenericCurlError differently from
+a regular R error by indicating this was a failure in a URL request.
+We can do both of these with
+```r
+u = tryCatch(getURLContent("http://www.nytime.org"),
+             COULDNT_RESOLVE_HOST = function(e, ...)
+			                           getURLContent("http://www.nytimes.com", followlocation = TRUE),
+             GenericCurlError = function(e, ...)
+			                      cat("Error in RCurl: ", e$message, "\n"))
+
+```
+
+
 # Warnings as Errors
 Sometimes it is convenient to raise warnings to actual errors.
 This is useful when debugging and you want to stop when the warning
@@ -60,3 +126,5 @@ occurs.  One could trace() or debug() the
 ```r
 options(warn = 2)
 ```
+
+

@@ -21,7 +21,37 @@ head() and tail() show us the top and bottom of a vector, data.frame, matrix, et
 These are also good for taking a quick look at an object to verify it is as expected.
 
 Many objects have names.
-The name 
+The names are very useful when we, e.g., subset the vector as we can still identify the
+elements by their names.
+For example, consider the two vectors
+```r
+x = c(history = 100, psychology = 900, statistics = 400)
+y = c(100, 900, 400)
+```
+Now,
+```r
+x[ x > 200]
+psychology statistics 
+       900        400 
+```
+But 
+```r
+y [ y > 200]
+[1] 900 400
+```
+So we don't know which elements are included in the result, just their values.
+
+And often the same names  are used on parallel vectors, i.e., two vectors whose elements
+are in order that correspond to each other and the same observational unit.
+So the subset of one tells us which values to extract from the the other.
+The logical condition does this also, so the names are not vital.
+
+However, the names are vital if we have two vectors x and y 
+and we want to get the elements of y corresponding to the names of x, regardless of the 
+order of the two vectors:
+```r
+y[ names(x) ]
+```
 
 
 

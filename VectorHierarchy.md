@@ -18,11 +18,9 @@ There are two basic types of collections in R.
 vectors and lists (although we can create lists with a call to vector()!)
 
 Vectors are homogeneous in that all the elements must have the same type
-and R will insist on this
+and R will make this happen automatically by coercion.
 
 Lists can be heterogeneous, i.e. each element can have a different type.
-
-
 
 
 There are 4 fundamental vector types that people encounter most often.
@@ -88,3 +86,42 @@ While the order may not be important for statistical analysis,
 it is often important for data analysis, e.g. to match observations
 in two vectors where the i-th element in one vector corresponds
 to the same observational unit in the other vector.
+
+
+We can keep measurements from the same observational units
+in two "parallel" vectors.
+
+Alternatively, we can combine two or more 'paralle' vectors in
+a data.frame.
+
+A data.frame is a list. Check the typeof() of a data.frame.
+The elements of the list are the columns.
+But a data.frame has extra properties  than a list.
+Every element of the list has to have the same length as all the others.
+e.g.,
+```r
+x = data.frame(a = 1:10, b = 1:10)
+71> x$y = 1:100
+Error in `$<-.data.frame`(`*tmp*`, "y", value = 1:100) : 
+  replacement has 100 rows, data has 10
+```
+But, via the recycling rule,
+```r
+x$y = 1
+```
+works fine. 1 is repeated nrow(x) times.
+
+
+A data frame is guaranteed to be 2-dimensional - it has a dim().
+The names() are the names of the elements. This comes from being a list.
+We can subset using the list operations, e.g. df[["y"]], df$y.
+
+We can also use 2-dimensional subsetting
+```r
+df[ i, j]
+```
+[See 2-D Subsetting](Subsetting2D.html).
+
+
+
+
