@@ -1,0 +1,36 @@
+Using the version of R2llvm in this directory
+R CMD INSTALL R2llvm 
+source("list.R")
+
+Loading required package: Rllvm
+Loading required package: RAutoGenRunTime
+Loading required package: bitops
+Loading required package: typesys
+Error in match(call$fn$name, names(env$.compilerHandlers)) : 
+  object 'cmp' not found
+In addition: Warning messages:
+1: multiple methods tables found for ‘addFinalizer’ 
+2: replacing previous import ‘methods::Complex’ by ‘rstatic::Complex’ when loading ‘R2llvm’ 
+3: replacing previous import ‘Rllvm::Function’ by ‘rstatic::Function’ when loading ‘R2llvm’ 
+4: S3 methods ‘construct_ir.Call’, ‘construct_ir.Symbol’ were declared in NAMESPACE but not found 
+
+Enter a frame number, or 0 to exit   
+
+ 1: source("list.R")
+ 2: withVisible(eval(ei, envir))
+ 3: eval(ei, envir)
+ 4: eval(ei, envir)
+ 5: list.R#17: compileFunction(f)
+ 6: lapply(cfg.blocks, compileCFGBlock, types, nenv, ir, llvm.fun, bl
+ 7: FUN(X[[i]], ...)
+ 8: lapply(block$body, compile, ecompiler, builder)
+ 9: FUN(X[[i]], ...)
+10: compile.Assign(X[[i]], ...)
+11: `compile.=`(call, cmp, helper, .targetType = .targetType)
+12: compile(args[[2]], env, ir)
+13: compile.Call(args[[2]], env, ir)
+14: match(call$fn$name, names(env$.compilerHandlers))
+
+
+The error is  not finding cmp.
+It would seem the error is in compile.Call() but it is actually in compile.Assign
