@@ -1,0 +1,9 @@
+Package: Pkg
+Version: 0.1-0
+Title: Bivariate Plotting Functions
+Description: This provides functions adding marginal density plots and histograms
+ to scatter plots, using the base graphics system.
+Author: Duncan Temple Lang
+Maintainer: Duncan Temple Lang <duncan@r-project.org>
+License: BSD
+Imports: graphics

@@ -1,0 +1,4 @@
+importFrom(graphics, plot)
+export(plot)
+export(MyClass)
+S3method(plot, MyClass)
