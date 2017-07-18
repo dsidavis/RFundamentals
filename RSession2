@@ -1,0 +1,243 @@
+campus-042-166[RFundamentals-51]>R
+
+R Under development (unstable) (2016-06-30 r70858) -- "Unsuffered Consequences"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.2.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+PID = 1160 
+Time = 2017-07-13 11:04:48 
+Dir = /Users/duncan/DSI/Workshops/RFundamentals 
+1> x = 2147483647
+2> class(x)
+[1] "numeric"
+3> x = 2147483647L
+4> class(x)
+[1] "integer"
+5> class(x + 1L)
+[1] "integer"
+Warning message:
+In x + 1L : NAs produced by integer overflow
+6> x + 1L
+[1] NA
+Warning message:
+In x + 1L : NAs produced by integer overflow
+7> f = lm(mpg ~ wt, mtcars)
+8> class(f)
+[1] "lm"
+9> typeof(f)
+[1] "list"
+10> names(f)
+ [1] "coefficients"  "residuals"     "effects"       "rank"         
+ [5] "fitted.values" "assign"        "qr"            "df.residual"  
+ [9] "xlevels"       "call"          "terms"         "model"        
+11> str(f)
+List of 12
+ $ coefficients : Named num [1:2] 37.29 -5.34
+  ..- attr(*, "names")= chr [1:2] "(Intercept)" "wt"
+ $ residuals    : Named num [1:32] -2.28 -0.92 -2.09 1.3 -0.2 ...
+  ..- attr(*, "names")= chr [1:32] "Mazda RX4" "Mazda RX4 Wag" "Datsun 710" "Hornet 4 Drive" ...
+ $ effects      : Named num [1:32] -113.65 -29.116 -1.661 1.631 0.111 ...
+  ..- attr(*, "names")= chr [1:32] "(Intercept)" "wt" "" "" ...
+ $ rank         : int 2
+ $ fitted.values: Named num [1:32] 23.3 21.9 24.9 20.1 18.9 ...
+  ..- attr(*, "names")= chr [1:32] "Mazda RX4" "Mazda RX4 Wag" "Datsun 710" "Hornet 4 Drive" ...
+ $ assign       : int [1:2] 0 1
+ $ qr           :List of 5
+  ..$ qr   : num [1:32, 1:2] -5.657 0.177 0.177 0.177 0.177 ...
+  .. ..- attr(*, "dimnames")=List of 2
+  .. .. ..$ : chr [1:32] "Mazda RX4" "Mazda RX4 Wag" "Datsun 710" "Hornet 4 Drive" ...
+  .. .. ..$ : chr [1:2] "(Intercept)" "wt"
+  .. ..- attr(*, "assign")= int [1:2] 0 1
+  ..$ qraux: num [1:2] 1.18 1.05
+  ..$ pivot: int [1:2] 1 2
+  ..$ tol  : num 1e-07
+  ..$ rank : int 2
+  ..- attr(*, "class")= chr "qr"
+ $ df.residual  : int 30
+ $ xlevels      : Named list()
+ $ call         : language lm(formula = mpg ~ wt, data = mtcars)
+ $ terms        :Classes 'terms', 'formula'  language mpg ~ wt
+  .. ..- attr(*, "variables")= language list(mpg, wt)
+  .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+  .. .. ..- attr(*, "dimnames")=List of 2
+  .. .. .. ..$ : chr [1:2] "mpg" "wt"
+  .. .. .. ..$ : chr "wt"
+  .. ..- attr(*, "term.labels")= chr "wt"
+  .. ..- attr(*, "order")= int 1
+  .. ..- attr(*, "intercept")= int 1
+  .. ..- attr(*, "response")= int 1
+  .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
+  .. ..- attr(*, "predvars")= language list(mpg, wt)
+  .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+  .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+ $ model        :'data.frame':	32 obs. of  2 variables:
+  ..$ mpg: num [1:32] 21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+  ..$ wt : num [1:32] 2.62 2.88 2.32 3.21 3.44 ...
+  ..- attr(*, "terms")=Classes 'terms', 'formula'  language mpg ~ wt
+  .. .. ..- attr(*, "variables")= language list(mpg, wt)
+  .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+  .. .. .. ..- attr(*, "dimnames")=List of 2
+  .. .. .. .. ..$ : chr [1:2] "mpg" "wt"
+  .. .. .. .. ..$ : chr "wt"
+  .. .. ..- attr(*, "term.labels")= chr "wt"
+  .. .. ..- attr(*, "order")= int 1
+  .. .. ..- attr(*, "intercept")= int 1
+  .. .. ..- attr(*, "response")= int 1
+  .. .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
+  .. .. ..- attr(*, "predvars")= language list(mpg, wt)
+  .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+  .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+ - attr(*, "class")= chr "lm"
+12> sapply(f, class)
+$coefficients
+[1] "numeric"
+
+$residuals
+[1] "numeric"
+
+$effects
+[1] "numeric"
+
+$rank
+[1] "integer"
+
+$fitted.values
+[1] "numeric"
+
+$assign
+[1] "integer"
+
+$qr
+[1] "qr"
+
+$df.residual
+[1] "integer"
+
+$xlevels
+[1] "list"
+
+$call
+[1] "call"
+
+$terms
+[1] "terms"   "formula"
+
+$model
+[1] "data.frame"
+
+13> letters[27]
+[1] NA
+14> letters[c()]
+character(0)
+15> letters
+ [1] "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p"
+[17] "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"
+16> letters[]
+ [1] "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p"
+[17] "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"
+17> mtcars
+*** output flushed ***
+18> mtcars[, 1]
+ [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3
+[14] 15.2 10.4 10.4 14.7 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3
+[27] 26.0 30.4 15.8 19.7 15.0 21.4
+19> mtcars[, 1:2]
+                     mpg cyl
+Mazda RX4           21.0   6
+Mazda RX4 Wag       21.0   6
+Datsun 710          22.8   4
+Hornet 4 Drive      21.4   6
+Hornet Sportabout   18.7   8
+Valiant             18.1   6
+Duster 360          14.3   8
+Merc 240D           24.4   4
+Merc 230            22.8   4
+Merc 280            19.2   6
+Merc 280C           17.8   6
+Merc 450SE          16.4   8
+Merc 450SL          17.3   8
+Merc 450SLC         15.2   8
+Cadillac Fleetwood  10.4   8
+Lincoln Continental 10.4   8
+Chrysler Imperial   14.7   8
+Fiat 128            32.4   4
+Honda Civic         30.4   4
+Toyota Corolla      33.9   4
+Toyota Corona       21.5   4
+Dodge Challenger    15.5   8
+AMC Javelin         15.2   8
+Camaro Z28          13.3   8
+Pontiac Firebird    19.2   8
+Fiat X1-9           27.3   4
+Porsche 914-2       26.0   4
+Lotus Europa        30.4   4
+Ford Pantera L      15.8   8
+Ferrari Dino        19.7   6
+Maserati Bora       15.0   8
+Volvo 142E          21.4   4
+20> mtcars[, i, drop = FALSE]
+*** output flushed ***
+21> x = 1:3
+22> x
+[1] 1 2 3
+23> x[2] = 10
+24> x
+[1]  1 10  3
+25> x[c(1, 2) ] = 100
+26> x
+[1] 100 100   3
+27> x[c(1, 2,3) ] = c(100, -10)
+Warning message:
+In x[c(1, 2, 3)] = c(100, -10) :
+  number of items to replace is not a multiple of replacement length
+28> 
+28> x[] = 0
+29> x
+[1] 0 0 0
+30> x = list(a = 1, b = 2:3, c = rnorm(5)
++   C-c C-c^C
+No suitable frames for recover()
+30> x = list(a = 1, b = 2:3, c = rnorm(5))
+31> x
+$a
+[1] 1
+
+$b
+[1] 2 3
+
+$c
+[1] -2.1776044 -0.2711828 -0.9262634 -0.7509286  0.7251980
+
+32> x[[c(1,2)]]
+Error in x[[c(1, 2)]] : subscript out of bounds
+No suitable frames for recover()
+32> x = list(abc = 1, def = 2:3, c = rnorm(5))
+33> x[["abc"]]
+[1] 1
+34> x[["ab"]]
+NULL
+35> x$abc
+[1] 1
+36> x$ab
+[1] 1
+37> var = "ab"
+38> x$var
+NULL
+39> var = "abc"
+40> x[[var]]
+[1] 1
+41> x[1][1][1][1][1]
