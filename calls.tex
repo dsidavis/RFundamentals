@@ -13,31 +13,33 @@
 
 \begin{figure}
 \begin{tikzpicture}
-\draw (0,9) node {\Large \textbf{$>$ scatter.smooth(mtcars[ , c(1, 2)])}};
+\draw (0,9) node[anchor=east] {\Large \textbf{$>$ scatter.smooth(mtcars[ , c(1, 2)])}};
 
 \begin{scope}[very thick]
-\draw (0,6) rectangle (3.2, 4);           %scatter.smooth
-\draw (3.0,4.2) rectangle (4.8, 2); %xy.coords
-\draw (4.6,2.2) rectangle (6.6, 0);  %[
+\draw (0,6) rectangle (3.1, 4)   ;   %scatter.smooth
+\draw (3.0,4.2) rectangle (4.7, 2); %xy.coords
+\draw (4.6,2.2) rectangle (6.5, 0); %[
 \end{scope}
 
-\begin{scope}[anchor=east]
-\draw (-.1, 5.1) node {scatter.smooth} ;
-\draw (2.9, 3.2) node {xy.coords} ;
+%anchor=west
+\begin{scope}[anchor=east,color=red]
+\draw (1.1, 6.3) node {scatter.smooth(mtcars, c(1,2))} ;
+%\draw (-.1, 5.1) node {scatter.smooth} ;
+\draw (2.9, 3.2) node {xy.coords()} ;
 \draw (4.5, 1.2) node {[} ;
 \end{scope}
 \begin{scope}[anchor=west]
-\draw (.1, 5.7) node {x} ;
-\draw (.1, 5.4) node {y} ;
-\draw (.1, 5.1) node {span};
-\draw (.1, 4.8) node {degree};
-\draw (.1, 4.5) node {family};
-\draw (1.5, 5.7) node {xlab};
-\draw (1.5, 5.4) node {ylab};
-\draw (1.5, 5.1) node {ylim};
-\draw (1.5, 4.8) node {evaluation};
-\draw (1.5, 4.5) node {...};
-\draw (1.5, 4.2) node {lpars};
+\draw (.09, 5.7) node {x} ;
+\draw (.09, 5.4) node {y} ;
+\draw (.09, 5.1) node {span};
+\draw (.09, 4.8) node {degree};
+\draw (.09, 4.5) node {family};
+\draw (1.4, 5.7) node {xlab};
+\draw (1.4, 5.4) node {ylab};
+\draw (1.4, 5.1) node {ylim};
+\draw (1.4, 4.8) node {evaluation};
+\draw (1.4, 4.5) node {...};
+\draw (1.4, 4.2) node {lpars};
 \end{scope}
 \begin{scope}[anchor=west]
 \draw (3.1, 3.9) node {x} ;
@@ -55,7 +57,7 @@
 \draw (4.7, .7) node {drop};
 \end{scope}
 
-\begin{scope}[dashed]
+\begin{scope}[dashed,color=blue]
 \draw (3.1,5.5) rectangle (6.1, 6.5);
 \draw (3.2,6) node[anchor=west] {namespace::stats};
 \draw (5.,6.4) rectangle (7.4, 7.4);
@@ -88,7 +90,7 @@
 \end{tikzpicture}
 \cprotect\caption[The Call Stack, Call Frames and their Search Paths]{\textbf{The Call Stack, Call Frames and their Search Paths.}
 This shows the call stack for \verb!scatter.smooth(mtcars[, c(1, 2)])!.
-scatter.smooth() calls xy.coords and finally the argument for x in 
+scatter.smooth() calls xy.coords() and finally the argument for x in 
 scatter.smooth is needed. Due to R's lazy evaluation, this is evaluated next,
 hence the call the \verb![(mtcars, c(1, 2))!.
 Within each of the three call frames, 
@@ -97,7 +99,7 @@ call frame and then in its parent environment, and its parent environment,
 and so on.
 These  environments are displayed moving from left to right and show
 the search through packages and their imports and their parents.
-Afer \verb|R\_GlobalEnv|, the search continues along the regular search path,
+Afer \verb|R_GlobalEnv|, the search continues along the regular search path,
 i.e., the packages loaded on the seach path via require() and library().
 }
 \end{figure}
