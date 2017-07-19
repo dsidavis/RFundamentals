@@ -11,15 +11,21 @@
 %\draw[red] (4,4) rectangle (6, 0);
 %\end{tikzpicture}
 
+%{\Large \textbf{$>$ scatter.smooth(mtcars[ , c(1, 2)])}};
 \begin{figure}
 \begin{tikzpicture}
-\draw (0,9) node[anchor=east] {\Large \textbf{$>$ scatter.smooth(mtcars[ , c(1, 2)])}};
+%\draw (0,9) node[anchor=east] {\Large \textbf{$>$ scatter.smooth(mtcars[ , c(1, 2)])}};
+\draw (0,9) node {\Large \textbf{$>$ scatter.smooth(mtcars[ , c(1, 2)])}};
 
 \begin{scope}[very thick]
 \draw (0,6) rectangle (3.1, 4)   ;   %scatter.smooth
 \draw (3.0,4.2) rectangle (4.7, 2); %xy.coords
 \draw (4.6,2.2) rectangle (6.5, 0); %[
 \end{scope}
+
+\draw [->] (-.5,4) -- (3.0, 1)
+     node [midway,sloped,below] {Call Stack};
+
 
 %anchor=west
 \begin{scope}[anchor=east,color=red]
@@ -57,6 +63,7 @@
 \draw (4.7, .7) node {drop};
 \end{scope}
 
+\draw [->] (3.4,7.) -- (8.5, 9.)  node [above,midway,sloped] {Call Frame Search Path};
 \begin{scope}[dashed,color=blue]
 \draw (3.1,5.5) rectangle (6.1, 6.5);
 \draw (3.2,6) node[anchor=west] {namespace::stats};
@@ -82,8 +89,8 @@
 %\draw[red] (4.6,2.2) rectangle (6.6, 0);
 
 % [
-\draw (6.4,1.3) rectangle (9.4, 2.3);
-\draw (6.5,1.8) node[anchor=west] {namespace::base};
+\draw (6.5,1.3) rectangle (9.4, 2.3);
+\draw (6.6,1.8) node[anchor=west] {namespace::base};
 \draw (9.3,1.9) rectangle (11.6, 2.9);
 \draw (9.4,2.4) node[anchor=west] {R\_GlobalEnv};
 \end{scope}
