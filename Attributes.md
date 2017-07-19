@@ -83,3 +83,5 @@ structure(computeVector(),  names = c("a", "b","c"), class = "myData")
 ```
 and now we can return that or put it directly into a call to fun().
 
+
+
