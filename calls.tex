@@ -95,6 +95,8 @@ call frame and then in its parent environment, and its parent environment,
 and so on.
 These  environments are displayed moving from left to right and show
 the search through packages and their imports and their parents.
+Afer \verb|R\_GlobalEnv|, the search continues along the regular search path,
+i.e., the packages loaded on the seach path via require() and library().
 }
 \end{figure}
 \end{document}

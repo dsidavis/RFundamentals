@@ -60,9 +60,23 @@ x
 
 However, `table(factor1, factor2)` gives a two way table and we can include more factors also.
 
-
-
 Factors are very useful for subsetting. See [Subsetting](Subsetting.html)
+The simple idea is that since a factor is really an integer vector
+with values between 1 and the number of levels, we can use it to subset
+another vector that parallels the levels.
+For example, we can subset a vector of color values with the same
+length as the levels, i.e.,
+```r
+plot(x, y, col = colors[ my.factor ])
+```
+The same applies for plotting characters.
+
+We could also do this with names, e.g.,
+```r
+names(colors) = levels(my.factor)
+colors[ as.character( my. factor) ]
+```
+but direct subsetting by using the factor values as indices is more direct.
 
 ## Ordered Factor
 
