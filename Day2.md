@@ -4,6 +4,8 @@
 1. Everything is a copy (and copy on write).
 -->
 
++ [R Session for Day 2](RSession2)
+
 ## Questions & Review 
 
 + attach() - NOT UNDER ANY CIRCUMSTANCES (unless *never* change)

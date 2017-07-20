@@ -101,3 +101,33 @@ An ordered factor is a factor. This is an example of S3 inheritance.
 
 
 
+
+
+
+# Creating a Factors with Levels and Labels
+
+Consider the following vector
+```r
+x = c("A", "A", "B", "C", "A", "B")
+[1] "A" "A" "B" "C" "A" "B"
+```
+
+Now we create a factor
+```r
+factor(x)
+[1] A A B C A B
+Levels: A B C
+```
+
+We can also specify the levels and/or the labels 
+```r
+factor(x, labels = c("x1", "x2", "x3"))
+[1] x1 x1 x2 x3 x1 x2
+Levels: x1 x2 x3
+```
+
+```r
+ factor(x, levels = c("C", "B", "A"))
+[1] A A B C A B
+Levels: C B A
+```

@@ -479,5 +479,34 @@ and react differently to different classes.
 This is done best via [tryCatch()](tryCatch.html).
 Adding classes to your errors and warnings is really a good thing to do.
 
+We can generate an error with
+```r
+stop("my error message")
+```
+However, we can create an error object  with a call to simpleError(), e.g.,
+```r
+e = simpleError("my message")
+```
+Then we can set its class with
+```r
+class(e) = c("MyErrorClass", class(e))
+```
+and then pass it to stop()
+```r
+stop(e)
+```
+Alternatively, we can do this in one line
+```r
+stop ( structure("my message", class = c("MyErrorClass", "simpleError", "error", "condition")) )
+```
+The two-step approach is better in case simpleError() ever changes its class vector.
 
 
+
+
+function(x, y, ignore = FALSE, ...)
+{
+   extra = list(...)
+   if("ignore.case" %in% extra)
+     ignore.case = extra$ignore.case
+}

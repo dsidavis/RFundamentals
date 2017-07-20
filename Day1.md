@@ -2,6 +2,8 @@
 
 ## Day 1
 
++ [R Session for Day 1](Day1.Rsession)
+
 + REPL
 + Evaluating `pi`
 + Evaluating `1 + 2`

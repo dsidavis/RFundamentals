@@ -1,5 +1,7 @@
 # R Fundamentals Day 3
 
++ [R Session for Day 3](RSession3)
+
 + Recap/Questions
 + Everything is an object in R - including the language objects, functions, if, while, ....
 + lists, data.frames 

@@ -1,31 +1,48 @@
-tapply(), by(), aggregate()
+# Day 4
 
-example of expand.grid() and apply() over these and long form.
++ [R Session for Day 4](RSession4)
 
-Getting the (row,col) values from a logical subsetting of a matrix.
++ Getting the (row,col) values from a logical subsetting of a matrix.
+```r
+ set.seed(1012)
+ m = matrix(rnorm(15), 5, 3)
+ m > 0
+ which(m > 0)
+``` 
+ But which row and column pairs
+```r
+ a = m > 0
+ cbind(row(a)[a], col(a)[a])
+```
 
-# Probably Day 4
++ example of expand.grid() and apply() over these and long form.
 
++ tapply(), by(), aggregate()
+
++ S3 classes and methods
+    + Generic function & UseMethod
+    + NextMethod
 + [Writing Functions](WritingFunctions.html)
-    + Default values for parameters
-    + Idioms
-    + warnings and errors
+    + Default Values for Parameters
+    + Idioms for writing parameters and default values.
+    + Warnings and Errors
 + [Debugging](Debugging.html)
 + [Writing R Packages](WritingPackages.html)
     + Directory structure
 	+ DESCRIPTION
 	+ NAMESPACE
       + Imports and exports
-+ S3 classes and methods
+
+
+# Maybe Get To (No!)
++ Closures & Environments
+  + The computational model
+  + <<- 
+  + Clean up unnecessary variables
 
 + S4 classes and methods
 
 
   
-+ Formulae
-+ Closures & Environments
-  + The computational model
-  + <<- 
-  + Clean up unnecessary variables
 + Formulae & Environments
   + Clean up unnecessary variables
