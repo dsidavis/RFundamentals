@@ -18,9 +18,9 @@ DAY2.HTML=$(patsubst %,%.html,$(DAY2))
 DAY3= Apply WritingFunctions Day3 tryCatch rnormVec WritingPackages Day4 Debugging
 DAY3.HTML=$(patsubst %,%.html,$(DAY3))
 
-DAY4=
+DAY4= Day4 Debugging
 
-DAY4.HTML=$(patsubst %,%.html,$(DAY4))
+DAY4.HTML=$(patsubst %,%.html,$(DAY4)) RSession4
 
 
 Day1:  $(DAY1.HTML)
