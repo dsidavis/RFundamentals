@@ -14,7 +14,10 @@
 
 sim =
 function(a, b, n = rpois(1, a + b))
-  data.frame(x = rnorm(n, a), y = rexp(n, b))
+{
+  x = rnorm(n, a)
+  data.frame(x = x, y = x*rexp(n, min(.1, b*x)))
+}
 
 
 
@@ -31,7 +34,7 @@ g = expand.grid(cond1, cond2)
 
 # Run the simulations for the 6 different levels.
 # We could use apply() since these are character vectors
-ans = lapply(seq_len(nrow(g)),
+ans = lapply(1:nrow(g),
               function(i) {
                  settings = g[i,]
                  replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
