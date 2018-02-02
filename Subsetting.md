@@ -77,11 +77,12 @@ This can be used with match()
 
 ### Subsetting Non-elements
 
-What if we subset an element of a vector that is
+What if we subset an element of a vector that is beyond the length?
+```
 x = c(1, 5, 10)
 x[5]
-
 NA
+```
 
 
 
@@ -97,8 +98,6 @@ But
 l[["abc"]]
 NULL
 ```
-
-
 
 
 

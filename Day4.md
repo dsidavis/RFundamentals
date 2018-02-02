@@ -36,13 +36,11 @@
 
 # Maybe Get To (No!)
 + Closures & Environments
-  + The computational model
-  + <<- 
-  + Clean up unnecessary variables
+   + The computational model
+   + <<- 
+   + Clean up unnecessary variables
 
 + S4 classes and methods
 
-
-  
 + Formulae & Environments
-  + Clean up unnecessary variables
+   + Clean up unnecessary variables

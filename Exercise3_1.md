@@ -1,6 +1,6 @@
 # Exercise
 
-+ Preallocating a list (or any vectkrinteger)
++ Preallocating a list (or any vector)
 ```r
 x = vector("list", 10)
 for(i in 1:10) 

@@ -5,6 +5,7 @@
 + Is `1 + -2` a legitimate command?
 + Is `1 + *2` a legitimate command?
 + `x[[1][2]`
++ `x[[1]][2`
 
 + `plot(x, y, main = 'Don't do this')`
 <!-- Instead, use xlab = "Don't do this" -->

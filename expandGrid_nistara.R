@@ -16,8 +16,6 @@ sim =
 function(a, b, n = rpois(1, a + b))
   data.frame(x = rnorm(n, a), y = rexp(n, b))
 
-
-
 cond1 = c("A", "B")
 cond2 = c("High", "Medium", "Low")
 

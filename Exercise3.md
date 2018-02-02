@@ -8,6 +8,7 @@ scatter.smooth(mtcars$mpg, mtcars$wt, family = "gaussian", x = "Weight of car", 
 that had a ... parameter and that also had a parameter that came after the ...
 How did I find scatter.smooth() programmatically?
 
+<!--
 ```r
 o = ls("package:stats")
 i = sapply(o, function(x){ 
@@ -19,3 +20,4 @@ i = sapply(o, function(x){
 				    FALSE
 	          })
 ```
+-->

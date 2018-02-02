@@ -269,15 +269,15 @@ values.
 
 # Exercise
 1. Consider
- ```r
+```r
  1 + pi
- ```
+```
  What are the steps involved in R computing this?
 
 1. Consider
- ```r
+```r
  1 + 2 * 3
- ```
+```
  What are the steps involved in R computing this? 
  How many function calls are there? To what function?
  

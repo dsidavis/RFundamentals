@@ -16,19 +16,20 @@ We combine these into a single collection of values.
 
 There are two basic types of collections in R.
 vectors and lists (although we can create lists with a call to vector()!)
+These are ordered collections of elements.
 
-Vectors are homogeneous in that all the elements must have the same type
+**Vectors** are homogeneous in that all the elements must have the same type
 and R will make this happen automatically by coercion.
 
-Lists can be heterogeneous, i.e. each element can have a different type.
+**Lists** can be heterogeneous, i.e. each element can have a different type.
 
 
 There are 4 fundamental vector types that people encounter most often.
 These are, in order,
- + logical - `TRUE`, `FALSE`
- + integer - 1L, 2L, as.integer(4)
- + numeric - 1, 1.0, 2.3443242e4, pi
- + character - "1", "1.0", "abc"
++ logical - `TRUE`, `FALSE`
++ integer - 1L, 2L, as.integer(4)
++ numeric - 1, 1.0, 2.3443242e4, pi
++ character - "1", "1.0", "abc"
  
 There is also complex  for representing complex numbers (real + imaginary part).
  
@@ -80,7 +81,55 @@ c(TRUE, 20)
 ```
 
 
-#
+# Names of Vector Elements
+
+Vectors are ordered collections of elements.
+
+The elements may have names.  We can then refer to the elements
+by name rather or position.
+
+The names() function returns a character vector of the names, or `NULL`.
+We can set the names() with
+```
+ names(x) = c("a", "b", "c")
+``` 
+
+# Attributes
+
+names() are treated as attributes of an object.
+We can have arbitrary attributes on an object.
+names is special, as is dim, class, row.names, and other important
+foundational attributes.
+
+One can get the attributes of an object with
+```
+attributes(mtcars)
+```
+
+We can get an individual attribute with attr()
+```
+attr(mtcars, "row.names")
+```
+
+We can also set an attribute with attr()
+```
+attr(mtcars, "origin") = "myData.csv"
+```
+Then we can query it with
+```
+attr(mtcars, "origin") 
+```
+
+The function str() shows attributes.
+
+The function structure() is also convenient for creating
+objects and associating one or more attributes on the object.
+```
+x = structure(1:26, names = LETTERS, class = c("alphabet"))
+```
+
+
+# Data Frame
 
 While the order may not be important for statistical analysis,
 it is often important for data analysis, e.g. to match observations
@@ -91,7 +140,7 @@ to the same observational unit in the other vector.
 We can keep measurements from the same observational units
 in two "parallel" vectors.
 
-Alternatively, we can combine two or more 'paralle' vectors in
+Alternatively, we can combine two or more 'parallel' vectors in
 a data.frame.
 
 A data.frame is a list. Check the typeof() of a data.frame.

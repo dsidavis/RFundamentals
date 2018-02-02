@@ -1,6 +1,5 @@
 # How Function Calls Work?
 
-
 Consider a function call in R.
 We'll use getDocTitle() from the ReadPDF package we are developing
 as an example. There is nothing special about this.
@@ -8,6 +7,15 @@ as an example. There is nothing special about this.
 We'll source() the file  getTitle.R into the R session, so the
 functions defined in that file will be in the global environment.
 
+
+Consider the function
+```
+getDocTitle =
+function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...)
+{
+   # R CODE HERE.....
+}
+```
 
 Consider the call 
 ```r
@@ -74,7 +82,16 @@ There are no other named arguments, so none to partially match by name.
 
 ### Step 3
 The remaining 2 arguments in the call are "article.xml" and 2.
-We match these two the first 
+We match these two the first parameters.
+
+
+Remember that R has not evaluated the arguments in the call.
+It has only associated the expressions in the call with the relevant parameters.
+Lazy evaluation defers the evaluation of each argument until the corresponding
+parameter is actually referenced.
+
+
+match.call()
 
 
 
@@ -127,7 +144,7 @@ frame.
 ### Step 2 - Partial name matching
 Having matched lpars, we have 
 fam, xl, yla, and  main as named arguments.
-The first three clearl partially match family, xlab and ylab.
+The first three clearly partially match family, xlab and ylab.
 Note that yl would have been an ambiguous as it matches ylim and ylab.
 So we needed to add the 'a'.
 

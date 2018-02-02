@@ -131,3 +131,43 @@ Levels: x1 x2 x3
 [1] A A B C A B
 Levels: C B A
 ```
+
+
+Consider
+
+```
+x = c("A", "B", "B", "A", "C")
+```
+
+```
+factor(x)
+[1] A B B A C
+Levels: A B C
+```
+
+Now let's specify a different set of levels
+```
+factor(x, c("X", "Y", "Z"))
+[1] <NA> <NA> <NA> <NA> <NA>
+Levels: X Y Z
+```
+None of the values were found in the levels vector.
+
+But if our goal was to relabel the levels, we can use
+```
+factor(x, labels = c("X", "Y", "Z"))
+[1] X Y Y X Z
+Levels: X Y Z
+```
+This maps A, B, C to X, Y, Z
+
+
+The labels parameter also allows us to map two or more levels to one (new) level
+```
+184> factor(x, labels = c("A", "B", "B"))
+[1] A B B A B
+Levels: A B
+```
+There is no C in the result and it was mapped to B.
+
+We can also do all of this by manipulating the levels attribute.

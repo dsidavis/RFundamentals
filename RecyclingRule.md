@@ -37,7 +37,7 @@ mapply(f, a, b)
 ```
 
 The answer is generally that R makes both vectors the same length.
-R takes the veector with the smaller length and extends that vector
+R takes the vector with the smaller length and extends that vector
 to have the same length as the longer one.
 It does this by the (equivalent of the) rep() function.
 Suppose x is a vector of length n1 and y is a vector length n2

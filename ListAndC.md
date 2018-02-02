@@ -23,3 +23,20 @@ class(a)
 class(b)
 length(b)
 ```
+
+
+# Care with the c() Function
+
+We can create vectors and lists using c() - the concatenation function.
+We can also create lists with c() or list().
+Be careful when using c().
+
+
+```
+c(1, c(2, 3, 4), 10:15)
+```
+
+What about
+```
+list(1, c(2, 3, 4))
+```
