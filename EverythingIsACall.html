@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="almost-everything-is-a-call">(Almost) Everything is a Call</h1>
+<p>We saw that we have symbols/names such as <code>pi</code> and <code>x</code> and that R evaluates this by finding the symbol in an environment and then returning the value bound to that.</p>
+<p>We also saw literal values such as 1, 2, TRUE, FALSE, &quot;a string&quot;. R evaluates these as themselves.</p>
+<p>Everything else is a function call, e.g., numeric(), list(), plot(x, y), 1 + 2, x[1], x[2] = 10.</p>
+<p>What about :, the sequence creation operator. This is a function.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="st">`</span><span class="dt">:</span><span class="st">`</span>
+<span class="kw">.Primitive</span>(<span class="st">&quot;:&quot;</span>)</code></pre>
+<p>Similar to +, all the math and logic operators are functions, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="st">`</span><span class="dt">&amp;</span><span class="st">`</span>
+function (e1, e2)  <span class="kw">.Primitive</span>(<span class="st">&quot;&amp;&quot;</span>)</code></pre>
+<p>What about if(), for() and while(), i.e. the control flow operators. Indeed, these are also functions. Consider the simple function</p>
+<pre class="sourceCode r"><code class="sourceCode r">z =<span class="st"> </span>function(<span class="dt">n =</span> <span class="dv">10</span>)  
+{ 
+  ctr =<span class="st"> </span><span class="dv">0</span> 
+  while(ctr &lt;<span class="st"> </span>n) 
+     ctr =<span class="st"> </span>ctr +<span class="st"> </span><span class="dv">1</span>
+  ctr
+}</code></pre>
+<p>If we call this, we get the count up to 10.</p>
+<p>However, if we redefine <code>while</code>, we can change how this works.</p>
+<pre class="sourceCode r"><code class="sourceCode r">while =
+function(...)
+ <span class="dv">101</span></code></pre>
+<p>Now if we call z(), we get back 0, i.e. the value we assigned to ctr in the first line. The second expression in the body of z calls our new while function and that just returns 101. We ignore this and so return 0.</p>
+<p>Similarly, we can redefine if() and for().</p>
+</body>
+</html>

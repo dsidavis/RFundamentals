@@ -1,5 +1,15 @@
 # R Fundamentals Day 3
 
+<center>
+<div>
+<table>
+<tr>
+<th>[Day1](Day1.md)</th><th>[Day2](Day2.md)</th><th>[Day3](Day3.md)</th><th>[Day4](Day4.md)</th>
+</tr>
+</table>
+</div>
+</center>
+
 + [R Session for Day 3](RSession3)
 
 + Recap/Questions
@@ -12,7 +22,7 @@
     + Need to use which().  But need to ensure only one or else hierarchical subsetting.
     + Or `x [ logicalVector ][[1]]`
 + [factors](Factors.html)
-    + Subsetting by factors
+    + Subsetting by factors and keeping/dropping levels.
 + [Vectorization in rnorm(), etc.](rnormVec.html)
     + `rnorm(n, mean = vector, sd = vector)`
 + [apply() functions](Apply.html)

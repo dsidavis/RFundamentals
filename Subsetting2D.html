@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="subsetting-data.frames-and-matrices">Subsetting Data.Frames and Matrices</h1>
+<p>Subsetting a 2-dimensional object in R follows the same rules as one dimension. We can use positions, negative positions, logical vectors, names, empty/missing indices for each dimension. The computation is</p>
+<pre class="sourceCode r"><code class="sourceCode r">obj[i, j]</code></pre>
+<p>This is essentially the same as the two step</p>
+<pre class="sourceCode r"><code class="sourceCode r">obj[i, ] [, j]</code></pre>
+<p>The empty/missing index means all the elements from that dimension. So for a data.frame df,</p>
+<pre class="sourceCode r"><code class="sourceCode r">df[, ]</code></pre>
+<p>means all of the rows and all of the columns.</p>
+<pre class="sourceCode r"><code class="sourceCode r">df[ <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">6</span>), ]</code></pre>
+<p>means rows 1, 3 and 6, and all of the columns. Since this is [, we get back a data frame.</p>
+<h2 id="single-column-as-vector-or-data-frame">Single Column as Vector or Data Frame?</h2>
+<p>Typically, if we subset a single column, e.g,</p>
+<pre class="sourceCode r"><code class="sourceCode r">mtcars[, <span class="st">&quot;mpg&quot;</span>]</code></pre>
+<p>R recognizes we want that as a vector and not as a data frame with one column.</p>
+<p>However, if we do want to ensure it is a data.frame with one column, we can use the <code>drop = FALSE</code> in the [ ] operation, as we did for factors when we wanted to drop the levels that were not in the subset. So</p>
+<pre class="sourceCode r"><code class="sourceCode r">mtcars[, <span class="st">&#39;mpg&#39;</span>, drop =<span class="st"> </span><span class="ot">FALSE</span>]
+                     mpg
+Mazda RX4           <span class="fl">21.0</span>
+Mazda RX4 Wag       <span class="fl">21.0</span>
+Datsun <span class="dv">710</span>          <span class="fl">22.8</span>
+Hornet <span class="dv">4</span> Drive      <span class="fl">21.4</span>
+Hornet Sportabout   <span class="fl">18.7</span>
+......</code></pre>
+<p>gives a data.frame with one column.</p>
+<p>Again, like list[[x]] where x may have more than one element, it can be useful to use drop = FALSE to ensure you get a data frame in a computation such as <code>df[, x]</code> where x may have 1 or more than one element.</p>
+</body>
+</html>

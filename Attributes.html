@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="attributes">Attributes</h1>
+<p>Every object has a class(), typeof() and a length(). In other words, we can always call the class(), typeof() and length() functions on any R object and get a result with some meaning. And I nearly always use these after a command just to make certain that I get what I think I am getting - in other words, to verify my expectations.</p>
+<p>The class() tells us how we as users should think about this object. For example, the result of a call to lm() is a linear model and has class <code>lm</code>. The actual object is a list, but we are to think of it as an lm object.</p>
+<p>The typeof() function tells us the fundamental type of the object, in other words, how it is constructred.</p>
+<p>The function str() is also useful for seeing the structure of an object and an overview of its contents.</p>
+<p>head() and tail() show us the top and bottom of a vector, data.frame, matrix, etc. These are also good for taking a quick look at an object to verify it is as expected.</p>
+<p>Many objects have names. The names are very useful when we, e.g., subset the vector as we can still identify the elements by their names. For example, consider the two vectors</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">c</span>(<span class="dt">history =</span> <span class="dv">100</span>, <span class="dt">psychology =</span> <span class="dv">900</span>, <span class="dt">statistics =</span> <span class="dv">400</span>)
+y =<span class="st"> </span><span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">900</span>, <span class="dv">400</span>)</code></pre>
+<p>Now,</p>
+<pre class="sourceCode r"><code class="sourceCode r">x[ x &gt;<span class="st"> </span><span class="dv">200</span>]
+psychology statistics 
+       <span class="dv">900</span>        <span class="dv">400</span> </code></pre>
+<p>But</p>
+<pre class="sourceCode r"><code class="sourceCode r">y [ y &gt;<span class="st"> </span><span class="dv">200</span>]
+[<span class="dv">1</span>] <span class="dv">900</span> <span class="dv">400</span></code></pre>
+<p>So we don't know which elements are included in the result, just their values.</p>
+<p>And often the same names are used on parallel vectors, i.e., two vectors whose elements are in order that correspond to each other and the same observational unit. So the subset of one tells us which values to extract from the the other. The logical condition does this also, so the names are not vital.</p>
+<p>However, the names are vital if we have two vectors x and y and we want to get the elements of y corresponding to the names of x, regardless of the order of the two vectors:</p>
+<pre class="sourceCode r"><code class="sourceCode r">y[ <span class="kw">names</span>(x) ]</code></pre>
+<h2 id="structure">structure()</h2>
+<p>Often we compute a vector (or list) and then set the names and possibly specify the class. In a function, we often see</p>
+<pre class="sourceCode r"><code class="sourceCode r">  ans =<span class="st"> </span><span class="kw">computeVector</span>()
+  <span class="kw">names</span>(ans) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;c&quot;</span>)
+  <span class="kw">class</span>(ans) =<span class="st"> &quot;myData&quot;</span>
+  ans</code></pre>
+<p>So we create a temporary variable, set its names() attribute and then return it.</p>
+<p>Or on the command line, we may have to create this temporary variable, set its names, pass it to another function and then remove the temporary variable:</p>
+<pre class="sourceCode r"><code class="sourceCode r">tmp =<span class="st"> </span><span class="kw">computeVector</span>()
+<span class="kw">names</span>(tmp) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;c&quot;</span>)
+ans =<span class="st"> </span><span class="kw">fun</span>(tmp)
+<span class="kw">rm</span>(tmp)</code></pre>
+<p>Often it is more convenient to set attributes in a single call that also creates the object. We use structure(), e.g.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">structure</span>(<span class="kw">computeVector</span>(),  <span class="dt">names =</span> <span class="kw">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>,<span class="st">&quot;c&quot;</span>), <span class="dt">class =</span> <span class="st">&quot;myData&quot;</span>)</code></pre>
+<p>and now we can return that or put it directly into a call to fun().</p>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="the-apply-function-family">The Apply Function Family</h1>
+<p>The *apply() functions basically perform loops over a collection of elements. They are simpler and slightly more efficient than loops. The are much more efficient than user-programmed loops that don't preallocate the results!</p>
+<p>These include + apply() - matrices, over rows or over columns + lapply() - vectors/lists + sapply() - same as lapply() but attempts to 'S'implify the result to a vector/matrix + tapply(), by(), aggregate() - for split/group by and apply a function to each group + mapply() - looping over two or more parallel vectors, passing the i-th element of each to the function. + eapply() - looping over all the elements of an evironment + Map() - alternative version of mapply() + Reduce - for aggregating over a vector in a &quot;cumulative&quot;/rolling manner + rep() and replicate()</p>
+<p>Consider a vector x with n elements. The command</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lapply</span>(x, f)</code></pre>
+<p>gives the result equivalent to</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">list</span>( <span class="kw">f</span>(x[[<span class="dv">1</span>]]), <span class="kw">f</span>(x[[<span class="dv">2</span>]]), ...., <span class="kw">f</span>(x[[n]]) )</code></pre>
+<p>That's the heart of the lapply function.</p>
+<h1 id="passing-additional-arguments-to-fun">Passing Additional Arguments to FUN</h1>
+<p>Often, we want to pass additional arguments to the function we are apply'ing. A simple example is computing the quantiles of each column in a data.frame. By default, we get the 0%, 25%, 50%, 75% and 100%. If we want 0, 10, 20, , ..., 100, we would call the quantile function as</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">quantile</span>(x, <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>))</code></pre>
+<p>So in our lapply() function, we might create an anonymous function as</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lapply</span>(df, function(x) <span class="kw">quantile</span>(x, <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>)))</code></pre>
+<p>This is often quite convenient. However, there is a simpler version for this scenario. It looks very similar:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lapply</span>(df, quantile,  <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>))</code></pre>
+<p>This is the equivalent of</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">list</span>( <span class="kw">quantile</span>(x[[<span class="dv">1</span>]], <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>)), 
+      <span class="kw">quantile</span>(x[[<span class="dv">2</span>]], <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>)), 
+      ...., 
+      <span class="kw">quantile</span>(x[[n]], <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>) ))</code></pre>
+<p>We can pass any number of additional arguments to our FUN in lapply().</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lapply</span>(df, quantile, <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>), <span class="ot">TRUE</span>, <span class="ot">FALSE</span>)</code></pre>
+<p>It is often much clearer to specify the arguments by name</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lapply</span>(df, quantile, <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> .<span class="dv">1</span>), <span class="dt">na.rm =</span> <span class="ot">TRUE</span>, <span class="dt">names =</span> <span class="ot">FALSE</span>)</code></pre>
+<p>It is somewhat confusing that these arguments are for FUN, and not for lapply. So let's look at the definition of lapply, specifically the signature (i.e. parameters and default values)</p>
+<pre class="sourceCode r"><code class="sourceCode r">function (X, FUN, ...) 
+{
+    FUN &lt;-<span class="st"> </span><span class="kw">match.fun</span>(FUN)
+    if (!<span class="kw">is.vector</span>(X) ||<span class="st"> </span><span class="kw">is.object</span>(X)) 
+        X &lt;-<span class="st"> </span><span class="kw">as.list</span>(X)
+    <span class="kw">.Internal</span>(<span class="kw">lapply</span>(X, FUN))
+}
+&lt;bytecode:<span class="st"> </span><span class="dv">0x7fca1902ae60</span>&gt;
+<span class="er">&lt;</span>environment:<span class="st"> </span>namespace:base&gt;</code></pre>
+<p>So all of the additional arguments are mapped to <code>...</code>. What we cannot see in the definition of the function (because it calls .Internal()) is that all of the ... are passed to FUN. So if we implemented lapply in R code, it would involve calls of the form</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">FUN</span>( X[[i]], ...)</code></pre>
+<p>We, of course, do not have to name all arguments or specify a value for each parameter. Instead, we can use <a href="FunctionCalls.html">the way R matches arguments to parameters</a> to understand how to specify the arguments in the way that will match the parameters as we desire.</p>
+<h1 id="simplification-in-sapply">Simplification in sapply()</h1>
+<p>sapply() is literally a call to lapply() followed up by an attempt to simplify the result. This is useful for interactive use or when we know that all calls to the function FUN will definitely give us a value we expect and sapply() will simplify to what we want. For example, if FUN always returns a single scalar value (logical, integer, numeric, character), sapply() will collapse the result to a vector, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sapply</span>(docTexts, function(x) <span class="kw">any</span>(<span class="kw">grepl</span>(<span class="st">&quot;colorado&quot;</span>, x)))</code></pre>
+<p>The (anonymous) function will return a single logical value. sapply() will then collapse this to a logical vector.</p>
+<p>Is our anonymous function we are apply()'ing guaranteed to return a TRUE or a FALSE value? What will grepl() return if the character vector <code>x</code> is the empty character vector? It will return logical(0). So what will any(logical(0)) return? We might expect a logical(0), but in fact, it returns FALSE. So our function is guaranteed to return a non-empty logical vector with length 1.</p>
+<p>So sapply() will collapse the result to a vector.</p>
+<p>However, consider if we had done the computations differently, by collapsing the lines from <code>readLines()</code>, so that docTexts was a character vector and not a list with each element a character vector of different lengths, i.e., the number of lines.</p>
+<pre class="sourceCode r"><code class="sourceCode r">md =<span class="st"> </span><span class="kw">list.files</span>(<span class="dt">pattern =</span> <span class="st">&quot;md$&quot;</span>)
+docTexts =<span class="st"> </span><span class="kw">sapply</span>(md, function(x) <span class="kw">paste</span>(<span class="kw">readLines</span>(x), <span class="dt">collapse =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>))
+<span class="kw">names</span>(docTexts) =<span class="st"> </span>md</code></pre>
+<p>Note that we used sapply() rather than lapply() to collapse the result to a character vector. Do we know that paste() will collapse an empty character to a non-empty character vector? Yes,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">paste</span>(<span class="kw">character</span>(), <span class="dt">collapse =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</code></pre>
+<p>But</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">paste</span>(<span class="kw">character</span>(), <span class="dt">sep =</span> <span class="st">&quot;&quot;</span>)</code></pre>
+<p>does return an empty character vector character(0) .</p>
+<p>If by some means, each element of docTexts was a character vector, but one or more were empty, the following command</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sapply</span>(docTexts, function(x) <span class="kw">grepl</span>(<span class="st">&quot;colorado&quot;</span>, x))</code></pre>
+<p>would result in some values being TRUE or FALSE and those corresponding to 0-length inputs would be logical(0).</p>
+<p>In this case, sapply() would loose information if it collapses the result to a logical vecto. Consider the following example:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>, <span class="ot">TRUE</span>, <span class="kw">logical</span>(<span class="dv">0</span>), <span class="ot">FALSE</span>)</code></pre>
+<p>becomes</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>, <span class="ot">TRUE</span>, <span class="ot">FALSE</span>)</code></pre>
+<p>and we cannot determine which element corresponds to the input elements.</p>
+<h2 id="multiple-return-values">Multiple Return Values</h2>
+<p>When a function returns more than one value and we use it as the FUN in sapply(), sapply() might collapse the result in a different way. If all the calls to FUN return a vector of length n, then sapply() will create an n x length(x). For example, we'll process each column in mtcars and compute the min and max:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sapply</span>(mtcars, function(x) <span class="kw">c</span>(<span class="kw">min</span>(x), <span class="kw">max</span>(x)))
+      mpg cyl  disp  hp drat    wt qsec vs am gear carb
+[<span class="dv">1</span>,] <span class="fl">10.4</span>   <span class="dv">4</span>  <span class="fl">71.1</span>  <span class="dv">52</span> <span class="fl">2.76</span> <span class="fl">1.513</span> <span class="fl">14.5</span>  <span class="dv">0</span>  <span class="dv">0</span>    <span class="dv">3</span>    <span class="dv">1</span>
+[<span class="dv">2</span>,] <span class="fl">33.9</span>   <span class="dv">8</span> <span class="fl">472.0</span> <span class="dv">335</span> <span class="fl">4.93</span> <span class="fl">5.424</span> <span class="fl">22.9</span>  <span class="dv">1</span>  <span class="dv">1</span>    <span class="dv">5</span>    <span class="dv">8</span></code></pre>
+<p>sapply essentially calls cbind() on the results of each. Actually, more accurately, it does the equivalent of</p>
+<pre class="sourceCode r"><code class="sourceCode r">tmp =<span class="st"> </span><span class="kw">lapply</span>(mtcars, function(x) <span class="kw">c</span>(<span class="kw">min</span>(x), <span class="kw">max</span>(x)))
+<span class="kw">do.call</span>(cbind, tmp)</code></pre>
+<p>Note the use of do.call() to call an argument</p>
+<h1 id="vapply">vapply()</h1>
+<p>Whether sapply() collapses the result may depend on the actual <strong>contents</strong> (i.e. the values, not just the structure) of the vector over which we are applying FUN. This isn't reliable. So using lapply() and examing the result works generally.</p>
+<p>However, we can also use vapply() to indicate what we expect from each function call.</p>
+<h1 id="mapply">mapply()</h1>
+<p>Consider two vectors, x and y.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">mapply</span>(f, x, y)</code></pre>
+<p>is equivalent to</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>( <span class="kw">f</span>(x[[<span class="dv">1</span>]], y[[<span class="dv">1</span>]]), <span class="kw">f</span>(x[[<span class="dv">2</span>]], y[[<span class="dv">2</span>]]), ..., <span class="kw">f</span>(x[[n]], y[[n]]))</code></pre>
+<p>Well this is not quite true. By default, mapply() will attempt to simplify the result like sapply() does. We can disable this with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">mapply</span>(f, x, y, <span class="dt">SIMPLIFY =</span> <span class="ot">FALSE</span>)</code></pre>
+<p>Note that if x and y don't have the same length, the recycling rule will come into effect to make the shorter of these the same length as the longer.</p>
+<h1 id="exercise">Exercise</h1>
+<p>Why is the function first in the call to mapply() in contrast to the second parameter in lapply(), sapply(), apply(), etc.</p>
+<h1 id="apply">apply()</h1>
+<p>We already discussed that matrices are not as commonly used in data analysis and at the top-level commands as data.frames. As a result, apply() doesn't get used as much as either.</p>
+<p>If we do use apply(), it coerces the first argument to a matrix. So if we pass a data.frame() with columns of different types, the elements of the matrix will have to be of the most general type of the columns. So, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">d =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">values =</span> <span class="kw">rnorm</span>(<span class="dv">26</span>), <span class="dt">b =</span> letters, <span class="dt">c =</span> LETTERS, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
+<span class="kw">table</span>(<span class="kw">apply</span>(d, <span class="dv">1</span>, class))
+character 
+       <span class="dv">26</span> </code></pre>
+<p>So all of the row vectors passed to class() are character vectors.</p>
+<p>The same applies if we operate column-wise:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">apply</span>(d, <span class="dv">2</span>, class))
+character 
+        <span class="dv">3</span> </code></pre>
+<p>So not only would we make a copy of the values in the data.frame into a matrix, we'd also make a mess of the data types.</p>
+<p>Suppose we have stringsAsFactors = TRUE in our example. Will apply coerce the two factor columns into character vectors or leave them as integer vectors without the labels for the levels? Let's see:</p>
+<pre class="sourceCode r"><code class="sourceCode r">d =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">values =</span> <span class="kw">rnorm</span>(<span class="dv">26</span>), <span class="dt">b =</span> letters, <span class="dt">c =</span> LETTERS, <span class="dt">stringsAsFactors =</span> <span class="ot">TRUE</span>)
+<span class="kw">apply</span>(d, <span class="dv">1</span>, print)</code></pre>
+<p>When we have a matrix(), we do use apply(). And apply() works for higher-dimensional arrays, i.e. 3-D, 4-D, ... In that case, we specify a vector of dimensions over which to compute, e.g, instead of rows, perhaps the first and third dimension with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">apply</span>(arr, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), function(x) {})</code></pre>
+<h1 id="when-to-use-which-apply-function">When to use which apply function</h1>
+<ul>
+<li>When you have a matrix, use apply().</li>
+<li>When you want to loop over row, use apply(), or lapply(seq_len(nrow(df)), function(i) df[i, ])</li>
+<li>When you loop over pairs, triples, etc. of vectors, use mapply().</li>
+<li>When you have a vector or list and don't know what the result of each call will be, use lapply()</li>
+<li>For a vector/list and you know the structure of the result of each call, use vapply()</li>
+<li>For a vector/list when you anticipate that the result can be simplified to a vector/matrix/array, use sapply() and check the results.</li>
+<li>When looping over elements of an environment, use eapply().</li>
+</ul>
+</body>
+</html>

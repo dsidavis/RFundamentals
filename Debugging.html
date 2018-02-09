@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="debugging-in-r">Debugging in R</h1>
+<ul>
+<li>print()/cat()/message()</li>
+<li>browser()/recover()</li>
+<li>debug()</li>
+<li>trace()</li>
+<li>traceback()</li>
+<li>options() error = recover/browser/dump.frames</li>
+</ul>
+<h1 id="proactive-debugging">Proactive Debugging</h1>
+<p>Stop in a given function before it starts doing its work.</p>
+<h1 id="reactive-debugging">Reactive Debugging</h1>
+<p>When an error occurs, we want to stop and look around at the current state of the computations. This includes not only the line where the error occurred and the variables used in that expression, but also the state of other function calls that led to this error. While the error clearly occurs in function y, the problem may have been caused by function x calling y with a bad/unexpected argument which was computed in x erroneously.</p>
+<p>We arrange to stop when there is an error</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">options</span>(<span class="dt">error =</span> recover)</code></pre>
+<p>An alternative is to call <code>traceback()</code> immediately after an error occurred (i.e. before we issue another R command at the REPL).</p>
+<h1 id="turning-warnings-into-errors">Turning warnings into errors</h1>
+<p>Warnings are harder to catch. Warnings are typically displayed at the end of a computation, not when they occur. We can change this with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">options</span>(<span class="dt">warn =</span> <span class="dv">1</span>)</code></pre>
+<p>To trap warnings as they occur and stop to examine the call stack, we might debug the warning() function and see where it is called. Alternatively, we can elevate <strong>all</strong> warnings to errors with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">options</span>(<span class="dt">warn =</span> <span class="dv">2</span>)</code></pre>
+<h1 id="post-mortem-debugging">Post-mortem Debugging</h1>
+<p>After an error occurs and the next prompt is shown, you can use traceback() to explore the call stack. This behaves much like debugging with <code>options(error = recover)</code>. It merely changes the default where now you chose to examine the call stack, whereas with error = recover, you are always asked to explore it and have to exit.</p>
+<h2 id="batch-debugging">Batch Debugging</h2>
+<p>We can run R in &quot;batch&quot; mode, i.e., you run R not interactively but as a background/asynchronous job/process. This is useful for very long running tasks what happens when there is an error.</p>
+<h1 id="section"></h1>
+<pre class="sourceCode r"><code class="sourceCode r">tmp =<span class="st"> </span>mtcars[-<span class="dv">31</span>,]
+<span class="kw">by</span>(tmp, <span class="kw">list</span>(tmp$cyl, tmp$am), function(x) <span class="kw">lm</span>(mpg ~<span class="st"> </span>wt, x))<span class="er">)</span>
+<span class="kw">by</span>(tmp, <span class="kw">list</span>(tmp$cyl, tmp$am), lm, <span class="dt">formula =</span> mpg ~<span class="st"> </span>wt)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">debug</span>(lm)
+<span class="kw">by</span>(tmp, <span class="kw">list</span>(tmp$cyl, tmp$am), lm, <span class="dt">formula =</span> mpg ~<span class="st"> </span>wt)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">trace</span>(lm, <span class="kw">quote</span>(<span class="kw">print</span>(data)), <span class="dt">print =</span> <span class="ot">FALSE</span>)
+<span class="kw">by</span>(tmp, <span class="kw">list</span>(tmp$cyl, tmp$am), lm, <span class="dt">formula =</span> mpg ~<span class="st"> </span>wt)</code></pre>
+<p>The following gives an error:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">by</span>(tmp, <span class="kw">list</span>(tmp$cyl, tmp$am), lm, <span class="dt">formula =</span> mpg ~<span class="st"> </span>et)</code></pre>
+<h2 id="section-1"></h2>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ReadPDF)
+<span class="kw">getDocTitle</span>(<span class="st">&quot;foo&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ReadPDF)
+f =<span class="st"> </span><span class="kw">list.files</span>(<span class="st">&quot;~/DSIProjects/Zoonotics-shared/LatestDocs/PDF/0000708828/&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;xml$&quot;</span>, <span class="dt">full =</span> <span class="ot">TRUE</span>)
+<span class="kw">getDocTitleString</span>(f)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;~/DSIProjects/ReadPDF/R/getTitle.R&quot;</span>)</code></pre>
+<p>Note that some of the functions getDocTitle() calls <strong>may</strong> be in the ReadPDF namespace and unexported. In this case, our new functions won't find them as we have source()d these into the global environment.</p>
+<p>Let's debug isTitleBad() to see why it thinks this txt is not a title.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">debug</span>(isTitleBad)</code></pre>
+</body>
+</html>

@@ -36,7 +36,7 @@ What if we try
  m[c(1, 1, 1, 2, 2, 3), c(1, 2, 3, 2, 3, 3) ]
 ```
 This works as we discussed previously, but not necessarily as we want.
-Consider kust the first index vector, i.e. for the rows.
+Consider the first index vector, i.e. for the rows.
 ```
  m[c(1, 1, 1, 2, 2, 3), ]
 ```
@@ -55,6 +55,9 @@ Then if we apply the column subsetting `c(1, 2, 3, 2, 3, 3)`,
 we would get the first three columns, followed by the second and third, and then third, so again
 six columns with repeats.
 
+
+In general, when we have `x[i, j]`, you can break this down into
+`x[i,][, j]`.
 
 
 ## Subsetting by Row-Column Index Pairs

@@ -51,8 +51,46 @@ x[  match(a, b, 0) ]
 ```
 
 
-### Subsetting By Empty Position Vector
-What about 
+### Subsetting By Empty Vector - `x[ ]`
+Consider
+```
+x = 1:10
+```
+
+What's the difference between  the following two expressions:
+```
+x
+x[]
+```
+The first (`x`) returns the value of x which is the entire vector.
+So to does `x[]`.
+Precisely, `x[]` subsets all of the elements
+
+So why do we care?
+Consider 
+```
+mtcars[1, ]
+```
+mtcars is a data frame (and the following also applies to a matrix or array).
+mtcars[1, 2] would return the first row and its second element.
+But `mtcars[1, ]` returns the first row and then all of its elements.
+The empty subset for the columns means "all of the elements for that dimension".
+So 
+```
+mtcars[1:2, ]  # all columns for first two rows
+mtcars[ , 1:2] # all rows for first two columns
+mtcars[, ]  # all rows and all columns.
+```
+all utilize this.
+
+What's the difference between
+```
+x = 0
+x[] = 0
+```
+
+`x = 0` assigns the literal value 0 to the variable x.
+`x[] = 0` replaces all of the 
 
 
 ### Subsetting with index value 0

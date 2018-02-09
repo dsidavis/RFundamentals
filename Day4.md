@@ -1,5 +1,15 @@
 # Day 4
 
+<center>
+<div>
+<table>
+<tr>
+<th>[Day1](Day1.md)</th><th>[Day2](Day2.md)</th><th>[Day3](Day3.md)</th><th>[Day4](Day4.md)</th>
+</tr>
+</table>
+</div>
+</center>
+
 + [R Session for Day 4](RSession4)
 
 + Getting the (row,col) values from a logical subsetting of a matrix.

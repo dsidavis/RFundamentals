@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="r-fundamentals-day-3">R Fundamentals Day 3</h1>
+<ul>
+<li><p><a href="RSession3">R Session for Day 3</a></p></li>
+<li>Recap/Questions</li>
+<li>Everything is an object in R - including the language objects, functions, if, while, ....</li>
+<li>lists, data.frames
+<ul>
+<li>[, [[ and $</li>
+<li>Data frames and 2-D subsetting</li>
+</ul></li>
+<li>Can't use logical vector in 1-D list subsetting for [[
+<ul>
+<li>x[[ c(TRUE, FALSE, TRUE, ... ) ]]</li>
+<li>Need to use which(). But need to ensure only one or else hierarchical subsetting.</li>
+<li>Or <code>x [ logicalVector ][[1]]</code></li>
+</ul></li>
+<li><a href="Factors.html">factors</a>
+<ul>
+<li>Subsetting by factors</li>
+</ul></li>
+<li><a href="rnormVec.html">Vectorization in rnorm(), etc.</a>
+<ul>
+<li><code>rnorm(n, mean = vector, sd = vector)</code></li>
+</ul></li>
+<li><a href="Apply.html">apply() functions</a>
+<ul>
+<li>Passing additional arguments</li>
+<li>Different apply() functions</li>
+</ul></li>
+<li><a href="tryCatch.html">try()/tryCatch()</a></li>
+<li><a href="MatrixSubsetting.html">2-D subsetting - matrices</a></li>
+<li><a href="WritingFunctions.html">Writing Functions</a>
+<ul>
+<li>Default values for parameters</li>
+<li>Idioms</li>
+<li>warnings and errors</li>
+</ul></li>
+<li><a href="Debugging.html">Debugging</a></li>
+<li><a href="WritingPackages.html">Writing R Packages</a>
+<ul>
+<li>Directory structure</li>
+<li>DESCRIPTION</li>
+<li>NAMESPACE</li>
+</ul></li>
+<li><p><a href="Day4.html">Other Topics</a></p></li>
+</ul>
+</body>
+</html>

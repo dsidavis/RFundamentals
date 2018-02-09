@@ -79,10 +79,10 @@ function()
 This does the job.
 
 How can we improve it? or what are its weaknesses?
-+ The directory is hard-coded! ("XML")
-+ The pattern for the names of the XML files is hardcoded ("xml$"), wherease we may want to process
++  The directory is hard-coded! ("XML")
++  The pattern for the names of the XML files is hardcoded ("xml$"), wherease we may want to process
   e.g., Rdb files, etc.
-+ We should put the names of the files on both docs and the answer. Putting it on docs will put it
++  We should put the names of the files on both docs and the answer. Putting it on docs will put it
   on the answer.
   
 Let's fix these first, although there are other issues we may want to addres.
@@ -137,10 +137,14 @@ getNumPages(ff = sample(files, 20))
 ```
 
 
-A similar "inconvenice" is that we may have already parsed all the documents.
+A similar "inconvenience" is that we may have already parsed all the documents.
 This won't always be the case, but it probably will be when we are developing the function.
 So it would be convenient to be able to avoid reparsing them each time and be able to pass the
-list() of parsed documents. In fact, we can skip list.files() and just pass the documents.
+list() of parsed documents.
+Not only may we have parsed the documents, but we may have modified them. Then we
+don't want to reparse the documents as we would not be working on the same content.
+
+In fact, we can skip list.files() and just pass the documents.
 So again, we lift the first expression in the body of the function into the parameter definitions,
 giving a new parameter named docs with a default value:
 ```r
@@ -161,7 +165,7 @@ earlier, we can then pass these direcly
 ```r
 getNumPages(docs = xdocs)
 ```
-and skip the repeated calls to list.files() and xmlParse().
+and skip the repeated (i.e., we did them ourselves outside of the function) calls to list.files() and xmlParse().
 
 
 All of these make the function more flexible, albeit slightly less clear, but only just.
@@ -179,12 +183,12 @@ function(files, y = sum(nonempty))
    ll = lapply(files, readLines)
    nlines = sapply(ll, length)
    nonempty = nlines > 0
-   
+   y
    ....
 }
 ```
-This works because the default value is evaluated within the call frame when it is needed.
-So it sees the parameters and the local variables that exist at the time it is evaluated.
+This works because the default value  (`sum(nonempty)`) is evaluated within the call frame when it is needed.
+So it sees the parameters and the local variables (`nonempty`) that exist at the time it is evaluated.
 
 There is no doubt that such use makes the code somewhat unclear to callers since they
 don't know what this variable is or how it is defined.
@@ -199,8 +203,11 @@ This means it can include if() and if()-else statements
 each with complicated bodies.  
 Don't take this too far. 
 Instead of complex code in the default values,
-make the code a  function that returns the correct value.
+make the code for the default value a separate function that returns the correct value.
 You'll have to pass the relevant parameters to the function.
+
+Having a separate function means we can test and debug it separately.
+This is a a very good thing!
 
 
 ### Circular Definitions in Parameter Default Values
@@ -210,7 +217,7 @@ Consider
 circular = 
 function(x = length(y), y = length(x))
 {
-   x
+   x + y
 }
 ```
 
@@ -221,6 +228,11 @@ Error in circular() :
   promise already under evaluation: recursive default argument reference or earlier problems?
 ```
 The default value of x refers to y and the default value of y refers to x.
+
+But what about 
+```
+circular(1:10)
+```
 
 However,
 ```r
@@ -242,8 +254,8 @@ f()
 A function returns control to the caller, i.e. complete the call to this function,
 by explicitly calling return() with a value (or not),
 or when the last expression in the body is evaluated.
-The return value is the value in the return() call that is evaluated
-or the value of the last expression evaluated in the function.
+*The return value is the value in the return() call that is evaluated
+or the value of the last expression evaluated in the function.*
 
 This means that in functions that have a simple sequence of commands, we don't 
 need an explicit return call.

@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="missing-values">Missing Values</h1>
+<p>A very important aspect of the R language is the concept of a missing value - an NA. This stands for Not Available. This occurs often in data analysis and R captures it conceptually and as a fundamental part of the computational model. This is different from representing a missing value arbitrarily as -99 or -999 or some other value that is unlikely to occur. Many R functions allow us to deal with NA values in different ways and how we do so is an important statistical concern/issue.</p>
+<p>We can write an NA literal value exactly as NA, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">10</span>)</code></pre>
+<p>NA values are very different from NaN values. NaN stands for Not a Number. It arises from mathematical calculations that don't make sense. For example, log(-10) gives NaN.</p>
+<p>NA values print as</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="ot">NA</span>
+[<span class="dv">1</span>] <span class="ot">NA</span></code></pre>
+<p>i.e., with no quotes. Compare this with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="st">&quot;NA&quot;</span></code></pre>
+<p>&quot;NA&quot; may be an abbreviation for Nebraska which is very different from a missing value (NA).</p>
+<p>NA values in a factor print as <code>&lt;NA&gt;</code> so that we can distinguish them from a level with the name NA. For example,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(<span class="kw">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="ot">NA</span>, <span class="st">&quot;A&quot;</span>))
+[<span class="dv">1</span>] A    B    &lt;<span class="ot">NA</span>&gt;<span class="st"> </span>A   
+Levels:<span class="st"> </span>A B</code></pre>
+<p>Whereas,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(<span class="kw">c</span>(<span class="st">&quot;CA&quot;</span>, <span class="st">&quot;NA&quot;</span>, <span class="st">&quot;AK&quot;</span>, <span class="st">&quot;AZ&quot;</span>))
+[<span class="dv">1</span>] CA <span class="ot">NA</span> AK AZ
+Levels:<span class="st"> </span>AK AZ CA <span class="ot">NA</span></code></pre>
+<p>for state abbreviations!</p>
+<h2 id="na-logic.">NA Logic.</h2>
+<p>What is the value of</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> +<span class="st"> </span><span class="ot">NA</span></code></pre>
+<p>What is the result of adding one to a number I don't know? I still don't know. So the result is NA.</p>
+<p>Similarly, sum(), mean(), sd(), cor(), cov(), etc. for a vector values yields NA. However, these have an na.rm = TRUE/FALSE argument that allow us to &quot;remove&quot; missing values from the computations, i.e. skip them, not actually remove them from the vector(s). So</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">mean</span>(<span class="kw">c</span>(<span class="dv">12</span>, <span class="dv">233</span>, <span class="dv">10</span>, <span class="ot">NA</span>), <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</code></pre>
+<p>yields 85 (so dividing by 3) and the same as</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">mean</span>( <span class="kw">na.omit</span>(<span class="kw">c</span>(<span class="dv">12</span>, <span class="dv">233</span>, <span class="dv">10</span>, <span class="ot">NA</span>)) )</code></pre>
+<p>The function na.omit() is useful for omiting elements of a vector or rows of a data.frame.</p>
+<p>Don't remove rows with missing values. Instead, omit them from specific computations. Removing a row because it has an NA value for a variable we don't care about throws away valuable observations.</p>
+<h2 id="testing-if-a-value-is-na">Testing if a Value is NA</h2>
+<p>How can we test if a value is? An obvious approach is</p>
+<pre class="sourceCode r"><code class="sourceCode r">x ==<span class="st"> </span><span class="ot">NA</span></code></pre>
+<p>So we take a vector x as, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="dv">1</span>, <span class="ot">NA</span>, <span class="dv">4</span>) ==<span class="st"> </span><span class="ot">NA</span></code></pre>
+<p>Is 1 equal to the value we don't know? I don't know? So the first element of the answer is NA.</p>
+<p>What about</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="ot">NA</span> ==<span class="st"> </span><span class="ot">NA</span></code></pre>
+<p>Is the value I don't know equal to the other value I don't know? How can I know? They are both unknown but can be different. So the result is also NA.</p>
+<p>So</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="dv">1</span>, <span class="ot">NA</span>, <span class="dv">4</span>) ==<span class="st"> </span><span class="ot">NA</span>
+[<span class="dv">1</span>] <span class="ot">NA</span>  <span class="ot">NA</span>  <span class="ot">NA</span></code></pre>
+<p>So how do we tell which values are missing in an vector? The function is.na() tells us</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">is.na</span>( <span class="kw">c</span>(<span class="dv">1</span>, <span class="ot">NA</span>, <span class="dv">4</span>))
+[<span class="dv">1</span>] <span class="ot">FALSE</span>  <span class="ot">TRUE</span> <span class="ot">FALSE</span></code></pre>
+<p>So we can subset only the non-missing values with</p>
+<pre class="sourceCode r"><code class="sourceCode r">x[ <span class="kw">is.na</span>( x ) ]</code></pre>
+<p>or</p>
+<pre class="sourceCode r"><code class="sourceCode r">myDataFrame[ !<span class="kw">is.na</span>(myDataFrame$x), ]</code></pre>
+<p>to exclude all the rows in which x has an NA value.</p>
+</body>
+</html>

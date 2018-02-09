@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="the-search-path">The Search Path</h1>
+<p>We saw that the search path is an ordered collection of environments. Importantly, the parent of one of these environments is the next element of the search path.</p>
+<h2 id="order-matters">Order Matters</h2>
+<p>When we load a package (using library() or require()) R adds this to the search path. By default, R adds it in the second position. We can control this via the <code>pos</code> parameter.</p>
+<p>Importantly, if we have two packages that both provide a variable named, say, foo. Then which one we will find depends on which package is first in the search path. This is one reason for explicitly specifying the variable you want by prefixing it with the package name, e.g.,</p>
+<pre><code>codetools::findGlobals
+RCIndex::findGlobals</code></pre>
+<p>Code that just used findGlobals() could give an error if it finds the wrong one. Even worse, it may silently give the wrong results.</p>
+<h2 id="short-search-paths">Short Search Paths</h2>
+<p>Recall how we find symbols such as +. As the search path gets longer, we have to seach more environments. This is a reason to keep the search path to what you actually need. You can refer to variables in packages withou having the package on the search path. You can use, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">codetools::<span class="kw">findGlobals</span>(plot)</code></pre>
+<h2 id="packages">Packages</h2>
+<p>Later we'll talk about code in packages and how R finds variables to which these functions refer. We typically try not to use the search path within packages to avoid the possibility of the user ordering the search path in a way we did not intend/anticipate. We need to be more robust than this and so we import packages and (some of) their variables.</p>
+<h2 id="the-attach-function.-never-use">The attach() function. Never use!</h2>
+<blockquote>
+<p>Instead of using the attach function, use with(), within(), subset() or explicitly qualify the names of the elements in a data.frame/list with the variable name identifying the data.frame/list.</p>
+</blockquote>
+<p>R has the function attach() and some people use this to insert a data frame into the search path. This ostensibly makes it &quot;easier&quot; to refer to the names of columns/elements, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">mtcars$mpg
+<span class="kw">attach</span>(mtcars)
+mpg</code></pre>
+<p>Let's see what happens</p>
+<pre><code>search()
+[1] &quot;.GlobalEnv&quot;        &quot;package:stats&quot;     &quot;package:graphics&quot; 
+[4] &quot;package:grDevices&quot; &quot;package:datasets&quot;  &quot;package:utils&quot;    
+[7] &quot;package:methods&quot;   &quot;Autoloads&quot;         &quot;package:base&quot;     </code></pre>
+<p>Now we attach <code>mtcars</code></p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">attach</span>(mtcars)</code></pre>
+<p>The data frame is now in the second position of search path</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">search</span>()
+ [<span class="dv">1</span>] <span class="st">&quot;.GlobalEnv&quot;</span>        <span class="st">&quot;mtcars&quot;</span>            <span class="st">&quot;package:stats&quot;</span>    
+ [<span class="dv">4</span>] <span class="st">&quot;package:graphics&quot;</span>  <span class="st">&quot;package:grDevices&quot;</span> <span class="st">&quot;package:datasets&quot;</span> 
+ [<span class="dv">7</span>] <span class="st">&quot;package:utils&quot;</span>     <span class="st">&quot;package:methods&quot;</span>   <span class="st">&quot;Autoloads&quot;</span>        
+[<span class="dv">10</span>] <span class="st">&quot;package:base&quot;</span>     </code></pre>
+<p>We can walk the search path by environnments, and we see that the parent of the global environment is a new enviroment for the mtcars data:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">parent.env</span>(<span class="kw">globalenv</span>())
+&lt;environment:<span class="st"> </span><span class="dv">0x7ff242c97260</span>&gt;
+<span class="kw">attr</span>(,<span class="st">&quot;name&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;mtcars&quot;</span></code></pre>
+<p>We can see what variables/symbols it contains with ls()</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ls</span>(<span class="dv">2</span>) <span class="co"># or ls(&quot;mtcars&quot;)</span>
+ [<span class="dv">1</span>] <span class="st">&quot;am&quot;</span>   <span class="st">&quot;carb&quot;</span> <span class="st">&quot;cyl&quot;</span>  <span class="st">&quot;disp&quot;</span> <span class="st">&quot;drat&quot;</span> <span class="st">&quot;gear&quot;</span> <span class="st">&quot;hp&quot;</span>   <span class="st">&quot;mpg&quot;</span>  <span class="st">&quot;qsec&quot;</span>
+[<span class="dv">10</span>] <span class="st">&quot;vs&quot;</span>   <span class="st">&quot;wt&quot;</span>  </code></pre>
+<p>And the command <code>cyl</code> works just a <code>pi</code> did. R looks in each element of the search path until it finds the symbol <code>cyl</code> and it does so in the second element.</p>
+<p><code>mtcars</code> was originally a data.frame. We now have an environment that contains the columns/elements of the data frame. As with almost all computations in R, these variables in the environment on the search path are <strong>copies</strong> of the original values in the data frame. The elements in the environment in the search path are not aliases or linked to the data frame. Importantly, if we modify a value in the data frame, it is not reflected in the corresponding variable in search path.</p>
+<pre><code>mtcars$cyl[1] = 100
+mtcars$cyl[1]
+[1] 100
+cyl[1]
+[1] 6</code></pre>
+<p>Worse still. Let's modify cyl[1] to be 8.</p>
+<pre class="sourceCode r"><code class="sourceCode r">cyl[<span class="dv">1</span>] =<span class="st"> </span><span class="dv">8</span></code></pre>
+<p>Somewhat curiously, this created a new variable cyl in our global environment. It did not change the one in the second element of the search path. How do we know? We can get that with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">get</span>(<span class="st">&quot;cyl&quot;</span>, <span class="dv">2</span>)
+ [<span class="dv">1</span>] <span class="dv">6</span> <span class="dv">6</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">8</span> <span class="dv">8</span> <span class="dv">8</span> <span class="dv">8</span> <span class="dv">8</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">8</span> <span class="dv">8</span> <span class="dv">8</span> <span class="dv">8</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">8</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">4</span></code></pre>
+<p>and this shows the original value.</p>
+<p>So now we have 3 variables named <code>cyl</code> - two on the search path and one in the mtcars data.frame.</p>
+<pre><code>ls()</code></pre>
+<p>Let's get rid of the one in the global environment for now</p>
+<pre><code>rm(cyl)</code></pre>
+<p>If we had used a global assignment, i.e.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">cyl[<span class="dv">1</span>] &lt;&lt;-<span class="st"> </span><span class="dv">8</span></code></pre>
+<p>that would have replaced the first element in the second element of the search path.</p>
+<p>Check that no new variable named cyl has been created in the global environment.</p>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="list">List</h1>
+<p>A list is an ordered collection of elements, just like each of the vector types. However, very importantly and differently, the elements of a list can have different types. Within a list, we can have a numeric vector of length 2, an integer vector with 0 elements, a function, a data.frame, another list containing arbitrary elements, and so on.</p>
+<p>The elements in a list do not have to have the same length. In a data.frame, which is a list, we ensure that the elements do have the same length so that the i-th row corresponds to the i-th observation across all.</p>
+<p>When creating lists, we use the list() function, e.g.m</p>
+<pre class="sourceCode r"><code class="sourceCode r">ll =<span class="st"> </span><span class="kw">list</span>(<span class="dt">x =</span> <span class="dv">1</span>, <span class="dt">y =</span> <span class="dv">1</span>:<span class="dv">10</span>, <span class="dt">z =</span> mtcars, <span class="dt">a =</span> <span class="kw">lm</span>(mpg ~<span class="st"> </span>., mtcars))</code></pre>
+<p><a href="ListAndC.html">See here</a> for serious issues using c() instead of list().</p>
+<h2 id="subsetting-lists">Subsetting Lists</h2>
+<p><a href="Subsetting.html">See</a></p>
+<p>The key thing is to understand using [ on a list will return a list. So if you want an element from the list, and not a list containing that one element, you need to use <code>ll[[ index ]]</code> and not <code>l[index]</code>.</p>
+<p>Consider</p>
+<pre class="sourceCode r"><code class="sourceCode r">ll =<span class="st"> </span><span class="kw">list</span>(<span class="dv">1</span>, <span class="dv">2</span>)
+a =<span class="st"> </span>ll[<span class="dv">1</span>]
+b =<span class="st"> </span>a[<span class="dv">1</span>]
+a
+b
+<span class="kw">identical</span>(a, b) <span class="co"># TRUE</span>
+<span class="kw">identical</span>(b, b[<span class="dv">1</span>]) <span class="co"># TRUE</span></code></pre>
+<p>So we are not making progress.</p>
+<p>But</p>
+<pre class="sourceCode r"><code class="sourceCode r">ll[[<span class="dv">1</span>]]
+[<span class="dv">1</span>] <span class="dv">1</span></code></pre>
+<p>is what we want.</p>
+<h3 id="multiple-element-vector">[[ multiple element vector]]</h3>
+<p>Be careful of subsetting a list with [[ ]] and a vector that has multiple elements.</p>
+<p>Firstly,</p>
+<pre class="sourceCode r"><code class="sourceCode r">ll [[ <span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>) ]]</code></pre>
+<p>gives an error</p>
+<pre><code>Error in ll[[c(TRUE, FALSE)]] : 
+  attempt to select less than one element in integerOneIndex
+No suitable frames for recover()</code></pre>
+<p>Instead, use</p>
+<pre class="sourceCode r"><code class="sourceCode r">ll[[ <span class="kw">which</span>( <span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>)) ]]</code></pre>
+<p>But</p>
+<pre class="sourceCode r"><code class="sourceCode r">ll [[ <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>) ]]</code></pre>
+<p>is quite different. This is equivalent to</p>
+<pre class="sourceCode r"><code class="sourceCode r">ll[[<span class="dv">1</span>]][[<span class="dv">2</span>]]</code></pre>
+<p>So this only works if the first element we get has 2 elements, and it doesn't.</p>
+<p>But</p>
+<pre class="sourceCode r"><code class="sourceCode r">ll =<span class="st"> </span><span class="kw">list</span>(<span class="dv">1</span>:<span class="dv">10</span>, letters)
+ll[[<span class="dv">2</span>]][[<span class="dv">3</span>]]</code></pre>
+<p>gives &quot;c&quot;.</p>
+<h3 id="operator">$ operator</h3>
+<p>The $ operator + uses partial matching of names, while ll[[ &quot;ab&quot; ]] doesn't. + treats var in <code>ll$var</code> as a literal value &quot;var&quot;, and does not evaluate var to get its value. e.g. <code>r         i = &quot;abc&quot;         ll$i</code> looks for the element that starts with i, not abc.</p>
+<h2 id="pre-allocating">Pre-allocating</h2>
+<p>Often we want pre-allocate a list and then fill in its value in subsequent computations. We can do this for an logical, integer, numeric, character with, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">numeric</span>(<span class="dv">10</span>)</code></pre>
+<p>But the call</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">list</span>(<span class="dv">10</span>)</code></pre>
+<p>creates a list with one element - the value 10. So how do we create a list with 10 elements. There are several imaginative ways, but the best is</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="dv">10</span>)</code></pre>
+<p>One possible issue you may run into with both lists and vectors is preallocating the the vector and then adding elements to it by name. Consider</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="dv">10</span>)
+for(i in <span class="dv">1</span>:<span class="dv">10</span>) 
+ x[[ letters[i] ]] =<span class="st"> </span>i</code></pre>
+<p>What will x contain at the end of this?</p>
+</body>
+</html>

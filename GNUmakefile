@@ -31,8 +31,10 @@ Day4:  $(DAY4.HTML) expandGrid.R
 
 all: ship1 ship2 ship3 ship4
 
+HTML=$(DAY1.HTML) $(DAY2.HTML) $(DAY3.HTML) $(DAY4.HTML)
 
-
+h:
+	@echo $(HTML)
 
 ship1: Day1
 	rsync $(CSS) index.html Day1.Rsession $(DAY1.HTML) calls.pdf anson:dsi/RFundamentals

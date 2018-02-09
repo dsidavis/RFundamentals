@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="random-variable-functions">Random Variable Functions</h1>
+<p>The core R installation provides functions for working with several common random variables. There are r, d, p and q functions for the normal, exponential, cauchy, weibull, poisson, binomial, ... random variables. These are functions such as rnorm, rexp, dexp, dweibull, qweibull, qcauchy, pnorm and pbinom.</p>
+<ul>
+<li>The r function generates random values from that random variable.</li>
+<li>The d function evaluates the density/mass function for a value from that random variable</li>
+<li>The p computes the CDF</li>
+<li>The q computes the quantiles</li>
+</ul>
+<h1 id="vectorization">Vectorization</h1>
+<p>The r functions such as rnorm are vectorized in the sense that they return a vector of length n where n is the number of observations to generate</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rnorm</span>(<span class="dv">10</span>)
+ [<span class="dv">1</span>]  <span class="fl">0.39566264</span>  <span class="fl">0.32571408</span>  <span class="fl">1.01428275</span>  <span class="fl">0.82040600</span> -<span class="fl">0.99314479</span>
+ [<span class="dv">6</span>]  <span class="fl">0.27022508</span> -<span class="fl">0.20369918</span>  <span class="fl">0.09917783</span> -<span class="fl">0.70926140</span> -<span class="fl">0.15798729</span></code></pre>
+<p>And similarly, dnorm and pexp are vectorized in their inputs, i.e. return a vector of the same length as the first parameter.</p>
+<p>However rnorm and the other r* functions are vectorized in their other parameters, namely the parameters of the random variable's distribution. For R, we can generate n values from different distributions by specifying vectors for the second and third parameters of rnorm</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">10</span>, <span class="kw">seq</span>(-<span class="dv">50</span>, <span class="dv">50</span>, <span class="dt">length =</span> <span class="dv">10</span>), <span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">100</span>, <span class="dt">length =</span> <span class="dv">10</span>))</code></pre>
+<p>We can think of this in the following</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rnorm</span>(n, mu1, sd1)
+         mu2, sd2
+         mu3, sd3
+           ...
+         mun, sdn<span class="er">)</span></code></pre>
+<p>The recycling rule applies when either vector has fewer elements than the other.</p>
+<p>Similarly,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dnorm</span>(x, <span class="kw">seq</span>(-<span class="dv">50</span>, <span class="dv">50</span>, <span class="dt">length =</span> <span class="dv">10</span>), <span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">100</span>, <span class="dt">length =</span> <span class="dv">10</span>))</code></pre>
+<p>computes the density at the actual true mean and SD of the distributions from which they came, in this example.</p>
+<p>This is easier to verify with a smaller SD</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">10</span>, <span class="kw">seq</span>(-<span class="dv">50</span>, <span class="dv">50</span>, <span class="dt">length =</span> <span class="dv">10</span>), <span class="dv">1</span>)
+<span class="kw">dnorm</span>(x, <span class="kw">seq</span>(-<span class="dv">50</span>, <span class="dv">50</span>, <span class="dt">length =</span> <span class="dv">10</span>), <span class="dv">1</span>)
+ [<span class="dv">1</span>] <span class="fl">0.39877829</span> <span class="fl">0.25938075</span> <span class="fl">0.39194590</span> <span class="fl">0.19242167</span> <span class="fl">0.02508960</span> <span class="fl">0.05584537</span>
+ [<span class="dv">7</span>] <span class="fl">0.39133469</span> <span class="fl">0.05360063</span> <span class="fl">0.38245356</span> <span class="fl">0.23322550</span></code></pre>
+</body>
+</html>

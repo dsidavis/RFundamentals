@@ -1,0 +1,274 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<p>ADD: ... force() Lazy evaluation</p>
+<h1 id="writing-functions">Writing Functions</h1>
+<p>More than the syntax, one wants to understand the ideas, <em>concepts</em> and <strong>process</strong> of writing functions.</p>
+<p>We can create an R function very easily with</p>
+<pre><code>function()
+  4</code></pre>
+<p>We have not assigned the function to a name - a variable. So when we define it, it disappears. But these anonymous functions are convenient, e.g., in calls to lapply():</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lapply</span>(docTexts, function(x) <span class="kw">grep</span>(<span class="st">&quot;foo&quot;</span>, x))</code></pre>
+<p>But we can assign functions to variables:</p>
+<pre><code>f = function()
+          4</code></pre>
+<p>does assign the function to a variable. We can assign any object in R to a variable, just like we discussed defining variables <a href="Variables.html">before</a>. There is nothing special about a function.</p>
+<h2 id="parameters">Parameters</h2>
+<p><code>function</code> is a keyword in R. The () immediately following provides the parameter names and their default values, if provided. The body of the function can be any R expression - a literal value, a call, or commonly a collection of expressions within a { }.</p>
+<p>As we have discussed in how functions are called, a function starts its work after R has create the call frame and matched the arguments to the parameters. It then evaluates each expression in the body in sequence. So when writing functions, we don't really have to think about how the arguments in a call to that function get there; we just work with them in the call frame.</p>
+<h2 id="default-values">Default Values</h2>
+<p>Some very convenient features of R functions include + we can give any parameter a default value so that the user does not have to specify it, + these default values do not have to be literals but can be complex R expressions + the expressions for default values can reference other parameters, even if we end up using their default values also, + we can specify arguments for any of the parameters and omit the rest without having to worry about the order of the parameters,etc.</p>
+<p>Indeed, a parameter does not even have to have a default value and we still do not have to provide a value for it.</p>
+<p>The following is an idiom I use frequently. We'll make this concrete. I want to process a collection of XML files. It is not important for our purposes, but we'll extract the number of <page> elements each contains. The XML files are in a directory named XML. Our function will parse each file into a list, then compute the number of pages in each. We might define this as</p>
+<pre class="sourceCode r"><code class="sourceCode r">getNumPages =<span class="st"> </span>
+function()
+{
+  ff =<span class="st"> </span><span class="kw">list.files</span>(<span class="st">&quot;XML&quot;</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>, <span class="dt">pattern =</span> <span class="st">&quot;xml$&quot;</span>)
+  docs =<span class="st"> </span><span class="kw">lapply</span>(ff, xmlParse)
+  <span class="kw">sapply</span>(docs, function(x) <span class="kw">length</span>(<span class="kw">getNodeSet</span>(x, <span class="st">&quot;//page&quot;</span>)))
+}</code></pre>
+<p>This does the job.</p>
+<p>How can we improve it? or what are its weaknesses? + The directory is hard-coded! (&quot;XML&quot;) + The pattern for the names of the XML files is hardcoded (&quot;xml$&quot;), wherease we may want to process e.g., Rdb files, etc. + We should put the names of the files on both docs and the answer. Putting it on docs will put it on the answer.</p>
+<p>Let's fix these first, although there are other issues we may want to addres. One &quot;obvious&quot; approach is to make the directory/path and the pattern parameters with default values:</p>
+<pre class="sourceCode r"><code class="sourceCode r">getNumPages =<span class="st"> </span>
+function(<span class="dt">dir =</span> <span class="st">&quot;XML&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;xml$&quot;</span>)
+{
+  ff =<span class="st"> </span><span class="kw">list.files</span>(dir, <span class="dt">full.names =</span> <span class="ot">TRUE</span>, <span class="dt">pattern =</span> pattern)
+  docs =<span class="st"> </span><span class="kw">lapply</span>(ff, xmlParse)
+  <span class="kw">sapply</span>(docs, function(x) <span class="kw">length</span>(<span class="kw">getNodeSet</span>(x, <span class="st">&quot;//page&quot;</span>)))
+}</code></pre>
+<p>This is essentially the same code as before, but more flexible. If we call <code>getNumPages()</code>, i.e. with no arguments, we get the same result. However, the caller can work on a different directory and also specify a different pattern for the extension</p>
+<p>We might go one step further here and allow the caller to specify other arguments that are passed on to list.files, e.g. recursive, ignore.case.</p>
+<pre class="sourceCode r"><code class="sourceCode r">getNumPages =<span class="st"> </span>
+function(<span class="dt">dir =</span> <span class="st">&quot;XML&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;xml$&quot;</span>, ...)
+{
+  ff =<span class="st"> </span><span class="kw">list.files</span>(dir, <span class="dt">full.names =</span> <span class="ot">TRUE</span>, <span class="dt">pattern =</span> pattern, ...)
+  docs =<span class="st"> </span><span class="kw">lapply</span>(ff, xmlParse)
+  <span class="kw">sapply</span>(docs, function(x) <span class="kw">length</span>(<span class="kw">getNodeSet</span>(x, <span class="st">&quot;//page&quot;</span>)))
+}</code></pre>
+<p>However, consider the following change</p>
+<pre class="sourceCode r"><code class="sourceCode r">getNumPages =<span class="st"> </span>
+function(<span class="dt">dir =</span> <span class="st">&quot;XML&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;xml$&quot;</span>,  
+         <span class="dt">ff =</span> <span class="kw">list.files</span>(dir, <span class="dt">full.names =</span> <span class="ot">TRUE</span>, <span class="dt">pattern =</span> pattern, ...), 
+         ...)
+{
+  docs =<span class="st"> </span><span class="kw">lapply</span>(ff, xmlParse)
+  <span class="kw">sapply</span>(docs, function(x) <span class="kw">length</span>(<span class="kw">getNodeSet</span>(x, <span class="st">&quot;//page&quot;</span>)))
+}</code></pre>
+<p>We have lifted the first expression in the body of the function into the parameters. So this creates a new parameter named ff (probably a bad name now that it is seen by the callers) and the default value is just the original computation.</p>
+<p>Why does this help? Well, the caller doesn't have to specify it but can still control the call to list.files(). However, if the caller does want to work on a smaller set of files (e.g., when developing and debugging the code), she has control over which files are processed.</p>
+<pre class="sourceCode r"><code class="sourceCode r">files =<span class="st"> </span><span class="kw">list.files</span>(<span class="st">&#39;XML&#39;</span>, <span class="dt">pattern =</span> <span class="st">&quot;xml$&quot;</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)
+<span class="kw">getNumPages</span>(<span class="dt">ff =</span> <span class="kw">sample</span>(files, <span class="dv">20</span>))</code></pre>
+<p>A similar &quot;inconvenice&quot; is that we may have already parsed all the documents. This won't always be the case, but it probably will be when we are developing the function. So it would be convenient to be able to avoid reparsing them each time and be able to pass the list() of parsed documents. In fact, we can skip list.files() and just pass the documents. So again, we lift the first expression in the body of the function into the parameter definitions, giving a new parameter named docs with a default value:</p>
+<pre class="sourceCode r"><code class="sourceCode r">getNumPages =<span class="st"> </span>
+function(<span class="dt">dir =</span> <span class="st">&quot;XML&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;xml$&quot;</span>,  
+         <span class="dt">ff =</span> <span class="kw">list.files</span>(dir, <span class="dt">full.names =</span> <span class="ot">TRUE</span>, <span class="dt">pattern =</span> pattern, ...), 
+         <span class="dt">docs =</span> <span class="kw">lapply</span>(ff, xmlParse)
+         ...)
+{
+  <span class="kw">sapply</span>(docs, function(x) <span class="kw">length</span>(<span class="kw">getNodeSet</span>(x, <span class="st">&quot;//page&quot;</span>)))
+}</code></pre>
+<p>So if we have done</p>
+<pre class="sourceCode r"><code class="sourceCode r">xdocs =<span class="st"> </span><span class="kw">lapply</span>(files, xmlParse)</code></pre>
+<p>earlier, we can then pass these direcly</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getNumPages</span>(<span class="dt">docs =</span> xdocs)</code></pre>
+<p>and skip the repeated calls to list.files() and xmlParse().</p>
+<p>All of these make the function more flexible, albeit slightly less clear, but only just.</p>
+<p>The default value of a parameter can even refer to a local variable defined within the body of the function. All that is necessary is that the parameter is not referenced before that local variable is created. For example,</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =<span class="st"> </span>
+function(files, <span class="dt">y =</span> <span class="kw">sum</span>(nonempty))
+{
+   ll =<span class="st"> </span><span class="kw">lapply</span>(files, readLines)
+   nlines =<span class="st"> </span><span class="kw">sapply</span>(ll, length)
+   nonempty =<span class="st"> </span>nlines &gt;<span class="st"> </span><span class="dv">0</span>
+   
+   ....
+}</code></pre>
+<p>This works because the default value is evaluated within the call frame when it is needed. So it sees the parameters and the local variables that exist at the time it is evaluated.</p>
+<p>There is no doubt that such use makes the code somewhat unclear to callers since they don't know what this variable is or how it is defined. But they can look at the body of the function. But if the local variable is defined within an if() statement, things can be unclear.</p>
+<h2 id="complex-default-values">Complex Default Values</h2>
+<p>The default value can be any R expression. This means it can include if() and if()-else statements each with complicated bodies.<br />Don't take this too far. Instead of complex code in the default values, make the code a function that returns the correct value. You'll have to pass the relevant parameters to the function.</p>
+<h3 id="circular-definitions-in-parameter-default-values">Circular Definitions in Parameter Default Values</h3>
+<p>Consider</p>
+<pre class="sourceCode r"><code class="sourceCode r">circular =<span class="st"> </span>
+function(<span class="dt">x =</span> <span class="kw">length</span>(y), <span class="dt">y =</span> <span class="kw">length</span>(x))
+{
+   x
+}</code></pre>
+<p>So what if we call this function with no arguments</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">circular</span>()
+Error in <span class="kw">circular</span>() :<span class="st"> </span>
+<span class="st">  </span>promise already under evaluation:<span class="st"> </span>recursive default argument reference or earlier problems?</code></pre>
+<p>The default value of x refers to y and the default value of y refers to x.</p>
+<p>However,</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =<span class="st"> </span>
+function(<span class="dt">x =</span> <span class="kw">length</span>(y), <span class="dt">y =</span> <span class="kw">length</span>(z), <span class="dt">z =</span> <span class="kw">length</span>(w), <span class="dt">w =</span> <span class="ot">NULL</span>)
+{
+   x
+}</code></pre>
+<p>yields</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">f</span>()
+[<span class="dv">1</span>] <span class="dv">1</span></code></pre>
+<h2 id="return-value">Return Value</h2>
+<p>A function returns control to the caller, i.e. complete the call to this function, by explicitly calling return() with a value (or not), or when the last expression in the body is evaluated. The return value is the value in the return() call that is evaluated or the value of the last expression evaluated in the function.</p>
+<p>This means that in functions that have a simple sequence of commands, we don't need an explicit return call.</p>
+<pre class="sourceCode r"><code class="sourceCode r">function(x, y)
+{
+    z =<span class="st"> </span>x -<span class="st"> </span>y
+    <span class="kw">sqrt</span>(<span class="kw">sum</span>(z *<span class="st"> </span>z))
+}</code></pre>
+<p>Consider the following function:</p>
+<pre class="sourceCode r"><code class="sourceCode r">getTextByCols =
+function(p, <span class="dt">threshold =</span> .<span class="dv">1</span>, <span class="dt">asNodes =</span> <span class="ot">FALSE</span>)
+{
+    if(<span class="kw">length</span>(p) ==<span class="st"> </span><span class="dv">0</span>)
+       <span class="kw">return</span>(<span class="kw">character</span>())
+    
+    txtNodes =<span class="st"> </span><span class="kw">getNodeSet</span>(p, <span class="st">&quot;.//text&quot;</span>)
+    bb =<span class="st"> </span><span class="kw">getBBox2</span>(txtNodes)
+    bb =<span class="st"> </span><span class="kw">as.data.frame</span>(bb)
+    bb$text =<span class="st"> </span><span class="kw">sapply</span>(txtNodes, xmlValue)
+
+    tt =<span class="st"> </span><span class="kw">table</span>(bb$left)
+      <span class="co"># Subtract 2 so that we start slightly to the left of the second column </span>
+      <span class="co"># to include those starting points</span>
+      <span class="co"># or change cut to be include.lowest = TRUE</span>
+    breaks =<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">names</span>(tt [ tt &gt;<span class="st"> </span><span class="kw">nrow</span>(bb)*threshold])) -<span class="st"> </span><span class="dv">2</span>
+
+    if(asNodes) 
+        <span class="kw">split</span>(txtNodes, <span class="kw">cut</span>(bb$left, <span class="kw">c</span>(<span class="dv">0</span>, breaks[-<span class="dv">1</span>], <span class="ot">Inf</span>)))
+    else {
+        cols =<span class="st"> </span><span class="kw">split</span>(bb, <span class="kw">cut</span>(bb$left, <span class="kw">c</span>(<span class="dv">0</span>, breaks[-<span class="dv">1</span>], <span class="ot">Inf</span>)))
+        cols =<span class="st"> </span><span class="kw">sapply</span>(cols, function(x) <span class="kw">paste</span>(x$text[ <span class="kw">order</span>(x$top) ], <span class="dt">collapse =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>))
+    }
+}</code></pre>
+<p>There is an explicit call to return within an if() statement at the beginning of the body of the function.</p>
+<p>After this, the function proceeds sequentially until the final expression - an if()-else command. This is evaluated and its value returned (implicitly).</p>
+<p>What is the value of an if() statement? It is the value of the last expression evaluated in the if()-else statement. if() evaluates the condition and then evaluates the body for either the TRUE or the FALSE condition. In this case, the TRUE condition is</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">split</span>(txtNodes, <span class="kw">cut</span>(bb$left, <span class="kw">c</span>(<span class="dv">0</span>, breaks[-<span class="dv">1</span>], <span class="ot">Inf</span>)))</code></pre>
+<p>However, for the FALSE condition, the body is the else part</p>
+<pre class="sourceCode r"><code class="sourceCode r">{
+   cols =<span class="st"> </span><span class="kw">split</span>(bb, <span class="kw">cut</span>(bb$left, <span class="kw">c</span>(<span class="dv">0</span>, breaks[-<span class="dv">1</span>], <span class="ot">Inf</span>)))
+   cols =<span class="st"> </span><span class="kw">sapply</span>(cols, function(x) <span class="kw">paste</span>(x$text[ <span class="kw">order</span>(x$top) ], <span class="dt">collapse =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>))
+}</code></pre>
+<p>R evaluates the calls within this {} block and returns the value of the last one. So the value returned is</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sapply</span>(cols, function(x) <span class="kw">paste</span>(x$text[ <span class="kw">order</span>(x$top) ], <span class="dt">collapse =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>))</code></pre>
+<p>Note that the final expression in the FALSE/else case is assigned to a local variable <code>cols</code>. This has the effect of making the result invisible, i.e. equivalent to</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">invisible</span>(<span class="kw">sapply</span>(cols, function(x) <span class="kw">paste</span>(x$text[ <span class="kw">order</span>(x$top) ], <span class="dt">collapse =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)))</code></pre>
+<p>In other words, assigning the return value of a function causes the result not to be printed at the top-level prompt.</p>
+<!--
+# Exercise
+What is the return value from the following function
+and call
+```r
+```
+-->
+
+
+<h2 id="unwanted-lazy-evaluation">Unwanted Lazy Evaluation</h2>
+<p>Lazy evaluation is very useful. However, there are some times it is not what we want. Sometimes we want one or more arguments to be evaluated immediately. This is easy to do - just reference the parameters. For example,</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =<span class="st"> </span>
+function(x, y)
+{
+   x
+   y
+   ....
+}</code></pre>
+<p>Merely referring to a parameter will cause it to be evaluated at that point.</p>
+<p>These lines look a little odd to some and somebody may remove them since, ostensibly, they don't do anything. Using <code>x = x</code> is somewhat odd also. For this reason, the function <code>force()</code> can be used, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =<span class="st"> </span>
+function(x, y)
+{
+   <span class="kw">force</span>(x)
+   <span class="kw">force</span>(y)
+   ....
+}</code></pre>
+<p>Hopefully people know to leave this code. But again, it does nothing more than just referencing x directly.</p>
+<h2 id="querying-how-the-function-was-called.">Querying How the Function Was Called.</h2>
+<p>We alluded to the fact that a function can know how an argument was specified in the call to this function. For example, the plot() function &quot;traps&quot; the call for x and y to use as the labels for the horizontal and vertical axis. As I hope you understand, there is nothing special about the plot function.</p>
+<p>So how does plot find this information? It calls substitute(x) <strong>before</strong> it uses the value of x.</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =<span class="st"> </span>
+function(x)
+{
+   k =<span class="st"> </span><span class="kw">substitute</span>(x)
+   <span class="kw">print</span>(k)
+   x<span class="dv">+1</span>
+}</code></pre>
+<p>When we call this with <code>f(rnorm(3, sd = 10))</code>, we see</p>
+<pre><code>rnorm(3, sd = 10)</code></pre>
+<p>printed and then we get the result we expect.</p>
+<p>How does this work? Because of lazy evaluation and because the substitute() function uses non-standard evaluation (NSE), substitute() returns the call in the promise for x.</p>
+<p>We often see</p>
+<pre class="sourceCode r"><code class="sourceCode r"> <span class="kw">deparse</span>(<span class="kw">substitute</span>(x))</code></pre>
+<p>to get a text version of the call. But deparse() is not part of the magic of getting the langage obejct/call. It just turns the language object into text. We can verify this with, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">deparse</span>( <span class="kw">quote</span>(x +<span class="st"> </span>y ^<span class="st"> </span><span class="dv">2</span>) )</code></pre>
+<h2 id="the-call-stack">The Call Stack</h2>
+<p>We have discussed the stack of function calls when discussing how a function is invoked and how it proceeds, calling other functions, which in turn call other functions. And we also saw that the stack of calls may seem out of order due to non-standard evaluation, e.g., the call to mtcar[] after the call to xy.coords in</p>
+<pre class="sourceCode r"><code class="sourceCode r">where <span class="dv">1</span>:<span class="st"> `</span><span class="dt">[.data.frame</span><span class="st">`</span>(mtcars, , <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;mpg&quot;</span>))
+where <span class="dv">2</span>:<span class="st"> </span>mtcars[, <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;mpg&quot;</span>)]
+where <span class="dv">3</span>:<span class="st"> </span><span class="kw">xy.coords</span>(x, y, xlabel, ylabel)
+where <span class="dv">4</span>:<span class="st"> </span><span class="kw">scatter.smooth</span>(mtcars[, <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;mpg&quot;</span>)])</code></pre>
+<p>(Aside: We got here with debug(xy.coords) and then debug(<code>[</code>))</p>
+<p>We can actually get a list of all the active calls via sys.calls()</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sys.calls</span>()
+[[<span class="dv">1</span>]]
+<span class="kw">scatter.smooth</span>(mtcars[, <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;mpg&quot;</span>)])
+
+[[<span class="dv">2</span>]]
+<span class="kw">xy.coords</span>(x, y, xlabel, ylabel)
+
+[[<span class="dv">3</span>]]
+mtcars[, <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;mpg&quot;</span>)]
+
+[[<span class="dv">4</span>]]
+<span class="st">`</span><span class="dt">[.data.frame</span><span class="st">`</span>(mtcars, , <span class="kw">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;mpg&quot;</span>))</code></pre>
+<p>Each of these is a call, in this case.</p>
+<p>We can deparse() any of these, we can manipulate them in other ways.</p>
+<p>Parallel to the calls is the call frames which is accessible via sys.frames(). These are in the same order as sys.calls(). Note however that the call stack in the debugger above (obtained via the command where) is upside-down relative to these! Confusing and one of the reasons I prefer the recover() function.</p>
+<p>See the help page for ?sys.parent to see what else we can explore on the call stack.</p>
+<h1 id="warnings-and-errors">Warnings and Errors</h1>
+<p>Your functions should verify the type and contents of the arguments and also any intermediate values that may cause problems. When you find a problem, you should raise either a warning or an error. The two basic functions for these are warning() and stop(). Both can be called with just an error message. Make the error message as informative as possible. Remember how you responded when reading cryptic error messages. R will tell the caller (which could be you) where the error took place. But you can provide much more contextual information about what was expected, what differed from this and possible explanations and common causes.</p>
+<h2 id="classes-on-errors-and-warnings">Classes on Errors and Warnings</h2>
+<p>While the warning and error messages are very useful, they are not easy to programmatically use. For one, they may be translated to a different language. Secondly, they are free form text and we have to make sense of that.</p>
+<p>The R &quot;condition&quot; mechanism - warnings and errors - allows us to create warnings and errors that have classes. Specifically, we can set a class vector on the warning or error. Importantly, callers can then identify these types/classes of errors and react differently to different classes. This is done best via <a href="tryCatch.html">tryCatch()</a>. Adding classes to your errors and warnings is really a good thing to do.</p>
+<p>We can generate an error with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stop</span>(<span class="st">&quot;my error message&quot;</span>)</code></pre>
+<p>However, we can create an error object with a call to simpleError(), e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">e =<span class="st"> </span><span class="kw">simpleError</span>(<span class="st">&quot;my message&quot;</span>)</code></pre>
+<p>Then we can set its class with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">class</span>(e) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;MyErrorClass&quot;</span>, <span class="kw">class</span>(e))</code></pre>
+<p>and then pass it to stop()</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stop</span>(e)</code></pre>
+<p>Alternatively, we can do this in one line</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stop</span> ( <span class="kw">structure</span>(<span class="st">&quot;my message&quot;</span>, <span class="dt">class =</span> <span class="kw">c</span>(<span class="st">&quot;MyErrorClass&quot;</span>, <span class="st">&quot;simpleError&quot;</span>, <span class="st">&quot;error&quot;</span>, <span class="st">&quot;condition&quot;</span>)) )</code></pre>
+<p>The two-step approach is better in case simpleError() ever changes its class vector.</p>
+<p>function(x, y, ignore = FALSE, ...) { extra = list(...) if(&quot;ignore.case&quot; %in% extra) ignore.case = extra$ignore.case }</p>
+</body>
+</html>

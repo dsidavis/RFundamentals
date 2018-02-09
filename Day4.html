@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="day-4">Day 4</h1>
+<ul>
+<li><p><a href="RSession4">R Session for Day 4</a></p></li>
+<li><p>Getting the (row,col) values from a logical subsetting of a matrix.</p>
+<pre class="sourceCode r"><code class="sourceCode r"> <span class="kw">set.seed</span>(<span class="dv">1012</span>)
+ m =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">15</span>), <span class="dv">5</span>, <span class="dv">3</span>)
+ m &gt;<span class="st"> </span><span class="dv">0</span>
+ <span class="kw">which</span>(m &gt;<span class="st"> </span><span class="dv">0</span>)</code></pre>
+<p>But which row and column pairs</p>
+<pre class="sourceCode r"><code class="sourceCode r"> a =<span class="st"> </span>m &gt;<span class="st"> </span><span class="dv">0</span>
+ <span class="kw">cbind</span>(<span class="kw">row</span>(a)[a], <span class="kw">col</span>(a)[a])</code></pre></li>
+<li><p>example of expand.grid() and apply() over these and long form.</p></li>
+<li><p>tapply(), by(), aggregate()</p></li>
+<li>S3 classes and methods
+<ul>
+<li>Generic function &amp; UseMethod</li>
+<li>NextMethod</li>
+</ul></li>
+<li><a href="WritingFunctions.html">Writing Functions</a>
+<ul>
+<li>Default Values for Parameters</li>
+<li>Idioms for writing parameters and default values.</li>
+<li>Warnings and Errors</li>
+</ul></li>
+<li><a href="Debugging.html">Debugging</a></li>
+<li><a href="WritingPackages.html">Writing R Packages</a>
+<ul>
+<li>Directory structure</li>
+<li>DESCRIPTION</li>
+<li>NAMESPACE</li>
+<li>Imports and exports</li>
+</ul></li>
+</ul>
+<h1 id="maybe-get-to-no">Maybe Get To (No!)</h1>
+<ul>
+<li>Closures &amp; Environments</li>
+<li>The computational model</li>
+<li>&lt;&lt;-</li>
+<li><p>Clean up unnecessary variables</p></li>
+<li><p>S4 classes and methods</p></li>
+<li>Formulae &amp; Environments</li>
+<li><p>Clean up unnecessary variables</p></li>
+</ul>
+</body>
+</html>

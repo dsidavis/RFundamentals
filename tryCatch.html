@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="warnings">Warnings</h1>
+<p>First rule about warnings - they are almost always errors.</p>
+<p>There are only 2 warnings that <em>might</em> <strong>NOT</strong> be errors. + <code>Incomplete final line found on</code> + <code>closing unused connection</code></p>
+<p>The first means that the last line of a file did not have a new line at the end and maybe the content of that last line was truncated. Check the result.</p>
+<p>The second means that somebody forgot to close a connection. While it is a lot better (and on occassion crucial) to close connections (e.g. using on.exit()), this is not an error and R will close the connection retroactively.</p>
+<h1 id="reasons-for-errors">Reasons for Errors</h1>
+<p>When we evaluate a command in R, we might get an error. There are so many possible causes for such errors, including common ones such as + a programming error with the wrong variable name, + the wrong variable that is the wrong type for a call, + the dimension of a matrix is incorrect, + not having loaded a package, + the package failing to load eventhough it is installed, + not finding a file because the path is incorrect or it doesn't exist + no internet connection, + a Web server is down and the URL request fails.</p>
+<h1 id="handling-errors">Handling Errors</h1>
+<p>Some functions raise errors while others return a value that indicates an error. Both approaches are useful. But you probably have to deal with both. We often loop over a collection of things, e.g., files, URLs, vectors, data frames and and want to continue on with other elements even if one or more fails. To do this, we can use the try() function, e.g.</p>
+<pre class="sourceCode r"><code class="sourceCode r">ans =<span class="st"> </span><span class="kw">lapply</span>(docs, function(x) <span class="kw">try</span>(<span class="kw">getDocTitle</span>(x)))</code></pre>
+<p>After this, we can find which ones failed by querying if an element inherits from the try-error class. We do this with</p>
+<pre class="sourceCode r"><code class="sourceCode r">w =<span class="st"> </span><span class="kw">sapply</span>(ans, is, <span class="st">&#39;try-error&#39;</span>)</code></pre>
+<h2 id="more-discriminating-error-handling">More Discriminating Error Handling</h2>
+<p>We often want to catch any type of error, but sometimes we want to deal with different types of errors in different ways. For example, if we might have an error due to a file not existing but we may want to check if a capitalized version exists. Or we may want to handle an error from requesting a Web site by visiting an alternative URL. To do this, we need the error to identify the type of error via its class. If this happens (rather than being just a generic error), we can use the tryCatch() function to specify errors for one or more classes of errors.</p>
+<p>Unfortunately, not enough functions raise errors with specific classes describing the errors. (You should make functions in the packages you write raise errors with informative classes.) <!-- SHOW HOW --> The RCurl package is one that does, so we'll use it as an example</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(RCurl)</code></pre>
+<p>We'll deliberately request a bad URL and get an error</p>
+<pre class="sourceCode r"><code class="sourceCode r">u =<span class="st"> </span><span class="kw">getURLContent</span>(<span class="st">&quot;http://www.nytime.org&quot;</span>)</code></pre>
+<p>Instead, we'll catch the error with try()</p>
+<pre class="sourceCode r"><code class="sourceCode r">u =<span class="st"> </span><span class="kw">try</span>(<span class="kw">getURLContent</span>(<span class="st">&quot;http://www.nytime.org&quot;</span>))</code></pre>
+<p>We can find the attributes of the error object</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">attributes</span>(u)
+$class
+[<span class="dv">1</span>] <span class="st">&quot;try-error&quot;</span>
+
+$condition
+&lt;COULDNT_RESOLVE_HOST in function (type, msg, <span class="dt">asError =</span> <span class="ot">TRUE</span>) {    if (!<span class="kw">is.character</span>(type)) {        i =<span class="st"> </span><span class="kw">match</span>(type, CURLcodeValues)        typeName =<span class="st"> </span>if (<span class="kw">is.na</span>(i))             <span class="kw">character</span>()        else <span class="kw">names</span>(CURLcodeValues)[i]    }    typeName =<span class="st"> </span><span class="kw">gsub</span>(<span class="st">&quot;^CURLE_&quot;</span>, <span class="st">&quot;&quot;</span>, typeName)    fun =<span class="st"> </span>(if (asError)         stop    else warning)    <span class="kw">fun</span>(<span class="kw">structure</span>(<span class="kw">list</span>(<span class="dt">message =</span> msg, <span class="dt">call =</span> <span class="kw">sys.call</span>()), <span class="dt">class =</span> <span class="kw">c</span>(typeName,         <span class="st">&quot;GenericCurlError&quot;</span>, if (asError) <span class="st">&quot;error&quot;</span> else <span class="st">&quot;warning&quot;</span>,         <span class="st">&quot;condition&quot;</span>)))}(6L, <span class="st">&quot;Couldn&#39;t resolve host &#39;www.nytime.org&#39;&quot;</span>, <span class="ot">TRUE</span>):<span class="st"> </span>Couldn<span class="st">&#39;t resolve host &#39;</span>www.nytime.org<span class="st">&#39;&gt;</span></code></pre>
+<p>Within the error is a condition and that has a lot more information. To deal with this better, we will use tryCatch().</p>
+<p>tryCatch() allows us to specify an R expression to evaluate and then a collection of error and warning handler functions. We specify these hander functions by the name of the class corresponding to the type of error to which we want the function to be called in response. In our case, we had an error with an S3 class vector with 4 elements:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">class</span>(<span class="kw">attr</span>(u, <span class="st">&quot;condition&quot;</span>))
+[<span class="dv">1</span>] <span class="st">&quot;COULDNT_RESOLVE_HOST&quot;</span> <span class="st">&quot;GenericCurlError&quot;</span>    
+[<span class="dv">3</span>] <span class="st">&quot;error&quot;</span>                <span class="st">&quot;condition&quot;</span>           </code></pre>
+<p>So we want to handle a COULDNT_RESOLVE_HOST error by perhaps going to a different Web site. We may also want to handle a GenericCurlError differently from a regular R error by indicating this was a failure in a URL request. We can do both of these with</p>
+<pre class="sourceCode r"><code class="sourceCode r">u =<span class="st"> </span><span class="kw">tryCatch</span>(<span class="kw">getURLContent</span>(<span class="st">&quot;http://www.nytime.org&quot;</span>),
+             <span class="dt">COULDNT_RESOLVE_HOST =</span> function(e, ...)
+                                       <span class="kw">getURLContent</span>(<span class="st">&quot;http://www.nytimes.com&quot;</span>, <span class="dt">followlocation =</span> <span class="ot">TRUE</span>),
+             <span class="dt">GenericCurlError =</span> function(e, ...)
+                                  <span class="kw">cat</span>(<span class="st">&quot;Error in RCurl: &quot;</span>, e$message, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>))</code></pre>
+<h1 id="warnings-as-errors">Warnings as Errors</h1>
+<p>Sometimes it is convenient to raise warnings to actual errors. This is useful when debugging and you want to stop when the warning occurs. One could trace() or debug() the</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">options</span>(<span class="dt">warn =</span> <span class="dv">2</span>)</code></pre>
+</body>
+</html>

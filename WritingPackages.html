@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="creating-an-r-package">Creating an R Package</h1>
+<p>Creating a package is pretty simple. You can have a package + for your own use + to share with people in your lab + make available to anyone via github or your Web site + put on CRAN for general use.</p>
+<p>When you put a package on CRAN, it has to successfully pass all the tests run by the shell command</p>
+<pre><code>R CMD check --as-cran myPkg.tar.gz</code></pre>
+<p>This includes documentation, examples, tests and more. But all the tests are almost always easily dealt with, just tedious.</p>
+<p>For any of the other audiences, a package doesn't have to pass all the tests, but it is a good idea.</p>
+<p>Putting your own functions that you use often is a good thing. It makes it easy to access the functions - you don't have to source() individual files, remembering where they are. It is also easy to use a package on multiple machines, which is convenient when a) you prototype on your laptop and then do the actual computations on a compute server, b) use several machines in parallel computing.</p>
+<h1 id="structure-of-a-package">Structure of a Package</h1>
+<p>There are helper functions for creating a package. However, it is a good idea to know how to do it manually as a) it is so simple, and b) if anything goes wrong, you want to be able to reason about it rather than just be stuck.</p>
+<p>Every package is it in its own director/folder, say <strong>myPkg</strong>. Within this folder, you need a file named DESCRIPTION and another named NAMESPACE. The R code goes into a directory named R. That's enough to have a functioning package.</p>
+<p>The DESCRIPTION file contains the metadata describing the package. There are several name: value pairs that have to be specified. These include Package, Title, Version, Description, Author, License. If the package uses functions from other packages, it should list that package in the Imports field.</p>
+<pre><code>Package: myPkg
+Version: 0.1-0
+Title: Bivariate Plotting Functions
+Description: This provides functions adding marginal density plots and histograms
+ to scatter plots, using the base graphics system.
+Author: Duncan Temple Lang
+Maintainer: Duncan Temple Lang &lt;duncan@r-project.org&gt;
+License: BSD
+Imports: graphics</code></pre>
+<p>The version value is typically formatted as major.minor-patch. The major number starts as 0. When you make a significant change with either a lot of new functionality or a backward incompatible change in one or more functions, you increment the major number.</p>
+<p>When you create a new release with new functionality, you increment the minor number.</p>
+<p>When you fix a bug, you increment the patch number.</p>
+<h2 id="license">License</h2>
+<p>The choice of license is important. BSD and GPL 2.0 or 3.0 are all good. Creative Commons is also good. But each has implications</p>
+<h2 id="the-namespace-file">The NAMESPACE File</h2>
+<p>This file lists what other packages or functions within other packages your code uses - <strong>imports</strong>, and what functions and variables (symbols) you want users of the package to be able to access directly - <strong>exports</strong>. The export mechanism allows you to hide helper functions in your package that are used by functions but are not intended to be called directly by a user.</p>
+<p>The simplest way to get started is to export everything in your package. You can do this with the following single line in the NAMESPACE file:</p>
+<pre><code>exportPattern(&quot;.*&quot;)</code></pre>
+<p>The pattern is a regular expression and is used to filter the names in the package. It amounts to</p>
+<pre><code>ls(pkg)[grepl(pattern, ls(pkg))]</code></pre>
+<p>To export specific functions, just list them with</p>
+<pre><code>export(getAuthorID)
+export(getAuthorDocs)</code></pre>
+<p>or we can put several functions in a single call to <code>export()</code>, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">export</span>(getAuthorID, getAuthorDocs)</code></pre>
+<h3 id="imports">Imports</h3>
+<p>The purposes of importing functions from other package are + a) to ensure that the functions are found regardless of what is on the search path and in what order, and + b) to avoid adding packages to the search path.</p>
+<p>When a package refers to many functions/variables in a package, we should import that package. Alternatively, if we reference only a few variables from another package, we can import just those via the importFrom() directive.</p>
+<p>We can import an entire package's contents (specificall what it exports to us) using</p>
+<pre><code>import(RCurl)
+import(RJSONIO)</code></pre>
+<p>We can be more specific and identify specific functions from a package</p>
+<pre><code>importFrom(RCurl, getForm, getCurlHandle)</code></pre>
+<h1 id="import-versus-depends">Import versus Depends</h1>
+<p>Dependencies are added to the search path. Imports are not.</p>
+<p>It is almost always better to use import() or importFrom() rather than a Dependency. This keeps the search path under the control of the user. If she wants to load a package, she can; if she doesn't, she doesn't have to.</p>
+<p>If a package requires the user to use functions from a package to create inputs for its own functions, then it may make sense to have that dependency package on the search path. But again, the user should chose this, not the package authors. The user can always use</p>
+<pre class="sourceCode r"><code class="sourceCode r"> x =<span class="st"> </span>dep::<span class="kw">fun</span>(a, b)
+ <span class="kw">fun2</span>(x)</code></pre>
+<p>where fun is in the dependency and fun2 is in our package.</p>
+<h1 id="s3-methods">S3 methods</h1>
+<p>If your package provides S3 methods that the user can invoke indirectly via the generic, you need to import the generic, (re)export the generic (eventhough you didn't write it) and then declare each S3 method. We do this all in the NAMESPACE file.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">importFrom</span>(graphics, plot)
+<span class="kw">export</span>(plot)
+<span class="kw">S3method</span>(plot, <span class="st">&quot;MyClass&quot;</span>)</code></pre>
+</body>
+</html>

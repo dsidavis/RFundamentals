@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="how-does-r-compute-1-2">How does R compute <code>1 + 2</code>?</h1>
+<p>First, let's consider the even simpler command</p>
+<pre class="sourceCode r"><code class="sourceCode r">pi</code></pre>
+<p>The R <a href="REPL.html">REPL</a> consists of the following 3 steps done in order and repeated indefinitely: Read, Eval, Print.</p>
+<h2 id="step-1-parse">Step 1: Parse</h2>
+<p>R parses the text and turns the text into tokens according to R's grammar. If the tokens do not form a grammatically correct command, R complains with a parsing error, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">2pi
+Error:<span class="st"> </span>unexpected symbol in <span class="st">&quot;2pi&quot;</span></code></pre>
+<p>This is because R variable/symbol names cannot start with a digit. So we get a syntax error. This is different from not being able to find a variable named 2pi. This error happens before looking for any variable/symbol.</p>
+<p>The REPL implicitly parses the user input and then passes the result to the Eval step. We will however explicitly parse the input ourselves to see what the parser creates</p>
+<pre class="sourceCode r"><code class="sourceCode r">e =<span class="st"> </span><span class="kw">parse</span>(<span class="dt">text =</span> <span class="st">&quot;pi&quot;</span>)
+e
+<span class="kw">expression</span>(pi)</code></pre>
+<p>This is an expression and its first element is pi. Specifically, this is an object of class <em>name</em> in R.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">class</span>(e[[<span class="dv">1</span>]])
+[<span class="dv">1</span>] <span class="st">&quot;name&quot;</span></code></pre>
+<h2 id="step-2-eval">Step 2: Eval</h2>
+<p>The evaluator gets this expression and evaluates its elements. In this case, there is one and it is a <em>name</em> element. This is &quot;simple&quot; for R to evaluate. It just searches for a variable with that name. But how and where does it search?</p>
+<p>For a top-level command (i.e. at the R prompt), R searches for a variable by looking first in the global environment.</p>
+<p><a href="GlobalEnvironment.html">See Environments</a></p>
+<p>Since <code>pi</code> is not in the global environment, R searches the parent environment of the global environment. This is the second element of R's search path. We can see the entire search path with the search() function:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">search</span>()
+[<span class="dv">1</span>] <span class="st">&quot;.GlobalEnv&quot;</span>        <span class="st">&quot;package:stats&quot;</span>     <span class="st">&quot;package:graphics&quot;</span> 
+[<span class="dv">4</span>] <span class="st">&quot;package:grDevices&quot;</span> <span class="st">&quot;package:datasets&quot;</span>  <span class="st">&quot;package:utils&quot;</span>    
+[<span class="dv">7</span>] <span class="st">&quot;package:methods&quot;</span>   <span class="st">&quot;Autoloads&quot;</span>         <span class="st">&quot;package:base&quot;</span>     </code></pre>
+<p>The global environment is first, then by default, the stats package, and so on. At the end, and always at the end, is the base package.</p>
+<p>Let's explicitly compute the parent of global environment:</p>
+<pre class="sourceCode r"><code class="sourceCode r">p =<span class="st"> </span><span class="kw">parent.env</span>(<span class="kw">globalenv</span>())
+&lt;environment:<span class="st"> </span>package:stats&gt;
+<span class="kw">attr</span>(,<span class="st">&quot;name&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;package:stats&quot;</span>
+<span class="kw">attr</span>(,<span class="st">&quot;path&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;/Users/duncan/Projects/R-3.3-devel/library/stats&quot;</span></code></pre>
+<p>And the parent of this environment is the graphics package, i.e., the next element in the search path.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">parent.env</span>(p)
+&lt;environment:<span class="st"> </span>package:graphics&gt;
+<span class="kw">attr</span>(,<span class="st">&quot;name&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;package:graphics&quot;</span>
+<span class="kw">attr</span>(,<span class="st">&quot;path&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;/Users/duncan/Projects/R-3.3-devel/library/graphics&quot;</span></code></pre>
+<p>So R looks in each environment on the search path in the order they are in the search path and stops when it finds the variable it is looking for, i.e. pi in this case.</p>
+<p>R will find this in the <strong>base</strong> package. We can verify this using the find() function</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">find</span>(<span class="st">&quot;pi&quot;</span>)</code></pre>
+<p>So now that R has found the variable <code>pi</code>, it evaluates the command <code>pi</code> by returning its current value. Thus 3.1415 is the result of the command <code>pi</code>.</p>
+<h2 id="step-3-print">Step 3: Print</h2>
+<p>If you don't assign the result of a top-level command (i.e. at the prompt), R generally prints the result. So we see</p>
+<pre class="sourceCode r"><code class="sourceCode r">[<span class="dv">1</span>] <span class="fl">3.141593</span></code></pre>
+<p>If we assigned the result to a variable, e.g</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span>pi</code></pre>
+<p>R would not print the result.</p>
+<p>Note that this automatic printing is used to display plots, e.g. lattice or grid plots. This can be quite confusing when a plot does not appear, all because it was assigned and not printed, e.g.</p>
+<pre class="sourceCode r"><code class="sourceCode r">p =<span class="st"> </span>lattice::<span class="kw">xyplot</span>(mpg ~<span class="st"> </span>wt, mtcars)</code></pre>
+<p>But</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(p)</code></pre>
+<p>shows the plot.</p>
+<p>R does not print the result if the function call that generated the result returns it explicitly within a call to invisible(), e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">invisible</span>(largeDataFrame)</code></pre>
+<p>This is a good thing to do in your functions if you know the results are typically large and a caller doesn't want to see it on the screen.</p>
+<p>Keyword: invsible()</p>
+<h2 id="step-4-loop">Step 4: Loop</h2>
+<p>Finally, R then emits a new prompt and waits for another line of input.</p>
+<h1 id="the-more-complex-command-1-2">The More Complex Command <code>1 + 2</code></h1>
+<p>Consider the simple command</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> +<span class="st"> </span><span class="dv">2</span></code></pre>
+<p>What does R do when it gets this line?</p>
+<h2 id="step-1-parse-1">Step 1: Parse</h2>
+<p>R parses the text and turns the text into tokens according to R's grammar. If the tokens do not form a grammatically correct command, R complains with a parsing error, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> +<span class="st"> </span><span class="er">*</span><span class="dv">2</span>
+Error:<span class="st"> </span>unexpected <span class="st">&#39;*&#39;</span> in <span class="st">&quot;1 + *&quot;</span></code></pre>
+<p>The parsing converts 1 + 2 into a function call of the form</p>
+<pre class="sourceCode r"><code class="sourceCode r">+(<span class="dv">1</span>, <span class="dv">2</span>)</code></pre>
+<p>Similarly, the command <code>x[1]</code> actually turns into a call</p>
+<pre class="sourceCode r"><code class="sourceCode r">[(x, <span class="dv">1</span>)</code></pre>
+<p>and</p>
+<pre class="sourceCode r"><code class="sourceCode r">x[<span class="dv">1</span>] =<span class="st"> </span><span class="dv">10</span></code></pre>
+<p>is a call of the form <code>[&lt;-(x, 1, 10)</code>.</p>
+<p>(Actually, there are `` around the operator + and [ in these calls, but that is a detail at this point.)</p>
+<p>In short &gt; (Almost) every action/operation in R is a function call</p>
+<p>For this reason, we'll be talking a lot about function calls. You need to understand how they work to understand R. This includes + how arguments are matched to parameters + how variables/symbols are found during the evaluation of a function + lazy evaluation + call frames and scope + how values are returned</p>
+<h1 id="step-2-eval-1">Step 2: Eval</h1>
+<p>R then evaluates this call. It first attempts to find the function +. It repeats the same search we saw for <code>pi</code> in the first command. In other words, it searches the global environment, then its parent which is the second element of the search path, and so on.</p>
+<h2 id="looking-for-a-function">Looking for a Function</h2>
+<p>R is smarter than to find just any symbol named +. It knows it is looking for a function, so if it finds a variable named + that is not a function, it keeps searching. Suppose we create a variable named log in our global environment</p>
+<pre class="sourceCode r"><code class="sourceCode r">log =<span class="st"> </span><span class="dv">1</span></code></pre>
+<p>and then call <code>log(3)</code>. R will parse the command &quot;log(3)&quot; into a call to the log function. It will search for the function log. It will find the variable named log we created in the global environment. But it is not a function, so it keeps searching</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">find</span>(<span class="st">&quot;log&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;.GlobalEnv&quot;</span>   <span class="st">&quot;package:base&quot;</span>
+<span class="dv">10</span>&gt;<span class="st"> </span><span class="kw">find</span>(<span class="st">&quot;log&quot;</span>, <span class="st">&quot;function&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;package:base&quot;</span></code></pre>
+<h3 id="function-not-available">Function not Available</h3>
+<p>If R fails to find the function, we get an error, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">z</span>(<span class="dv">1</span>)
+Error:<span class="st"> </span>could not find function <span class="st">&quot;z&quot;</span></code></pre>
+<p>Note that this is not a syntax error. It is a legitimate command syntactically. It is evaluating the call that causes the error.</p>
+<h2 id="the-function-call">The Function Call</h2>
+<p>Now that R has found the function +, it can call it. Note that the + function is a regular function object in R. We can manipulate it directly in R. We can print its value with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="st">`</span><span class="dt">+</span><span class="st">`</span>
+function (e1, e2)  <span class="kw">.Primitive</span>(<span class="st">&quot;+&quot;</span>)</code></pre>
+<div class="aside">
+Why did we need bacticks (``) around the +? Because if we type + and hit return in R, the parser considers this an incomplete command. So it emits the continuation prompt, coincidentally also the + character. So we cannot tell R to evaluate the command +. Instead, we need to say evaluate the symbol named + and we do this with `+`
+</div>
+<p>We don't have to worry about the .Primitive() call within the body of the <code>+</code> function. More importantly, <code>+</code> has two parameters/formal arguments, named e1 and e2. The R evaluator passes the arguments to the <code>+</code> function and these map to the variables e1 and e2. (We'll talk more about how this is done generally.)</p>
+<p>When the <code>+</code> function needs the value for the parameter e1, it evaluates the expression associated with e1. In this case, e1 will contain the <strong>value</strong> 1. When R evaluates a literal value (a number or a string), it simply returns that value. We chose this example because it uses literal values 1 and 2. The parser turns these tokens into numeric (not integer) values.</p>
+<h1 id="exercise">Exercise</h1>
+<ol style="list-style-type: decimal">
+<li><p>Consider</p>
+<pre class="sourceCode r"><code class="sourceCode r"> <span class="dv">1</span> +<span class="st"> </span>pi</code></pre>
+<p>What are the steps involved in R computing this?</p></li>
+<li><p>Consider</p>
+<pre class="sourceCode r"><code class="sourceCode r"> <span class="dv">1</span> +<span class="st"> </span><span class="dv">2</span> *<span class="st"> </span><span class="dv">3</span></code></pre>
+<p>What are the steps involved in R computing this? How many function calls are there? To what function?</p></li>
+<li><p>And <code>r  1 + sin(2)</code> What are the steps involved in R computing this?</p></li>
+</ol>
+<h1 id="step-3-print-1">Step 3: Print</h1>
+<p>R prints the result of the call to <code>+</code>, i.e. 3.</p>
+<h1 id="step-4-loop-1">Step 4: Loop</h1>
+<p>And we get another prompt, &gt; and R awaits our next command/input.</p>
+<h1 id="exercise-1">Exercise</h1>
+<ol style="list-style-type: decimal">
+<li>What happens with the command <code>sum(10, 20, 30 40)</code></li>
+<li>Will the command <code>10/</code> produce a syntax error?</li>
+</ol>
+</body>
+</html>

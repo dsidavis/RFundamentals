@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="global-environment">Global Environment</h1>
+<p>An environment in R is container in which objects (data/values) are <strong>bound</strong> to names, i.e. variables. So it stores variables.</p>
+<p>Environments are used throughout the R language. There is the global environment, i.e., your work space in which assignments made at the prompt are stored.</p>
+<p>We can list the contents of an environment with the ls() command. This gives us the names of the variables in that environment. If some of the names start with a ., use</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ls</span>(<span class="dt">all =</span> <span class="ot">TRUE</span>)</code></pre>
+<h1 id="packages">Packages</h1>
+<p>Environments are used to store the functions and data in an R package that is loaded.</p>
+<h1 id="call-frames">Call Frames</h1>
+<p>Environments are also used to represent call frames, i.e., a call to a function. The call frame is an environment, and stores the values for the parameters and any local variables created within the body of that function call.</p>
+<p>Later we'll talk more about packages and how they find symbols to which they refer.</p>
+<h1 id="mutable-pass-by-reference">Mutable &amp; Pass-by-reference</h1>
+<p>Environments have a particular property that makes them somewhat unique as R data structures. They are mutable, i.e. passed by reference. If we pass an environment in a function call, that function can change the contents of the environment and the caller will see those changes when they are made and when the function returns. This is not true of the common data structures in R.</p>
+</body>
+</html>

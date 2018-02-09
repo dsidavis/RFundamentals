@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="vectorized-operations">Vectorized Operations</h1>
+<p>R is a vectorized language. There are no scalar values - these are vectors of length 1. And most of the built-in R functions operate on vectors of inputs.</p>
+<p>There are two aspects of vectorization + element-wise operations + aggregate functions</p>
+<h2 id="element-wise-operations">Element-wise Operations</h2>
+<p>Functions such as +, -, ..., &amp;, |, grepl, gregexpr, and many more take as input a vector and return a vector of the same length.</p>
+<p>One example of an &quot;unexpected&quot; vectorization is rnorm(). This takes the number of observations/values to generate and typically a mean and a standard deviation. However these second and third parameters can be vectorized. So</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rnorm</span>(<span class="dv">3</span>, <span class="kw">c</span>(-<span class="dv">100</span>, <span class="dv">0</span>, <span class="dv">100</span>), <span class="kw">c</span>(<span class="dv">20</span>, <span class="dv">1</span>, <span class="dv">10</span>))</code></pre>
+<p>gives 3 values from N(-100, 20), N(0, 1), and N(100, 10).</p>
+<h1 id="recyling-rule">Recyling Rule</h1>
+<p>Since R is vectorized, i.e., does element-wise operations, what happens when we have two vectors with different lengths in an operation, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r">x +<span class="st"> </span><span class="dv">2</span>
+x -<span class="st"> </span>y
+a &amp;<span class="st"> </span>b
+<span class="kw">mapply</span>(f, a, b)</code></pre>
+<p>The answer is generally that R makes both vectors the same length. R takes the vector with the smaller length and extends that vector to have the same length as the longer one. It does this by the (equivalent of the) rep() function. Suppose x is a vector of length n1 and y is a vector length n2 and n2 &lt; n1. R rep()s the y vector with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rep</span>(y, <span class="dt">length =</span> <span class="kw">length</span>(x))</code></pre>
+<p>So let's look at this with an example.</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">10</span>)
+x &lt;<span class="st"> </span><span class="dv">0</span></code></pre>
+<p>R computes this as the equivalent as</p>
+<pre class="sourceCode r"><code class="sourceCode r">x &lt;<span class="st"> </span><span class="kw">rep</span>(<span class="dv">0</span>, <span class="dt">length =</span> <span class="kw">length</span>(x))</code></pre>
+<p>Now consider</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">11</span>)
+x &lt;<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)</code></pre>
+<p>We get</p>
+<pre class="sourceCode r"><code class="sourceCode r">Warning message:
+In x &lt;<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>) :
+<span class="st">  </span>longer object length is not a multiple of shorter object length</code></pre>
+<p>The problem here is that x has 11 elements and the right-hand-side of the &lt; operator has 2 elements. So when we use the recycling rule, the 2</p>
+<p>Recycling happens in many places.</p>
+<pre class="sourceCode r"><code class="sourceCode r">x &lt;<span class="st"> </span><span class="dv">1</span>
+df$newVar =<span class="st"> </span><span class="dv">10</span>  <span class="co"># repeats 10 to have the same length as the number of rows already in df</span>
+<span class="kw">plot</span>(x, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="co"># repeats red length(x) times.</span></code></pre>
+</body>
+</html>

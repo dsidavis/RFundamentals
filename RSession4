@@ -1,0 +1,853 @@
+
+R Under development (unstable) (2016-06-30 r70858) -- "Unsuffered Consequences"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.2.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+PID = 10081 
+Time = 2017-07-20 09:04:15 
+Dir = /Users/duncan/DSI/Workshops/RFundamentals 
+1> options(STERM='iESS', str.dendrogram.last="'", editor='emacsclient', show.error.locations=TRUE)
+3>sim =
+function(a, b, n = rpois(1, a + b))
+{
+  x = rnorm(n, a)
+  data.frame(x = x, y = x*rexp(n, min(.1, b*x)))
+}
+
+
+
+cond1 = c("A", "B")
+cond2 = c("High", "Medium", "Low")
+ 
+3> g = expand.grid(cond1, cond2)
+Error in expand.grid(cond1, cond2) : object 'cond1' not found
+
+Enter a frame number, or 0 to exit   
+
+1: expand.grid(cond1, cond2)
+
+Selection: g
+Enter an item from the menu, or 0 to exit
+Selection: 0
+3> cond1 = c("A", "B")
+cond2 = c("High", "Medium", "Low")
+
+mu = c(A = 10, B = 20)
+rate = c(High = 40, Medium = 30, Low = 24)
+
+NumReplicates = 10
+ # Generate the 6 possible combinations of settings
+ # This is a data.frame of factors. We could use stringsAsFactors = FALSE
+g = expand.grid(cond1, cond2)
+
+cond1 = c("A", "B")
+5> cond2 = c("High", "Medium", "Low")
+6> 
+6> mu = c(A = 10, B = 20)
+7> rate = c(High = 40, Medium = 30, Low = 24)
+8> 
+8> NumReplicates = 10
+9>  # Generate the 6 possible combinations of settings
+9>  # This is a data.frame of factors. We could use stringsAsFactors = FALSE
+9> g = expand.grid(cond1, cond2)
+10> g
+  Var1   Var2
+1    A   High
+2    B   High
+3    A Medium
+4    B Medium
+5    A    Low
+6    B    Low
+11> ans = lapply(1:nrow(g),
+              function(i) {
+                 settings = g[i,]
+                 replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
+       })
+ans = lapply(1:nrow(g),
++               function(i) {
++                  settings = g[i,]
++                  replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
++        })
+Error in FUN(X[[i]], ...) (from #4) : could not find function "sim"
+`
+Enter a frame number, or 0 to exit   
+
+1: lapply(1:nrow(g), function(i) {
+    settings = g[i, ]
+    replica
+2: FUN(X[[i]], ...)
+3: #4: replicate(NumReplicates, sim(mu[settings[1, 1]], rate[setting
+4: sapply(integer(n), eval.parent(substitute(function(...) expr)), s
+5: lapply(X = X, FUN = FUN, ...)
+6: FUN(X[[i]], ...)
+
+Selection: 0
+12> 
+12> sim =
+function(a, b, n = rpois(1, a + b))
+{
+  x = rnorm(n, a)
+  data.frame(x = x, y = x*rexp(n, min(.1, b*x)))
+}
+
+
+sim =
++ function(a, b, n = rpois(1, a + b))
++ {
++   x = rnorm(n, a)
++   data.frame(x = x, y = x*rexp(n, min(.1, b*x)))
++ }
+13> 
+13> ans = lapply(1:nrow(g),
+              function(i) {
+                 settings = g[i,]
+                 replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
+       })
+ans = lapply(1:nrow(g),
++               function(i) {
++                  settings = g[i,]
++                  replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
++        })
+16> class(ans)
+[1] "list"
+18> length(ans)
+[1] 6
+20> names(ans)
+NULL
+22> paste(g[,1], g[,2], sep = ".")
+[1] "A.High"   "B.High"   "A.Medium" "B.Medium" "A.Low"    "B.Low"   
+24> names(ans) = paste(g[,1], g[,2], sep = ".")
+26> sapply(ans, class)
+  A.High   B.High A.Medium B.Medium    A.Low    B.Low 
+  "list"   "list"   "list"   "list"   "list"   "list" 
+27> sapply(ans, length)
+  A.High   B.High A.Medium B.Medium    A.Low    B.Low 
+      10       10       10       10       10       10 
+28> ans[[1]][[1]]
+           x          y
+1   8.479622  22.974581
+2   6.461766   7.983245
+3  10.710927  30.926895
+4   9.378451  47.842679
+5  10.189473  55.081390
+6  10.313941 378.512525
+7  10.768815 219.292260
+8   9.395092  70.631026
+9   9.177796 391.505572
+10 10.302484  65.365747
+11  9.885636  54.574977
+12 10.720496  91.010476
+13 11.340430 159.156777
+14 10.827348  44.554354
+15 11.761511  92.673869
+16  9.562019   1.426949
+17 11.368864 166.421473
+18 10.387741  43.760599
+19  9.566367  64.390611
+20  8.031104 133.982577
+21  8.532481  27.059610
+22 10.569132  69.619118
+23  8.162958  35.736482
+24  9.987018 181.204326
+25  7.344348  93.816335
+26 10.657694 128.355453
+27  9.154455  18.031341
+28 10.864203 167.592362
+29 10.959254 282.107051
+30 12.877574 104.959525
+31  9.851184 145.891686
+32  9.097496  83.436876
+33  8.579200   9.109393
+34 10.900531 161.876249
+35 10.590906  65.667157
+36  9.577866  71.194914
+37  8.610507 184.837049
+38 10.781121  88.209364
+39 10.051221  44.528876
+40  9.528567 229.190837
+41  9.550346 124.570494
+42  9.667811  46.832662
+43  9.434168  29.040154
+44 12.410602  74.300852
+45  8.615599 137.869295
+29> sapply(ans[[1]], class)
+ [1] "data.frame" "data.frame" "data.frame" "data.frame" "data.frame"
+ [6] "data.frame" "data.frame" "data.frame" "data.frame" "data.frame"
+30> sapply(ans[[1]], nrow)
+ [1] 45 51 49 38 45 51 50 78 37 60
+31> tmp = unlist(ans, recursive = FALSE)
+32> length(tmp)
+[1] 60
+33> table(sapply(tmp, class))
+
+data.frame 
+        60 
+35> ans1 = do.call(rbind, tmp)
+37> class(ans1)
+[1] "data.frame"
+39> dim(ans1)
+[1] 2815    2
+41> n = sapply(ans, function(x) sum(sapply(x, nrow)))
+42> n
+  A.High   B.High A.Medium B.Medium    A.Low    B.Low 
+     504      585      399      565      340      422 
+43> sum(n)
+[1] 2815
+45> g[,1]
+[1] A B A B A B
+Levels: A B
+46> n
+  A.High   B.High A.Medium B.Medium    A.Low    B.Low 
+     504      585      399      565      340      422 
+47> rep(cond1, c(5, 6, 4, 3, 4))
+Error in rep(cond1, c(5, 6, 4, 3, 4)) : invalid 'times' argument
+No suitable frames for recover()
+49> rep(cond1, c(5, 6, 4, 3, 5, 4))
+Error in rep(cond1, c(5, 6, 4, 3, 5, 4)) : invalid 'times' argument
+No suitable frames for recover()
+51> rep(g[,1], c(5, 6, 4, 3, 5, 4))
+ [1] A A A A A B B B B B B A A A A B B B A A A A A B B B B
+Leveols: A B
+53> ordered
+function (x, ...) 
+factor(x, ..., ordered = TRUE)
+<bytecode: 0x7f926aab94a8>
+<environment: namespace:base>
+55> factor
+function (x = character(), levels, labels = levels, exclude = NA, 
+    ordered = is.ordered(x), nmax = NA) 
+{
+    if (is.null(x)) 
+        x <- character()
+    nx <- names(x)
+    if (missing(levels)) {
+        y <- unique(x, nmax = nmax)
+        ind <- sort.list(y)
+        y <- as.character(y)
+        levels <- unique(y[ind])
+    }
+    force(ordered)
+    exclude <- as.vector(exclude, typeof(x))
+    x <- as.character(x)
+    levels <- levels[is.na(match(levels, exclude))]
+    f <- match(x, levels)
+    if (!is.null(nx)) 
+        names(f) <- nx
+    nl <- length(labels)
+    nL <- length(levels)
+    if (!any(nl == c(1L, nL))) 
+        stop(gettextf("invalid 'labels'; length %d should be 1 or %d", 
+            nl, nL), domain = NA)
+    levels(f) <- if (nl == nL) 
+        as.character(labels)
+    else paste0(labels, seq_along(levels))
+    class(f) <- c(if (ordered) "ordered", "factor")
+    f
+}
+<bytecode: 0x7f926a8f6148>
+<environment: namespace:base>
+56> z = c("A", "A", "B", "C")
+59> factor(z)
+[1] A A B C
+Levels: A B C
+61> levels(factor(z))
+[1] "A" "B" "C"
+63> factor(z, levels = c("C", "B", "A"))
+[1] A A B C
+Levels: C B A
+65> factor(z, labels = c("C", "B", "A"))
+[1] C C B A
+Levels: C B A
+66> factor(z, labels = c("X", "Y", "Z"))
+[1] X X Y Z
+Levels: X Y Z
+68> names(ans1)
+[1] "x" "y"
+70> source("expandGrid.R")
+72> dev.new()
+73> library(lattice)
+xyplot(y ~ x | cond1 + cond2, ans1)
+library(lattice)
+74> xyplot(y ~ x | cond1 + cond2, ans1)
+75> mtcars
+                     mpg cyl  disp  hp drat    wt  qsec vs am gear
+Mazda RX4           21.0   6 160.0 110 3.90 2.620 16.46  0  1    4
+Mazda RX4 Wag       21.0   6 160.0 110 3.90 2.875 17.02  0  1    4
+Datsun 710          22.8   4 108.0  93 3.85 2.320 18.61  1  1    4
+Hornet 4 Drive      21.4   6 258.0 110 3.08 3.215 19.44  1  0    3
+Hornet Sportabout   18.7   8 360.0 175 3.15 3.440 17.02  0  0    3
+Valiant             18.1   6 225.0 105 2.76 3.460 20.22  1  0    3
+Duster 360          14.3   8 360.0 245 3.21 3.570 15.84  0  0    3
+Merc 240D           24.4   4 146.7  62 3.69 3.190 20.00  1  0    4
+Merc 230            22.8   4 140.8  95 3.92 3.150 22.90  1  0    4
+Merc 280            19.2   6 167.6 123 3.92 3.440 18.30  1  0    4
+Merc 280C           17.8   6 167.6 123 3.92 3.440 18.90  1  0    4
+Merc 450SE          16.4   8 275.8 180 3.07 4.070 17.40  0  0    3
+Merc 450SL          17.3   8 275.8 180 3.07 3.730 17.60  0  0    3
+Merc 450SLC         15.2   8 275.8 180 3.07 3.780 18.00  0  0    3
+Cadillac Fleetwood  10.4   8 472.0 205 2.93 5.250 17.98  0  0    3
+Lincoln Continental 10.4   8 460.0 215 3.00 5.424 17.82  0  0    3
+Chrysler Imperial   14.7   8 440.0 230 3.23 5.345 17.42  0  0    3
+Fiat 128            32.4   4  78.7  66 4.08 2.200 19.47  1  1    4
+Honda Civic         30.4   4  75.7  52 4.93 1.615 18.52  1  1    4
+Toyota Corolla      33.9   4  71.1  65 4.22 1.835 19.90  1  1    4
+Toyota Corona       21.5   4 120.1  97 3.70 2.465 20.01  1  0    3
+Dodge Challenger    15.5   8 318.0 150 2.76 3.520 16.87  0  0    3
+AMC Javelin         15.2   8 304.0 150 3.15 3.435 17.30  0  0    3
+Camaro Z28          13.3   8 350.0 245 3.73 3.840 15.41  0  0    3
+Pontiac Firebird    19.2   8 400.0 175 3.08 3.845 17.05  0  0    3
+Fiat X1-9           27.3   4  79.0  66 4.08 1.935 18.90  1  1    4
+Porsche 914-2       26.0   4 120.3  91 4.43 2.140 16.70  0  1    5
+Lotus Europa        30.4   4  95.1 113 3.77 1.513 16.90  1  1    5
+Ford Pantera L      15.8   8 351.0 264 4.22 3.170 14.50  0  1    5
+Ferrari Dino        19.7   6 145.0 175 3.62 2.770 15.50  0  1    5
+Maserati Bora       15.0   8 301.0 335 3.54 3.570 14.60  0  1    5
+Volvo 142E          21.4   4 121.0 109 4.11 2.780 18.60  1  1    4
+                    carb
+Mazda RX4              4
+Mazda RX4 Wag          4
+Datsun 710             1
+Hornet 4 Drive         1
+Hornet Sportabout      2
+Valiant                1
+Duster 360             4
+Merc 240D              2
+Merc 230               2
+Merc 280               4
+Merc 280C              4
+Merc 450SE             3
+Merc 450SL             3
+Merc 450SLC            3
+Cadillac Fleetwood     4
+Lincoln Continental    4
+Chrysler Imperial      4
+Fiat 128               1
+Honda Civic            2
+Toyota Corolla         1
+Toyota Corona          1
+Dodge Challenger       2
+AMC Javelin            2
+Camaro Z28             4
+Pontiac Firebird       2
+Fiat X1-9              1
+Porsche 914-2          2
+Lotus Europa           2
+Ford Pantera L         4
+Ferrari Dino           6
+Maserati Bora          8
+Volvo 142E             2
+76> split(mtcars$mpg, mtcars$am)
+$`0`
+ [1] 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4 10.4
+[14] 14.7 21.5 15.5 15.2 13.3 19.2
+
+$`1`
+ [1] 21.0 21.0 22.8 32.4 30.4 33.9 27.3 26.0 30.4 15.8 19.7 15.0 21.4
+
+78> lapply(split(mtcars$mpg, mtcars$am), median)
+$`0`
+[1] 17.3
+
+$`1`
+[1] 22.8
+
+79> sapply(split(mtcars$mpg, mtcars$am), median)
+   0    1 
+17.3 22.8 
+80> tapply(mtcars$mpg, mtcars$am, median)
+   0    1 
+17.3 22.8 
+82> tapply(mtcars$mpg, list(mtcars$cyl, mtcars$am), median)
+      0     1
+4 22.80 28.85
+6 18.65 21.00
+8 15.20 15.40
+84> table(mtcars$cyl, mtcars$am)
+   
+     0  1
+  4  3  8
+  6  4  3
+  8 12  2
+85> tapply(mtcars$mpg, list(mtcars$cyl, mtcars$am), length)
+   0 1
+4  3 8
+6  4 3
+8 12 2
+86> tapply(mtcars, list(mtcars$cyl, mtcars$am), nrow)
+Error in tapply(mtcars, list(mtcars$cyl, mtcars$am), nrow) : 
+  arguments must have same length
+
+Enter a frame number, or 0 to exit   
+
+1: tapply(mtcars, list(mtcars$cyl, mtcars$am), nrow)
+
+Selection: 0
+86> 
+86> by(mtcars, list(mtcars$cyl, mtcars$am), nrow)
+*** output flushed ***
+87> e = split(mtcars, list(mtcars$cyl, mtcars$am))
+89> length(e)
+[1] 6
+92> sapply(e, class)
+         4.0          6.0          8.0          4.1          6.1 
+"data.frame" "data.frame" "data.frame" "data.frame" "data.frame" 
+         8.1 
+"data.frame" 
+93> sapply(e, nrow)
+4.0 6.0 8.0 4.1 6.1 8.1 
+  3   4  12   8   3   2 
+94> e = by(mtcars, list(mtcars$cyl, mtcars$am), nrow)
+95> class(e)
+[1] "by"
+97> typeof(e)
+[1] "integer"
+99> e
+: 4
+: 0
+[1] 3
+---------------------------------------------------- 
+: 6
+: 0
+[1] 4
+---------------------------------------------------- 
+: 8
+: 0
+[1] 12
+---------------------------------------------------- 
+: 4
+: 1
+[1] 8
+---------------------------------------------------- 
+: 6
+: 1
+[1] 3
+---------------------------------------------------- 
+: 8
+: 1
+[1] 2
+100> dim(e)
+[1] 3 2
+102> attributes(e)
+$dim
+[1] 3 2
+
+$dimnames
+$dimnames[[1]]
+[1] "4" "6" "8"
+
+$dimnames[[2]]
+[1] "0" "1"
+
+
+$call
+by.data.frame(data = mtcars, INDICES = list(mtcars$cyl, mtcars$am), 
+    FUN = nrow)
+
+$class
+[1] "by"
+
+104> attr(e, "foo") = 10
+106> sum(e)
+[1] 32
+108> e[1, 3]
+Error in e[1, 3] : subscript out of bounds
+No suitable frames for recover()
+108> e[1, 2]
+[1] 8
+109> length(e)
+[1] 6
+112> e
+: 4
+: 0
+[1] 3
+---------------------------------------------------- 
+: 6
+: 0
+[1] 4
+---------------------------------------------------- 
+: 8
+: 0
+[1] 12
+---------------------------------------------------- 
+: 4
+: 1
+[1] 8
+---------------------------------------------------- 
+: 6
+: 1
+[1] 3
+---------------------------------------------------- 
+: 8
+: 1
+[1] 2
+113> matrix(e, 3, 2)
+     [,1] [,2]
+[1,]    3    8
+[2,]    4    3
+[3,]   12    2
+114> e["4","1"]
+[1] 8
+115> e = by(mtcars, list(mtcars$cyl, as.logical(mtcars$am)), nrow)
+118> e
+: 4
+: FALSE
+[1] 3
+---------------------------------------------------- 
+: 6
+: FALSE
+[1] 4
+---------------------------------------------------- 
+: 8
+: FALSE
+[1] 12
+---------------------------------------------------- 
+: 4
+: TRUE
+[1] 8
+---------------------------------------------------- 
+: 6
+: TRUE
+[1] 3
+---------------------------------------------------- 
+: 8
+: TRUE
+[1] 2
+119> dimnames(e)
+[[1]]
+[1] "4" "6" "8"
+
+[[2]]
+[1] "FALSE" "TRUE" 
+
+121> e["4", "TRUE"]
+[1] 8
+122> e = by(mtcars, list(mtcars$cyl, as.logical(mtcars$am)), function(d) lm(mpg ~ wt, d))
+124> typeof(e)
+[1] "list"
+125> dim(e)
+[1] 3 2
+127> e[[1]]
+
+Call:
+lm(formula = mpg ~ wt, data = d)
+
+Coefficients:
+(Intercept)           wt  
+     13.896        3.068  
+
+128> class(e[[1]])
+[1] "lm"
+130> typeof(e[[1]])
+[1] "list"
+131> names(e[[1]])
+ [1] "coefficients"  "residuals"     "effects"       "rank"         
+ [5] "fitted.values" "assign"        "qr"            "df.residual"  
+ [9] "xlevels"       "call"          "terms"         "model"        
+132> e
+: 4
+: FALSE
+
+Call:
+lm(formula = mpg ~ wt, data = d)
+
+Coefficients:
+(Intercept)           wt  
+     13.896        3.068  
+
+---------------------------------------------------- 
+: 6
+: FALSE
+
+Call:
+lm(formula = mpg ~ wt, data = d)
+
+Coefficients:
+(Intercept)           wt  
+      63.65       -13.14  
+
+---------------------------------------------------- 
+: 8
+: FALSE
+
+Call:
+lm(formula = mpg ~ wt, data = d)
+
+Coefficients:
+(Intercept)           wt  
+     25.059       -2.439  
+
+---------------------------------------------------- 
+: 4
+: TRUE
+
+Call:
+lm(formula = mpg ~ wt, data = d)
+
+Coefficients:
+(Intercept)           wt  
+     44.194       -7.893  
+
+---------------------------------------------------- 
+: 6
+: TRUE
+
+Call:
+lm(formula = mpg ~ wt, data = d)
+
+Coefficients:
+(Intercept)           wt  
+    22.2021      -0.5936  
+
+---------------------------------------------------- 
+: 8
+: TRUE
+
+Call:
+lm(formula = mpg ~ wt, data = d)
+
+Coefficients:
+(Intercept)           wt  
+      22.14        -2.00  
+
+133> par(mfrow = c(2, 2))
+137> plot(rnorm(10))
+138> plot(factor(sample(c("A", "B"), 10, replace = TRUE)))
+141> dev.new()
+142> plot(mtcars)
+143> plot
+function (x, y, ...) 
+UseMethod("plot")
+<bytecode: 0x7f9269b6f6d0>
+<environment: namespace:graphics>
+144> plot.data.frame
+Error: object 'plot.data.frame' not found
+No suitable frames for recover()
+144> print.by
+function (x, ..., vsep) 
+{
+    d <- dim(x)
+    dn <- dimnames(x)
+    dnn <- names(dn)
+    if (missing(vsep)) 
+        vsep <- strrep("-", 0.75 * getOption("width"))
+    lapply(X = seq_along(x), FUN = function(i, x, vsep, ...) {
+        if (i != 1L && !is.null(vsep)) 
+            cat(vsep, "\n")
+        ii <- i - 1L
+        for (j in seq_along(dn)) {
+            iii <- ii%%d[j] + 1L
+            ii <- ii%/%d[j]
+            cat(dnn[j], ": ", dn[[j]][iii], "\n", sep = "")
+        }
+        print(x[[i]], ...)
+    }, x, vsep, ...)
+    invisible(x)
+}
+<bytecode: 0x7f9269b7d638>
+<environment: namespace:base>
+145> e[[1]]
+
+Call:
+lm(formula = mpg ~ wt, data = d)
+
+Coefficients:
+(Intercept)           wt  
+     13.896        3.068  
+
+146> plot(e[[1]])
+Hit <Return> to see next plot: 
+Hit <Return> to see next plot: 
+Hit <Return> to see next plot: 
+Hit <Return> to see next plot: 
+Warning messages:
+1: In sqrt(crit * p * (1 - hh)/hh) : NaNs produced
+2: In sqrt(crit * p * (1 - hh)/hh) : NaNs produced
+147> x = 1
+148> class(x) = "duncan"
+150> plot.duncan = function(x, y, ...) print(c("Hi", x))
+152> plot(x)
+[1] "Hi" "1" 
+153> print(x)
+[1] 1
+attr(,"class")
+[1] "duncan"
+154> print.default
+function (x, digits = NULL, quote = TRUE, na.print = NULL, print.gap = NULL, 
+    right = FALSE, max = NULL, useSource = TRUE, ...) 
+{
+    noOpt <- missing(digits) && missing(quote) && missing(na.print) && 
+        missing(print.gap) && missing(right) && missing(max) && 
+        missing(useSource) && missing(...)
+    .Internal(print.default(x, digits, quote, na.print, print.gap, 
+        right, max, useSource, noOpt))
+}
+<bytecode: 0x7f926aa82188>
+<environment: namespace:base>
+155> grep
+function (pattern, x, ignore.case = FALSE, perl = FALSE, value = FALSE, 
+    fixed = FALSE, useBytes = FALSE, invert = FALSE) 
+{
+    if (!is.character(x)) 
+        x <- structure(as.character(x), names = names(x))
+    .Internal(grep(as.character(pattern), x, ignore.case, value, 
+        perl, fixed, useBytes, invert))
+}
+<bytecode: 0x7f926a1eee28>
+<environment: namespace:base>
+165> #lapply(docTexts, function(el) grep("foo", el))
+166> list.files
+function (path = ".", pattern = NULL, all.files = FALSE, full.names = FALSE, 
+    recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, 
+    no.. = FALSE) 
+.Internal(list.files(path, pattern, all.files, full.names, recursive, 
+    ignore.case, include.dirs, no..))
+<bytecode: 0x7f9269e95208>
+<environment: namespace:base>
+167> ans = lapply(1:nrow(g),
+              function(i) {
+                 settings = g[i,]
+                 replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
+       })
+ans = lapply(1:nrow(g),
++               function(i) {
++                  settings = g[i,]
++                  replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
++        })
+168> 
+168> rm(sim)
+170> ans = lapply(1:nrow(g),
+              function(i) {
+                 settings = g[i,]
+                 replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
+       })
+ans = lapply(1:nrow(g),
++               function(i) {
++                  settings = g[i,]
++                  replicate(NumReplicates, sim(mu[settings[1,1]], rate[settings[1,2]]), simplify = FALSE)
++        })
+Error in FUN(X[[i]], ...) (from #4) : could not find function "sim"
+
+Enter a frame number, or 0 to exit   
+
+1: lapply(1:nrow(g), function(i) {
+    settings = g[i, ]
+    replica
+2: FUN(X[[i]], ...)
+3: #4: replicate(NumReplicates, sim(mu[settings[1, 1]], rate[setting
+4: sapply(integer(n), eval.parent(substitute(function(...) expr)), s
+5: lapply(X = X, FUN = FUN, ...)
+6: FUN(X[[i]], ...)
+
+Selection: 6
+Called from: eval(substitute(browser(skipCalls = skip), list(skip = 7 - which)), 
+    envir = sys.frame(which))
+Browse[1]> body()
+sim(mu[settings[1, 1]], rate[settings[1, 2]])
+Browse[1]> 
+
+Enter a frame number, or 0 to exit   
+
+1: lapply(1:nrow(g), function(i) {
+    settings = g[i, ]
+    replica
+2: FUN(X[[i]], ...)
+3: #4: replicate(NumReplicates, sim(mu[settings[1, 1]], rate[setting
+4: sapply(integer(n), eval.parent(substitute(function(...) expr)), s
+5: lapply(X = X, FUN = FUN, ...)
+6: FUN(X[[i]], ...)
+
+Selection: 3
+Called from: lapply(X = X, FUN = FUN, ...)
+Browse[1]> 
+
+Enter a frame number, or 0 to exit   
+
+1: lapply(1:nrow(g), function(i) {
+    settings = g[i, ]
+    replica
+2: FUN(X[[i]], ...)
+3: #4: replicate(NumReplicates, sim(mu[settings[1, 1]], rate[setting
+4: sapply(integer(n), eval.parent(substitute(function(...) expr)), s
+5: lapply(X = X, FUN = FUN, ...)
+6: FUN(X[[i]], ...)
+
+Selection: 3
+Called from: lapply(X = X, FUN = FUN, ...)
+Browse[2]> ls()
+[1] "expr"     "n"        "simplify"
+Browse[2]> expr
+Error during wrapup: could not find function "sim"
+Browse[2]> 
+
+Enter a frame number, or 0 to exit   
+
+1: lapply(1:nrow(g), function(i) {
+    settings = g[i, ]
+    replica
+2: FUN(X[[i]], ...)
+3: #4: replicate(NumReplicates, sim(mu[settings[1, 1]], rate[setting
+4: sapply(integer(n), eval.parent(substitute(function(...) expr)), s
+5: lapply(X = X, FUN = FUN, ...)
+6: FUN(X[[i]], ...)
+
+Selection: 2
+Called from: sapply(integer(n), eval.parent(substitute(function(...) expr)), 
+    simplify = simplify)
+Browse[2]> 
+
+Enter a frame number, or 0 to exit   
+
+1: lapply(1:nrow(g), function(i) {
+    settings = g[i, ]
+    replica
+2: FUN(X[[i]], ...)
+3: #4: replicate(NumReplicates, sim(mu[settings[1, 1]], rate[setting
+4: sapply(integer(n), eval.parent(substitute(function(...) expr)), s
+5: lapply(X = X, FUN = FUN, ...)
+6: FUN(X[[i]], ...)
+
+Selection: 2
+Called from: sapply(integer(n), eval.parent(substitute(function(...) expr)), 
+    simplify = simplify)
+Browse[3]> body()
+{
+    settings = g[i, ]
+    replicate(NumReplicates, sim(mu[settings[1, 1]], rate[settings[1, 
+        2]]), simplify = FALSE)
+}
+Browse[3]> ls()
+[1] "i"        "settings"
+Browse[3]> i
+[1] 1
+Browse[3]> i = 2
+Browse[3]> i
+[1] 2
+Browse[3]> c
+
+Enter a frame number, or 0 to exit   
+
+1: lapply(1:nrow(g), function(i) {
+    settings = g[i, ]
+    replica
+2: FUN(X[[i]], ...)
+3: #4: replicate(NumReplicates, sim(mu[settings[1, 1]], rate[setting
+4: sapply(integer(n), eval.parent(substitute(function(...) expr)), s
+5: lapply(X = X, FUN = FUN, ...)
+6: FUN(X[[i]], ...)
+
+Selection: 0
+177> 

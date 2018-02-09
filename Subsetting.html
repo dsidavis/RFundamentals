@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="subsetting-in-r">Subsetting in R</h1>
+<p>Subsetting starts with vectors. As we explored, there is a <a href="VectorHierarchy.html">hierarchy</a> of vector types in R.</p>
+<p>There are several ways to subset a vector.</p>
+<p>General rule of thumb. + Subsetting with [] (single [) returns an object of the same type. + [[ ]] gives a single element.</p>
+<p>[[ ]] mostly used for lists, but works for vectors.</p>
+<p>We start with a vector, i.e., an ordered collection of values/elements.</p>
+<p>The most &quot;obvious&quot; way to subset is to specify the positions/indices of the elements you want.</p>
+<h2 id="subsetting-by-indexposition">Subsetting By Index/Position</h2>
+<pre class="sourceCode r"><code class="sourceCode r">x[ <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">6</span>) ]</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">i =<span class="st"> </span><span class="kw">match</span>(a, b)
+x[ i ] </code></pre>
+<h3 id="subsetting-position-0">Subsetting position 0</h3>
+<p>For any position that is 0 in our set of indices, R ignores that. So</p>
+<pre class="sourceCode r"><code class="sourceCode r">x[ <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">5</span>) ]</code></pre>
+<p>will return a vector of length 2 containing (a copy of) the 1st and 5th element of x.</p>
+<p>This is useful, especially in conjunction with match(). When we call match(a, b), we find the position of the first element in b for each of the elements in a. If an element of a is not in b, match() gives an NA for the position of this element of a. However, the third parameter of match() allows us to specify an alternative value for this situation. We often use 0 for this so that when we use the result from match() to subset a vector, we ignore the values that were not found. In other words,</p>
+<pre class="sourceCode r"><code class="sourceCode r">x[  <span class="kw">match</span>(a, b, <span class="dv">0</span>) ]</code></pre>
+<h3 id="subsetting-by-empty-vector---x">Subsetting By Empty Vector - <code>x[ ]</code></h3>
+<p>Consider</p>
+<pre><code>x = 1:10</code></pre>
+<p>What's the difference between the following two expressions:</p>
+<pre><code>x
+x[]</code></pre>
+<p>The first (<code>x</code>) returns the value of x which is the entire vector. So to does <code>x[]</code>. Precisely, <code>x[]</code> subsets all of the elements</p>
+<p>So why do we care? Consider</p>
+<pre><code>mtcars[1, ]</code></pre>
+<p>mtcars is a data frame (and the following also applies to a matrix or array). mtcars[1, 2] would return the first row and its second element. But <code>mtcars[1, ]</code> returns the first row and then all of its elements. The empty subset for the columns means &quot;all of the elements for that dimension&quot;. So</p>
+<pre><code>mtcars[1:2, ]  # all columns for first two rows
+mtcars[ , 1:2] # all rows for first two columns
+mtcars[, ]  # all rows and all columns.</code></pre>
+<p>all utilize this.</p>
+<p>What's the difference between</p>
+<pre><code>x = 0
+x[] = 0</code></pre>
+<p><code>x = 0</code> assigns the literal value 0 to the variable x. <code>x[] = 0</code> replaces all of the</p>
+<h3 id="subsetting-with-index-value-0">Subsetting with index value 0</h3>
+<p>R treats 0 as an index value by just ignoring that element of the request.</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="dv">1</span>:<span class="dv">10</span>
+x[<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">2</span>)]
+[<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span></code></pre>
+<p>This can be used with match()</p>
+<pre class="sourceCode r"><code class="sourceCode r">  i =<span class="st"> </span><span class="kw">match</span>(ids, tt, <span class="dv">0</span>)
+  tt[i]
+<span class="st">``</span>
+
+
+
+
+### Subsetting by Negative Index
+
+
+
+### Subsetting Non-elements
+
+What if we subset an element of a vector that is beyond the length?</code></pre>
+<p>x = c(1, 5, 10) x[5] NA ```</p>
+<pre class="sourceCode r"><code class="sourceCode r">l =<span class="st"> </span><span class="kw">list</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)
+l[[<span class="dv">5</span>]]  
+error -<span class="st"> </span>subscript out of bounds.</code></pre>
+<p>Error.</p>
+<p>But</p>
+<pre class="sourceCode r"><code class="sourceCode r">l[[<span class="st">&quot;abc&quot;</span>]]
+<span class="ot">NULL</span></code></pre>
+<h2 id="factors">Factors</h2>
+<h3 id="dropping-levels-in-subsets">Dropping Levels in Subsets</h3>
+<p>Consider the following factor:</p>
+<pre class="sourceCode r"><code class="sourceCode r">x  =<span class="st"> </span><span class="kw">factor</span>(<span class="kw">rep</span>(letters[<span class="dv">1</span>:<span class="dv">3</span>], <span class="kw">rpois</span>(<span class="dv">3</span>, <span class="dv">10</span>)))
+<span class="kw">table</span>(x)
+x
+ a  b  c 
+ <span class="dv">9</span> <span class="dv">16</span> <span class="dv">14</span> </code></pre>
+<p>These are ordered, by design. Let's take the first 5 elements</p>
+<pre class="sourceCode r"><code class="sourceCode r">x[<span class="dv">1</span>:<span class="dv">5</span>]
+[<span class="dv">1</span>] a a a a a
+Levels:<span class="st"> </span>a b c</code></pre>
+<p>What if we don't want the other two levels b and c? We can convert the subset/result to a factor (which will implicitly convert it to character vector)</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(x[<span class="dv">1</span>:<span class="dv">5</span>])
+[<span class="dv">1</span>] a a a a a
+Levels:<span class="st"> </span>a</code></pre>
+<p>Alternatively, we can use drop = TRUE within the [ ] operation:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">15</span>&gt;<span class="st"> </span>x[<span class="dv">1</span>:<span class="dv">5</span>, drop =<span class="st"> </span><span class="ot">TRUE</span>]
+[<span class="dv">1</span>] a a a a a
+Levels:<span class="st"> </span>a</code></pre>
+<p>The drop parameter is also useful for data.frames, matrices and arrays when we get to two and higher dimensional subsetting.</p>
+<h3 id="subsetting-by-a-factor">Subsetting By a Factor</h3>
+<p>A factor is an integer vector with an associated set of levels. The integer values are indices into the set of levels. So if x is a factor,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">levels</span>(x)[x]</code></pre>
+<p>prints the factor.</p>
+<p>This may not seem important, but it illustrates something important. We can subset using a factor as the indices/positions.</p>
+<p>Suppose we have a set of colors, one for each level of the factor. Then</p>
+<pre class="sourceCode r"><code class="sourceCode r">colors[ x ]</code></pre>
+<p>would give a vector of colors corresponding to the actual values of x. So</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(x, y, <span class="dt">col =</span> colors[ x ], <span class="dt">pch =</span> <span class="kw">c</span>(<span class="st">&quot;.&quot;</span>, <span class="st">&quot;+&quot;</span>, <span class="st">&quot;O&quot;</span>)[ x ])</code></pre>
+<p>will use the colors and plotting character corresponding to the values of x.</p>
+<p>We could do the same with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(colors) =<span class="st"> </span><span class="kw">levels</span>(x)
+colors[ <span class="kw">as.character</span>( x ) ]</code></pre>
+<p>but that is not as convenient.</p>
+<h2 id="lists">Lists</h2>
+<p>There are three operators for subsetting a list - [], [[ ]] and l$var + [ ] is for getting back a sub-list. + [[ ]] is for extracting a single element out of the list + $ is for extracting a single element out of the list.</p>
+<p>The $ operator takes the name on the right hand side of the $ as a literal name. So l<span class="math">$var looks for an element named var. It does **NOT** look for the variable named var and then use its value as the name of the element. So ```r l = list(abc = 1, def = 2) var = &quot;abc&quot; l$</span>var <code>gives back NULL, not 1. In short, x$var  does not evaluate var. But</code>r l<span class="math"><em>a</em><em>b</em><em>c</em><em>l</em></span>ab l$a ``` would work. The $ does partial name matching.</p>
+<p>You cannot use a number after the $. That is a syntax error. (Check it with the parse() function.)</p>
+<p>The l[[ expr ]] does evaluate the expression within the [[ ]]. So in our example above,</p>
+<pre class="sourceCode r"><code class="sourceCode r">l[[ var ]] </code></pre>
+<p>would return 1, the value of the element named &quot;a&quot; since var is a character vector.</p>
+<p>But note that that [[ ]] does not do partial name matching! So</p>
+<pre class="sourceCode r"><code class="sourceCode r">l[[ <span class="st">&quot;ab&quot;</span> ]]</code></pre>
+<p>yields NULL.</p>
+<p>Also note that</p>
+<pre class="sourceCode r"><code class="sourceCode r">l[[ <span class="kw">c</span>(<span class="st">&quot;abc&quot;</span>, <span class="st">&quot;def&quot;</span>) ]]</code></pre>
+<p>gives an error. Why? because [[ ]] treats an index with length more than 1 as a hierarchical path through the list. So suppose we had a list</p>
+<pre class="sourceCode r"><code class="sourceCode r">l =<span class="st"> </span><span class="kw">list</span>(<span class="dt">abc =</span> mtcars, <span class="dt">def =</span> <span class="kw">data.frame</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">2</span>))</code></pre>
+<p>Then</p>
+<pre class="sourceCode r"><code class="sourceCode r">l [[ <span class="kw">c</span>(<span class="st">&quot;abc&quot;</span>, <span class="st">&quot;mpg&quot;</span>) ]]</code></pre>
+<p>is the same as</p>
+<pre class="sourceCode r"><code class="sourceCode r">l[[ <span class="st">&quot;abc&quot;</span> ]] [[ <span class="st">&quot;mpg&quot;</span> ]]</code></pre>
+<p>This can be a real problem in a computation such as</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">someComputation</span>()
+i =<span class="st"> </span><span class="kw">match</span>(x, y)
+l[[ i ]]</code></pre>
+<p>where we expect x to have length 1 but it has more than one element. Then match(x, y) gives a value with length more than 1 and so l[[ i ]] tries to treat the list hierarchically. So be careful.</p>
+</body>
+</html>

@@ -4,6 +4,16 @@
 1. Everything is a copy (and copy on write).
 -->
 
+<center>
+<div>
+<table>
+<tr>
+<th>[Day1](Day1.md)</th><th>[Day2](Day2.md)</th><th>[Day3](Day3.md)</th><th>[Day4](Day4.md)</th>
+</tr>
+</table>
+</div>
+</center>
+
 + [R Session for Day 2](RSession2)
 
 ## Questions & Review 
@@ -36,6 +46,9 @@
 1. [Lists](Lists.html)
 1. [Making Lists - c() and list()](ListAndC.html)
 1. [Subsetting Lists -\[, \[\[, $](Subsetting.html)
+    1. \[ verus \[\[
+    1. partial name matching with $ and not with \[\[
+    1. hierarchical indexing
 1. [Data Frames](DataFrames.html)	
 1. [Subsetting in 2-Dimensions](Subsetting2D.html)
 

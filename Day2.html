@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="r-fundamentals---day-2">R Fundamentals - Day 2</h1>
+<!-- 
+1. Everything is a copy (and copy on write).
+-->
+
+<center>
+<div>
+<table>
+<tr>
+<th>
+<a href="Day1.md">Day1</a>
+</th><th>
+<a href="Day2.md">Day2</a>
+</th><th>
+<a href="Day3.md">Day3</a>
+</th><th>
+<a href="Day4.md">Day4</a>
+</th>
+</tr>
+</table>
+</div>
+</center>
+
+<ul>
+<li><a href="RSession2">R Session for Day 2</a></li>
+</ul>
+<h2 id="questions-review">Questions &amp; Review</h2>
+<ul>
+<li>attach() - NOT UNDER ANY CIRCUMSTANCES (unless <em>never</em> change)</li>
+</ul>
+<h2 id="data-typesstructures">Data Types/Structures</h2>
+<ol style="list-style-type: decimal">
+<li>[Basic data types - vectors] <!-- (BasicTypes.html) -->
+<ul>
+<li><a href="VectorHierarchy.html">Hierarchy of data types</a> and implicit coercion</li>
+<li><a href="Attributes.html">Class, typeof, length</a></li>
+<li><a href="Attributes.html">dim, names</a></li>
+<li><a href="Sequences.html">Sequences</a></li>
+<li><a href="NA.html">NAs and is.na()</a></li>
+</ul></li>
+<li><a href="RecyclingRule.html">Vectorized/Element-wise Functions &amp; the Recycling Rule</a>
+<ul>
+<li>The family of apply functions.<br /></li>
+</ul></li>
+<li><a href="Subsetting.html">Subsetting rules</a>
+<ol style="list-style-type: decimal">
+<li>index/position – <code>x[ c(10, 2) ]</code>
+<ol style="list-style-type: decimal">
+<li>Subset with 0</li>
+</ol></li>
+<li>logical indexing – <code>x[ c(FALSE, FALSE, TRUE, TRUE, FALSE) ]</code></li>
+<li>name – <code>x[ c(&quot;a&quot;, &quot;xyz&quot;) ]</code></li>
+<li>exclusion via negative position/index – <code>x[ - c(1, 3, 9) ]</code></li>
+<li>empty – <code>x[]</code></li>
+<li>Subsetting outside the length of a vector<br /></li>
+<li>drop = TRUE/FALSE - factors and<br /></li>
+<li>2-dimensional subsetting</li>
+<li>by two column matrix</li>
+<li>by matrix</li>
+</ol></li>
+<li><a href="Factors.html">Categorical data - factors</a><br /></li>
+<li><a href="Lists.html">Lists</a></li>
+<li><a href="ListAndC.html">Making Lists - c() and list()</a></li>
+<li>[Subsetting Lists -[, [[, $](Subsetting.html)
+<ol style="list-style-type: decimal">
+<li>[ verus [[</li>
+<li>partial name matching with $ and not with [[</li>
+<li>hierarchical indexing</li>
+</ol></li>
+<li><a href="DataFrames.html">Data Frames</a><br /></li>
+<li><p><a href="Subsetting2D.html">Subsetting in 2-Dimensions</a></p></li>
+<li><a href="Matrices.html">Matrices</a>
+<ul>
+<li><a href="MatrixSubsetting.html">Subsetting a matrix by matrix</a></li>
+</ul></li>
+<li><p><a href="Attributes2.html">Attributes Generally</a></p></li>
+</ol>
+</body>
+</html>

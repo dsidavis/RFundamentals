@@ -31,13 +31,21 @@ the recycling rule is used.
 R ensures that each column (element of the list) of the data.frame 
 has the same length. So R repeats TRUE nrow(mtcars) times.
 
+
 So what does
+```r
+mtcars$old = c(TRUE, FALSE)
+```
+yield?
+
+And what does
 ```r
 mtcars$old = c(TRUE, FALSE, TRUE)
 ```
-yield.
+do?
 
 
 
-We can use 2-dimensional subsetting  also.
-See
+
+We can use 2-dimensional subsetting also.
+See [Subsetting2D.md](Subsetting2D.md)

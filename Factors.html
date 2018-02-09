@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="factors-for-categorical-data">Factors for Categorical Data</h1>
+<p>We could represent categorical data as character strings. However, R does better than this using factors and ordered factors. Sometimes this is not useful, but often it is.</p>
+<h2 id="factor">Factor</h2>
+<p>A factor is a vector whose elements take values from a fixed finite set of possible values called the levels. Consider majors, states, ethnicities, racial groups. These are all categories.</p>
+<p>Typically we just define a factor() by giving the observed values and R then assumes that these are the possible levels.</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">factor</span>(<span class="kw">sample</span>(LETTERS[<span class="dv">1</span>:<span class="dv">3</span>], <span class="dv">20</span>, <span class="dt">replace =</span> <span class="ot">TRUE</span>))</code></pre>
+<p>We can look at the levels of the factor with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">levels</span>(x)</code></pre>
+<p>In this case, it is just A, B, C.</p>
+<p>Similarly, if we had sample 20 items from the full set of 26 LETTERS, the levels of the factor would only reflect those that were observed in the sample.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">123123</span>)
+x =<span class="st"> </span><span class="kw">factor</span>(<span class="kw">sample</span>(LETTERS, <span class="dv">20</span>, <span class="dt">replace =</span> <span class="ot">TRUE</span>))
+<span class="kw">table</span>(x)
+x
+C D E G K L N O P T Z 
+<span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">2</span> </code></pre>
+<p>However, we often want to include all the potential possible levels - be they observed or not. We can do this with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(x, <span class="dt">levels =</span> LETTERS)
+[<span class="dv">1</span>] P O K N K T N L T K N E Z C Z D G L L N
+Levels:<span class="st"> </span>A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</code></pre>
+<p><strong>(Repeat of above.)</strong> Sometimes we need to be able to indicate that there are additional categories that were not observed in our sample. A factor allows us do this by specifying the possible values in the levels and the observed values in the vector, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(<span class="kw">c</span>(<span class="st">&quot;African American&quot;</span>, <span class="st">&quot;White&quot;</span>, <span class="st">&quot;Hispanic&quot;</span>, ...),
+       <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;African American&quot;</span>, <span class="st">&quot;Hispanic&quot;</span>, <span class="st">&quot;White&quot;</span>, <span class="st">&quot;Native American&quot;</span>, <span class="st">&quot;Eskimo&quot;&quot;))</span></code></pre>
+<p>To summarize a factor, we can call summary() or table(). These do almost exactly the same thing.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(x)
+x
+ A  B  C 
+ <span class="dv">6</span>  <span class="dv">3</span> <span class="dv">11</span> </code></pre>
+<p>However, <code>table(factor1, factor2)</code> gives a two way table and we can include more factors also.</p>
+<p>Factors are very useful for subsetting. See <a href="Subsetting.html">Subsetting</a> The simple idea is that since a factor is really an integer vector with values between 1 and the number of levels, we can use it to subset another vector that parallels the levels. For example, we can subset a vector of color values with the same length as the levels, i.e.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(x, y, <span class="dt">col =</span> colors[ my.factor ])</code></pre>
+<p>The same applies for plotting characters.</p>
+<p>We could also do this with names, e.g.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(colors) =<span class="st"> </span><span class="kw">levels</span>(my.factor)
+colors[ <span class="kw">as.character</span>( my. factor) ]</code></pre>
+<p>but direct subsetting by using the factor values as indices is more direct.</p>
+<h2 id="ordered-factor">Ordered Factor</h2>
+<p>Some categorical variables have an implict order. For example Freshman &lt; Sophmore &lt; Junior &lt; Senior. And for grades, A+ &gt; A &gt; A- &gt; .... &gt; F. And we might map a continuous variable into bins/intervals and then the bins have a natural order, e.g.</p>
+<pre class="sourceCode r"><code class="sourceCode r">z =<span class="st"> </span><span class="kw">cut</span>(<span class="kw">rnorm</span>(<span class="dv">10000</span>, <span class="dv">0</span>, <span class="dv">100</span>), <span class="kw">c</span>(-<span class="ot">Inf</span>, -<span class="dv">10</span>, <span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="ot">Inf</span>), <span class="dt">ordered =</span> <span class="ot">TRUE</span>)
+<span class="kw">class</span>(z)
+[<span class="dv">1</span>] <span class="st">&quot;ordered&quot;</span> <span class="st">&quot;factor&quot;</span> 
+[<span class="dv">1</span>] <span class="st">&quot;(-Inf,-10]&quot;</span> <span class="st">&quot;(-10,0]&quot;</span>    <span class="st">&quot;(0,10]&quot;</span>     <span class="st">&quot;(10,30]&quot;</span>    <span class="st">&quot;(30,40]&quot;</span>   <span class="st">&quot;(40, Inf]&quot;</span> 
+<span class="kw">levels</span>(z)</code></pre>
+<p>R uses the ordering when displaying the computations involving the ordered factor, e.g. in tables or on plots.</p>
+<p>An ordered factor is a factor. This is an example of S3 inheritance.</p>
+<h1 id="creating-a-factors-with-levels-and-labels">Creating a Factors with Levels and Labels</h1>
+<p>Consider the following vector</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;A&quot;</span> <span class="st">&quot;A&quot;</span> <span class="st">&quot;B&quot;</span> <span class="st">&quot;C&quot;</span> <span class="st">&quot;A&quot;</span> <span class="st">&quot;B&quot;</span></code></pre>
+<p>Now we create a factor</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(x)
+[<span class="dv">1</span>] A A B C A B
+Levels:<span class="st"> </span>A B C</code></pre>
+<p>We can also specify the levels and/or the labels</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(x, <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;x1&quot;</span>, <span class="st">&quot;x2&quot;</span>, <span class="st">&quot;x3&quot;</span>))
+[<span class="dv">1</span>] x1 x1 x2 x3 x1 x2
+Levels:<span class="st"> </span>x1 x2 x3</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"> <span class="kw">factor</span>(x, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;C&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;A&quot;</span>))
+[<span class="dv">1</span>] A A B C A B
+Levels:<span class="st"> </span>C B A</code></pre>
+<p>Consider</p>
+<pre><code>x = c(&quot;A&quot;, &quot;B&quot;, &quot;B&quot;, &quot;A&quot;, &quot;C&quot;)</code></pre>
+<pre><code>factor(x)
+[1] A B B A C
+Levels: A B C</code></pre>
+<p>Now let's specify a different set of levels</p>
+<pre><code>factor(x, c(&quot;X&quot;, &quot;Y&quot;, &quot;Z&quot;))
+[1] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;
+Levels: X Y Z</code></pre>
+<p>None of the values were found in the levels vector.</p>
+<p>But if our goal was to relabel the levels, we can use</p>
+<pre><code>factor(x, labels = c(&quot;X&quot;, &quot;Y&quot;, &quot;Z&quot;))
+[1] X Y Y X Z
+Levels: X Y Z</code></pre>
+<p>This maps A, B, C to X, Y, Z</p>
+<p>The labels parameter also allows us to map two or more levels to one (new) level</p>
+<pre><code>184&gt; factor(x, labels = c(&quot;A&quot;, &quot;B&quot;, &quot;B&quot;))
+[1] A B B A B
+Levels: A B</code></pre>
+<p>There is no C in the result and it was mapped to B.</p>
+<p>We can also do all of this by manipulating the levels attribute.</p>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="Class.css" type="text/css" />
+</head>
+<body>
+<h1 id="how-function-calls-work">How Function Calls Work?</h1>
+<p>Consider a function call in R. We'll use getDocTitle() from the ReadPDF package we are developing as an example. There is nothing special about this.</p>
+<p>We'll source() the file getTitle.R into the R session, so the functions defined in that file will be in the global environment.</p>
+<p>Consider the function</p>
+<pre><code>getDocTitle =
+function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...)
+{
+   # R CODE HERE.....
+}</code></pre>
+<p>Consider the call</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getDocTitle</span>(<span class="st">&quot;article.xml&quot;</span>, <span class="dv">2</span>,  <span class="dt">me =</span> <span class="ot">TRUE</span>)</code></pre>
+<p>R first finds the getDocTitle function by searching in the appropriate places. It is now ready to actually invoke/call this function</p>
+<p>R has the function so it can query informatio about it, i.e. its parameters/formal arguments and body.</p>
+<p>The signature of getDocTitle() is</p>
+<pre class="sourceCode r"><code class="sourceCode r">function(file, <span class="dt">page =</span> <span class="dv">1</span>, <span class="dt">doc =</span> <span class="kw">xmlParse</span>(file), <span class="dt">meta =</span> <span class="ot">FALSE</span>, <span class="dt">minWords =</span> <span class="dv">1</span>, ...)</code></pre>
+<p>R creates a call frame. It creates bindings for each of the parameters: file, page, doc, meta and minWords and also <code>...</code>. For each of these, it assigns a <strong>promise</strong> that is either empty if there is no default value or to the expression for the default value. So file is assigned an empty promise, page is assigned the literal value 1, doc is assigned the expression <code>xmlParse(file)</code>, and meta and minWords get the literal values <code>FALSE</code> and 1, respectively. The <code>...</code> gets an entry also in the call frame.</p>
+<p>These default values will only be used if they are needed.</p>
+<p>I use the term parameter for a formal argument in the signature of the function, i.e. the name of an input the author of the function used when writing the body. An argument is a value passed in a specific call to the function.</p>
+<p>Next, R matches the arguments in the call to the parameters in the call frame. It does this in 3 steps: 1. named arguments whose names exactly match an expected parameter name 2. named arguments whose names partially match an expected parameter name that has not been previously matched in step 1 3. all other arguments, i.e. the unnamed ones, are matched by position to the remaining parameters.</p>
+<p>Our call to getDocTitle() was</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getDocTitle</span>(<span class="st">&quot;article.xml&quot;</span>, <span class="dv">2</span>,  <span class="dt">meta =</span> <span class="ot">TRUE</span>)</code></pre>
+<h3 id="step-1">Step 1</h3>
+<p>So step 1 matches meta = TRUE in the call to the parameter meta in the function definition and assigns <code>TRUE</code> (the argument value) to the meta parameter's binding in the call frame. Technically it doesn't assign the value of the argument, but rather a promise to evaluate it when it is needed. This is <em>lazy evaluation</em>.</p>
+<p>There are no other named arguments in the call, so this ends setp 1.</p>
+<p>We have matched the parameter meta.</p>
+<h3 id="step-2">Step 2</h3>
+<p>There are no other named arguments, so none to partially match by name.</p>
+<h3 id="step-3">Step 3</h3>
+<p>The remaining 2 arguments in the call are &quot;article.xml&quot; and 2. We match these two the first parameters.</p>
+<p>Remember that R has not evaluated the arguments in the call. It has only associated the expressions in the call with the relevant parameters. Lazy evaluation defers the evaluation of each argument until the corresponding parameter is actually referenced.</p>
+<p>match.call()</p>
+<h2 id="scatter.smooth">scatter.smooth()</h2>
+<p>Consider the scatter.smooth() function. We will call it as</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">scatter.smooth</span>(mtcars$mpg, mtcars$wt, <span class="dt">fam =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="dt">xl =</span> <span class="st">&quot;Weight of car&quot;</span>, 
+               <span class="dt">yla =</span> <span class="st">&quot;Miles per Gallon&quot;</span>, 
+               <span class="dt">lpars =</span> <span class="kw">list</span>(<span class="dt">lwd =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>),
+               <span class="dt">main =</span> <span class="st">&quot;Motor Trends Data&quot;</span>)</code></pre>
+<p>Its signature is</p>
+<pre class="sourceCode r"><code class="sourceCode r">function (x, <span class="dt">y =</span> <span class="ot">NULL</span>, <span class="dt">span =</span> <span class="dv">2</span>/<span class="dv">3</span>, <span class="dt">degree =</span> <span class="dv">1</span>, <span class="dt">family =</span> <span class="kw">c</span>(<span class="st">&quot;symmetric&quot;</span>, 
+    <span class="st">&quot;gaussian&quot;</span>), <span class="dt">xlab =</span> <span class="ot">NULL</span>, <span class="dt">ylab =</span> <span class="ot">NULL</span>, <span class="dt">ylim =</span> <span class="kw">range</span>(y, pred$y, 
+    <span class="dt">na.rm =</span> <span class="ot">TRUE</span>), <span class="dt">evaluation =</span> <span class="dv">50</span>, ..., <span class="dt">lpars =</span> <span class="kw">list</span>()) </code></pre>
+<p>So in our call we are not spelling out the full names for family, xlab and ylab. Also, we are not specifying span or degree (or ylim or evaluation).</p>
+<p>We can use match.call() to see what R will actually match.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">match.call</span>(scatter.smooth, 
+           <span class="kw">quote</span>(<span class="kw">scatter.smooth</span>(mtcars$mpg, mtcars$wt, <span class="dt">fam =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="dt">xl =</span> <span class="st">&quot;Weight of car&quot;</span>, 
+               <span class="dt">yla =</span> <span class="st">&quot;Miles per Gallon&quot;</span>, 
+               <span class="dt">lpars =</span> <span class="kw">list</span>(<span class="dt">lwd =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>),
+               <span class="dt">main =</span> <span class="st">&quot;Motor Trends Data&quot;</span>)))
+<span class="kw">scatter.smooth</span>(<span class="dt">x =</span> mtcars$mpg, <span class="dt">y =</span> mtcars$wt, <span class="dt">family =</span> <span class="st">&quot;gaussian&quot;</span>, 
+    <span class="dt">xlab =</span> <span class="st">&quot;Weight of car&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;Miles per Gallon&quot;</span>, <span class="dt">main =</span> <span class="st">&quot;Motor Trends Data&quot;</span>, 
+    <span class="dt">lpars =</span> <span class="kw">list</span>(<span class="dt">lwd =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>))            </code></pre>
+<blockquote>
+<p>Note the use of quote() to stop R evaluating the command but just to return it as a language object (of class call)</p>
+</blockquote>
+<p>R returned the actual call with the argument names for all of the inputs.</p>
+<p>In our call, the named arguments are fam, xl, yla, lpars, and main.</p>
+<h3 id="step-1---full-name-matching">Step 1 - Full name matching</h3>
+<p>Only the lpars argumet matches a parameter by name. So we assign that to the parameter in the call frame.</p>
+<h3 id="step-2---partial-name-matching">Step 2 - Partial name matching</h3>
+<p>Having matched lpars, we have fam, xl, yla, and main as named arguments. The first three clearly partially match family, xlab and ylab. Note that yl would have been an ambiguous as it matches ylim and ylab. So we needed to add the 'a'.</p>
+<p>main does not match any parameter name. So this is added to the <code>...</code>.</p>
+<h3 id="step-3---unnamed-argument-matching">Step 3 - Unnamed argument matching</h3>
+<p>We are now left with 2 arguments <code>mtcars$mpg</code> and <code>mtcars$wt</code>. We have filled in family, xlab, ylab, lpars. This leaves, in order, x, y, span, degree, ylim and evaluation. So these two arguments are mapped to x and y.</p>
+<h2 id="skipping-parameters">Skipping Parameters</h2>
+<p>Consider a different call to scatter.smooth():</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">scatter.smooth</span>(mtcars[, <span class="kw">c</span>(<span class="st">&quot;mpg&quot;</span>, <span class="st">&quot;wt&quot;</span>)], , , , <span class="st">&quot;gaussian&quot;</span>, <span class="st">&quot;Weight of car&quot;</span>, <span class="st">&quot;Miles per Gallon&quot;</span>, 
+               <span class="dt">lpars =</span> <span class="kw">list</span>(<span class="dt">lwd =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>),
+               <span class="dt">main =</span> <span class="st">&quot;Motor Trends Data&quot;</span>)</code></pre>
+<p>Here there are only 2 named arguments - lpars and main. The other arguments are specified by position.</p>
+<p>The first argument matches x. Then we explicitly skip y, span and degree by specifying no values for them but have a space in the call for them identified by the ,. Then we specify the value for family, xlab, ylab by position.</p>
+<p>In this case, we have explicitly specified a <strong>missing</strong> value for the parameters y, span and degree. R has already assigned the default value to each so those will be used.</p>
+<h2 id="exercise">Exercise</h2>
+<ul>
+<li><p>What happens in the following call:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">scatter.smooth</span>(mtcars$mpg, mtcars$wt, <span class="dt">family =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="dt">x =</span> <span class="st">&quot;Weight of car&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Miles per Gallon&quot;</span>)</code></pre></li>
+</ul>
+<!-- 
+o = ls("package:base")
+o = ls("package:stats")
+i = sapply(o, function(x){ f = get(x, "package:stats"); 
+                               if(is.function(f)) { p = names(formals(f)); ("..." %in% p && match("...", p) < length(p))} else FALSE})
+-->
+
+
+<h2 id="specifying-named-arguments-after-...">Specifying Named Arguments after <code>...</code></h2>
+<p>There is one additional important aspect when the function has a <code>...</code> parameter. Any named argument corresponding to a parameter defined after ... must match the parameter name exactly. Otherwise, it will be in stored in the <code>...</code> list. Consider the function</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =
+function(a, ..., <span class="dt">xyz =</span> <span class="dv">10</span>)
+{
+
+}</code></pre>
+<p>If we call f() as</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">f</span>(<span class="dv">99</span>, <span class="dt">xy =</span> <span class="dv">20</span>)</code></pre>
+<p>this will leave xyz as 10 and ... will be a list with one named element named xy and a value of 20.</p>
+<p>Let's check this</p>
+<pre><code>debug(f)
+f(99,  xy = 20)</code></pre>
+<p>At the <code>Browse[2]&gt;</code> prompt, we can issue commands to look at the local variables</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ls</span>(<span class="dt">all =</span> <span class="ot">TRUE</span>)
+[<span class="dv">1</span>] <span class="st">&quot;...&quot;</span> <span class="st">&quot;a&quot;</span>   <span class="st">&quot;xyz&quot;</span></code></pre>
+<p>We see all of the ones we are expecting What are their values</p>
+<pre><code>xyz
+[1] 10</code></pre>
+<p>So it did not receive our value 20, as we said. And it is in <code>...</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">list</span>(...)
+$xy
+[<span class="dv">1</span>] <span class="dv">20</span></code></pre>
+<p>In our call to scatter.smooth, if we had specified lpars as lp or lpa, it would have been matched to <code>...</code> and not lpars.</p>
+<h2 id="evaluation-of-the-function-body">Evaluation of the Function Body</h2>
+<p>Once we have matched the arguments to the parameters, R evaluates the call by evaluating each of the expressions in the body of the function. It evaluates each expression within the context of the current call frame. This means that it looks for variables in the call frame first. This is like looking in the global environment first for a top-level command.</p>
+<p>Consider the call to scatter.smooth() above, i.e.,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">scatter.smooth</span>(mtcars$mpg, mtcars$wt, <span class="dt">fam =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="dt">xl =</span> <span class="st">&quot;Weight of car&quot;</span>, 
+               <span class="dt">yla =</span> <span class="st">&quot;Miles per Gallon&quot;</span>, 
+               <span class="dt">lpars =</span> <span class="kw">list</span>(<span class="dt">lwd =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>),
+               <span class="dt">main =</span> <span class="st">&quot;Motor Trends Data&quot;</span>)</code></pre>
+<p>After matching the arguments to the parameters, we have the call frame</p>
+<p>The full definition of scatter.smooth can be seen by printing it: <code>scatter.smooth function (x, y = NULL, span = 2/3, degree = 1, family = c(&quot;symmetric&quot;,      &quot;gaussian&quot;), xlab = NULL, ylab = NULL, ylim = range(y, pred$y,      na.rm = TRUE), evaluation = 50, ..., lpars = list())  {     xlabel &lt;- if (!missing(x))          deparse(substitute(x))     ylabel &lt;- if (!missing(y))          deparse(substitute(y))     xy &lt;- xy.coords(x, y, xlabel, ylabel)     x &lt;- xy$x     y &lt;- xy$y     xlab &lt;- if (is.null(xlab))          xy$xlab     else xlab     ylab &lt;- if (is.null(ylab))          xy$ylab     else ylab     pred &lt;- loess.smooth(x, y, span, degree, family, evaluation)     plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)     do.call(lines, c(list(pred), lpars))     invisible() } &lt;bytecode: 0x7ff242f2b270&gt; &lt;environment: namespace:stats&gt;</code>r We'll ignore the first two expressions for now.</p>
+<p>Note the</p>
+<pre class="sourceCode r"><code class="sourceCode r">&lt;environment:<span class="st"> </span>namespace:stats&gt;</code></pre>
+<p>at the end of the output. This tells us that the function lives in the stats package.</p>
+<p>R evaluates the call <code>xy.coords(x, y, xlabel, ylabel)</code> in the same way we described in the REPL but uses a different starting environment for finding variables. R first finds the function xy.coords by searching in the call frame for this call to scatter.smooth. xy.coords is not in the call frame. So it searches the parent environment of the call frame. This is the environment of the definition of the function scatter.smooth. This is the namespace:stats that we see in the display of the scatter.smooth function.</p>
+<p>xy.coords is not in the stats package (either exported or or not). In fact, it is in grDevices package. So how does R find it from the call frame of scatter.smooth()? The parent environment of the namespace:stats is an environment named &quot;imports:stats&quot;</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">parent.env</span>(<span class="kw">getNamespace</span>(<span class="st">&quot;stats&quot;</span>))
+&lt;environment:<span class="st"> </span><span class="dv">0x7fca18b6f9b8</span>&gt;
+<span class="kw">attr</span>(,<span class="st">&quot;name&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;imports:stats&quot;</span></code></pre>
+<p>We can list all the variables in this with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ls</span>(<span class="kw">parent.env</span>(<span class="kw">getNamespace</span>(<span class="st">&quot;stats&quot;</span>)), <span class="dt">all =</span> <span class="ot">TRUE</span>)
+  [<span class="dv">1</span>] <span class="st">&quot;.filled.contour&quot;</span>  <span class="st">&quot;abline&quot;</span>           <span class="st">&quot;arrows&quot;</span>          
+  [<span class="dv">4</span>] <span class="st">&quot;as.graphicsAnnot&quot;</span> <span class="st">&quot;assocplot&quot;</span>        <span class="st">&quot;axis&quot;</span>            
+  [<span class="dv">7</span>] <span class="st">&quot;Axis&quot;</span>             <span class="st">&quot;axis.Date&quot;</span>        <span class="st">&quot;axis.POSIXct&quot;</span>    
+ [<span class="dv">10</span>] <span class="st">&quot;axTicks&quot;</span>          <span class="st">&quot;barplot&quot;</span>          <span class="st">&quot;barplot.default&quot;</span> 
+ [<span class="dv">13</span>] <span class="st">&quot;box&quot;</span>              <span class="st">&quot;boxplot&quot;</span>          <span class="st">&quot;boxplot.default&quot;</span> 
+ [<span class="dv">16</span>] <span class="st">&quot;boxplot.matrix&quot;</span>   <span class="st">&quot;bxp&quot;</span>              <span class="st">&quot;cdplot&quot;</span>          
+ [<span class="dv">19</span>] <span class="st">&quot;clip&quot;</span>             <span class="st">&quot;close.screen&quot;</span>     <span class="st">&quot;co.intervals&quot;</span>    
+ [<span class="dv">22</span>] <span class="st">&quot;contour&quot;</span>          <span class="st">&quot;contour.default&quot;</span>  <span class="st">&quot;coplot&quot;</span>          
+ [<span class="dv">25</span>] <span class="st">&quot;count.fields&quot;</span>     <span class="st">&quot;curve&quot;</span>            <span class="st">&quot;dev.cur&quot;</span>         
+ [<span class="dv">28</span>] <span class="st">&quot;dev.flush&quot;</span>        <span class="st">&quot;dev.hold&quot;</span>         <span class="st">&quot;dev.interactive&quot;</span> 
+ [<span class="dv">31</span>] <span class="st">&quot;dev.new&quot;</span>          <span class="st">&quot;dev.set&quot;</span>          <span class="st">&quot;devAskNewPage&quot;</span>   
+ [<span class="dv">34</span>] <span class="st">&quot;dotchart&quot;</span>         <span class="st">&quot;erase.screen&quot;</span>     <span class="st">&quot;extendrange&quot;</span>     
+ [<span class="dv">37</span>] <span class="st">&quot;filled.contour&quot;</span>   <span class="st">&quot;flush.console&quot;</span>    <span class="st">&quot;fourfoldplot&quot;</span>    
+ [<span class="dv">40</span>] <span class="st">&quot;frame&quot;</span>            <span class="st">&quot;grconvertX&quot;</span>       <span class="st">&quot;grconvertY&quot;</span>      
+ [<span class="dv">43</span>] <span class="st">&quot;grid&quot;</span>             <span class="st">&quot;hist&quot;</span>             <span class="st">&quot;hist.default&quot;</span>    
+ [<span class="dv">46</span>] <span class="st">&quot;identify&quot;</span>         <span class="st">&quot;image&quot;</span>            <span class="st">&quot;image.default&quot;</span>   
+ [<span class="dv">49</span>] <span class="st">&quot;layout&quot;</span>           <span class="st">&quot;layout.show&quot;</span>      <span class="st">&quot;lcm&quot;</span>             
+ [<span class="dv">52</span>] <span class="st">&quot;legend&quot;</span>           <span class="st">&quot;lines&quot;</span>            <span class="st">&quot;lines.default&quot;</span>   
+ [<span class="dv">55</span>] <span class="st">&quot;locator&quot;</span>          <span class="st">&quot;matlines&quot;</span>         <span class="st">&quot;matplot&quot;</span>         
+ [<span class="dv">58</span>] <span class="st">&quot;matpoints&quot;</span>        <span class="st">&quot;mosaicplot&quot;</span>       <span class="st">&quot;mtext&quot;</span>           
+ [<span class="dv">61</span>] <span class="st">&quot;n2mfrow&quot;</span>          <span class="st">&quot;pairs&quot;</span>            <span class="st">&quot;pairs.default&quot;</span>   
+ [<span class="dv">64</span>] <span class="st">&quot;palette&quot;</span>          <span class="st">&quot;panel.smooth&quot;</span>     <span class="st">&quot;par&quot;</span>             
+ [<span class="dv">67</span>] <span class="st">&quot;persp&quot;</span>            <span class="st">&quot;pie&quot;</span>              <span class="st">&quot;plot&quot;</span>            
+ [<span class="dv">70</span>] <span class="st">&quot;plot.default&quot;</span>     <span class="st">&quot;plot.design&quot;</span>      <span class="st">&quot;plot.function&quot;</span>   
+ [<span class="dv">73</span>] <span class="st">&quot;plot.new&quot;</span>         <span class="st">&quot;plot.window&quot;</span>      <span class="st">&quot;plot.xy&quot;</span>         
+ [<span class="dv">76</span>] <span class="st">&quot;points&quot;</span>           <span class="st">&quot;points.default&quot;</span>   <span class="st">&quot;polygon&quot;</span>         
+ [<span class="dv">79</span>] <span class="st">&quot;polypath&quot;</span>         <span class="st">&quot;rasterImage&quot;</span>      <span class="st">&quot;rect&quot;</span>            
+ [<span class="dv">82</span>] <span class="st">&quot;rug&quot;</span>              <span class="st">&quot;screen&quot;</span>           <span class="st">&quot;segments&quot;</span>        
+ [<span class="dv">85</span>] <span class="st">&quot;smoothScatter&quot;</span>    <span class="st">&quot;spineplot&quot;</span>        <span class="st">&quot;split.screen&quot;</span>    
+ [<span class="dv">88</span>] <span class="st">&quot;stars&quot;</span>            <span class="st">&quot;stem&quot;</span>             <span class="st">&quot;str&quot;</span>             
+ [<span class="dv">91</span>] <span class="st">&quot;strheight&quot;</span>        <span class="st">&quot;stripchart&quot;</span>       <span class="st">&quot;strwidth&quot;</span>        
+ [<span class="dv">94</span>] <span class="st">&quot;sunflowerplot&quot;</span>    <span class="st">&quot;symbols&quot;</span>          <span class="st">&quot;tail&quot;</span>            
+ [<span class="dv">97</span>] <span class="st">&quot;text&quot;</span>             <span class="st">&quot;text.default&quot;</span>     <span class="st">&quot;title&quot;</span>           
+[<span class="dv">100</span>] <span class="st">&quot;xinch&quot;</span>            <span class="st">&quot;xspline&quot;</span>          <span class="st">&quot;xy.coords&quot;</span>       
+[<span class="dv">103</span>] <span class="st">&quot;xyinch&quot;</span>           <span class="st">&quot;yinch&quot;</span>           </code></pre>
+<p>We see xy.coords is there as an imported variable. We can also directly query whether that environment has a variable named xy.coords with</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exists</span>(<span class="st">&quot;xy.coords&quot;</span>, <span class="kw">parent.env</span>(e))</code></pre>
+<p>or better, look for a function,</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exists</span>(<span class="st">&quot;xy.coords&quot;</span>, <span class="kw">parent.env</span>(e), <span class="dt">mode =</span> <span class="st">&quot;function&quot;</span>)</code></pre>
+<p>So R will find xy.coords() by searching the call frame of scatter.smooth, its parent environment, its parent and will then find it.</p>
+<p>Let's explore the computations and environments.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">debug</span>(scatter.smooth)
+<span class="kw">scatter.smooth</span>(mtcars$mpg, mtcars$wt, <span class="dt">fam =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="dt">xl =</span> <span class="st">&quot;Weight of car&quot;</span>, 
+               <span class="dt">yla =</span> <span class="st">&quot;Miles per Gallon&quot;</span>, 
+               <span class="dt">lpars =</span> <span class="kw">list</span>(<span class="dt">lwd =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>),
+               <span class="dt">main =</span> <span class="st">&quot;Motor Trends Data&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sys.frames</span>()
+[[<span class="dv">1</span>]]
+&lt;environment:<span class="st"> </span><span class="dv">0x7ff24861cb40</span>&gt;
+
+Browse[<span class="dv">2</span>]&gt;<span class="st"> </span><span class="kw">sys.frames</span>()[[<span class="dv">1</span>]]
+&lt;environment:<span class="st"> </span><span class="dv">0x7ff24861cb40</span>&gt;
+Browse[<span class="dv">2</span>]&gt;<span class="st"> </span><span class="kw">ls</span>(<span class="kw">sys.frames</span>()[[<span class="dv">1</span>]], <span class="dt">all =</span> <span class="ot">TRUE</span>)
+ [<span class="dv">1</span>] <span class="st">&quot;...&quot;</span>        <span class="st">&quot;degree&quot;</span>     <span class="st">&quot;evaluation&quot;</span> <span class="st">&quot;family&quot;</span>     <span class="st">&quot;lpars&quot;</span>     
+ [<span class="dv">6</span>] <span class="st">&quot;span&quot;</span>       <span class="st">&quot;x&quot;</span>          <span class="st">&quot;xlab&quot;</span>       <span class="st">&quot;xlabel&quot;</span>     <span class="st">&quot;y&quot;</span>         
+[<span class="dv">11</span>] <span class="st">&quot;ylab&quot;</span>       <span class="st">&quot;ylabel&quot;</span>     <span class="st">&quot;ylim&quot;</span>      </code></pre>
+<p>What is the parent environment of this call frame</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">parent.env</span>(<span class="kw">sys.frames</span>()[[<span class="dv">1</span>]])
+&lt;environment:<span class="st"> </span>namespace:stats&gt;</code></pre>
+<p>Yes, the statistics package's environment that is also on the search path. This is because the xy.coords() function is in the stats package as we saw when we printed it and the environment was displayed at the bottom of the output. This allows xy.coords to see other functions and variables in the stats package. We won't look along the search path as we did when we defined our function in the global environment. But note that the computational model is still the same. We look in the call frame, then its parent environment, then its parent's parent environment and so on. In this case, the parent environment of the call frame is a package's environment. <!-- In our function ???, the parent environment is the global environment. --></p>
+<p>So R finds xy.coords in the stats package via the parent environment of the call frame. It then creates the call frame and matches the arguments to the paremeters. The arguments are x, y, xlabel and ylabel. It finds all of these in the current call frame. So it assigns a promise to each of the corresponding parameters in the new call frame for xy.coords() to evaluate each of these expressions. This means that they will be evaluated when they are needed within xy.coords(). R will evaluate these promises within the call frame to this call to scatter.smooth(), not within the xy.coords call frame.</p>
+<p>If we follow all of environment parents, we see the ancestors of the scatter.smooth() call frame are</p>
+<pre class="sourceCode r"><code class="sourceCode r">&lt;environment:<span class="st"> </span>namespace:stats&gt;
+<span class="er">&lt;</span>environment:<span class="st"> </span><span class="dv">0x7ff2458acbb8</span>&gt;
+<span class="kw">attr</span>(,<span class="st">&quot;name&quot;</span>)
+[<span class="dv">1</span>] <span class="st">&quot;imports:stats&quot;</span>
+&lt;environment:<span class="st"> </span>namespace:base&gt;
+<span class="er">&lt;</span>environment:<span class="st"> </span>R_GlobalEnv&gt;</code></pre>
+<p>and then all the subsequent elements on the search path. The second of these is an additional environment for the stats package and is the one that contains the non-exported variables and also the variables that stats imported from any other package, in this case the graphics package and some variables from grDevices and utils.</p>
+<h2 id="LazyEval">
+<a name="LazyEval">Lazy Evaluation</a>
+</h2>
+
+<h2 id="lazy-evaluation-for-default-value-of-parameters">Lazy Evaluation for Default Value of Parameters</h2>
+<p>When we call a function and R matches the arguments to the parameters, it does not evaluate the code that gives the values for those arguments. Instead, it defers computing these until the parameter value is actually used in the function. Consider the function</p>
+<pre class="sourceCode r"><code class="sourceCode r">avg =<span class="st"> </span>
+function(x, <span class="dt">n =</span> <span class="kw">length</span>(x))
+{
+   x =<span class="st"> </span>x[!<span class="kw">is.na</span>(x)]
+   <span class="kw">sum</span>(x)/n
+}</code></pre>
+<p>We call this with</p>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">10</span>)
+x[ <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">9</span>) ] =<span class="st"> </span><span class="ot">NA</span>
+<span class="kw">avg</span>(x)</code></pre>
+<p>This removes any missing values from x. Then it evaluates the sum of the vector. Since we did not specify a value for n, we use the default value to compute n, but only now when it is needed. So the call length(x) will use the current value of x, i.e., with the missing values removed. So the value will be what we want.</p>
+<p>Another example of this is</p>
+<pre class="sourceCode r"><code class="sourceCode r">function(doc, <span class="dt">nodes =</span> <span class="kw">getNodeSet</span>(doc, <span class="st">&quot;//text&quot;</span>))
+{
+    if(<span class="kw">is.character</span>(doc))
+        doc =<span class="st"> </span><span class="kw">xmlParse</span>()
+        
+    <span class="kw">sapply</span>(nodes, xmlValue)
+}</code></pre>
+<h2 id="lazy-evaluation-for-arguments">Lazy Evaluation for Arguments</h2>
+<p>This is lazy evaluation of the default values of parameters. Consider lazy evaluation of the argument values</p>
+<pre class="sourceCode r"><code class="sourceCode r">revert =
+function(m, b)
+{
+   if(<span class="kw">nrow</span>(m) !=<span class="st"> </span><span class="kw">ncol</span>(m))
+     <span class="kw">return</span>(<span class="kw">numeric</span>(<span class="kw">nrow</span>(m)))
+     
+   <span class="kw">solve</span>(m)%*%<span class="st"> </span>b
+}</code></pre>
+<p>We can call this with</p>
+<pre class="sourceCode r"><code class="sourceCode r">rot =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="kw">cos</span>(pi/<span class="dv">4</span>), <span class="kw">sin</span>(pi/<span class="dv">4</span>), -<span class="kw">sin</span>(pi/<span class="dv">4</span>), <span class="kw">cos</span>(pi/<span class="dv">4</span>)), <span class="dv">2</span>, <span class="dv">2</span>, <span class="dt">byrow =</span> <span class="ot">TRUE</span>)
+<span class="kw">revert</span>(rot, <span class="kw">rnorm</span>(<span class="dv">2</span>))</code></pre>
+<p>We'll trace() the calls to rnorm() to see when they are called. In the call</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">revert</span>(rot, <span class="kw">rnorm</span>(<span class="dv">2</span>))
+trace:<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">2</span>)
+           [,<span class="dv">1</span>]
+[<span class="dv">1</span>,]  <span class="fl">1.8858897</span>
+[<span class="dv">2</span>,] -<span class="fl">0.2371549</span></code></pre>
+<p>we see rnorm() is called.</p>
+<p>Now, we call it with a non-square matrix. So the function doesn't use the second argument.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">revert</span>(<span class="kw">rbind</span>(rot, <span class="kw">c</span>(<span class="dv">10</span>, <span class="dv">5</span>)), <span class="kw">rnorm</span>(<span class="dv">3</span>))
+[<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span></code></pre>
+<p>There is no call to rnorm() which means the code for the second argument is never evaluated. This is lazy evaluation.</p>
+<h2 id="assignment-and-lazy-evaluation---a-warning.">Assignment and Lazy Evaluation - a Warning.</h2>
+<p>One very curious example of the perils of lazy evaluation is</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =
+function(a, b)
+{
+
+    if(a &lt;<span class="st"> </span><span class="dv">0</span>)
+      <span class="kw">return</span>(<span class="ot">FALSE</span>)
+      
+    a +<span class="st"> </span>b
+}</code></pre>
+<p>and the call</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">f</span>(-<span class="dv">10</span>, <span class="kw">sum</span>( x &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">100</span>)))</code></pre>
+<p>What is the value of the variable x in the global environment?</p>
+<p>And for</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">f</span>(<span class="dv">10</span>, <span class="kw">sum</span>( x &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">100</span>)))</code></pre>
+<h2 id="code-when-the-function-returns">Code when the Function Returns</h2>
+<p>There are times we want to ensure code is run just before we return from a function. For example, we may want to reset global graphics parameters that we set via par(), or arrange to close a connection that we opened within the function. We can do this before the call to return (i.e. the last expression of the function). However, there may be multiple places where the function might call return(), e.g. in different if()-else blocks. So this gets messy. We don't want to repeat the clean up code.</p>
+<p>Furthermore, what if there is an error or the user interrupts the computation and the R function doesn't get to the cleanup code.</p>
+<p>We can deal with this using the on.exit() function. At some point in the function (early typically), we add a call to on.exit() giving it the command we want to run when we return from the function.</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =
+function()
+{
+  opar =<span class="st"> </span><span class="kw">par</span>(<span class="dt">no.readonly =</span> <span class="ot">TRUE</span>)
+  <span class="kw">on.exit</span>(<span class="kw">par</span>(opar))
+  <span class="kw">par</span>(<span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>), <span class="dt">pty =</span> <span class="st">&quot;s&quot;</span>)
+  <span class="kw">plot</span>(<span class="dv">1</span>:<span class="dv">10</span>)
+}</code></pre>
+<p>Examine the value of par()[c(&quot;mar&quot;, &quot;pty&quot;)] before and after the call. They should be the same. However, if we had omitted the on.exit(), the values set in the function f would be in effect.</p>
+<p>As a second example, consider the function</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =
+function()
+{
+  <span class="kw">Sys.sleep</span>(<span class="dv">2</span>)
+  <span class="kw">print</span>(<span class="st">&quot;cleanup&quot;</span>)
+  <span class="ot">TRUE</span>
+}</code></pre>
+<p>We use print(&quot;cleanup&quot;) to illustrate doing something important to cleanup after the computations.</p>
+<p>Run this function and we see cleanup printed on the console after 2 seconds.</p>
+<p>Now, run the function again and immediately stop it (via Ctrl-C or the Stop button on the GUI). We do not see the cleanup printed.</p>
+<p>So let's change this to use on.exit()</p>
+<pre class="sourceCode r"><code class="sourceCode r">f =
+function()
+{
+  <span class="kw">on.exit</span>(<span class="kw">print</span>(<span class="st">&quot;cleanup&quot;</span>))
+  <span class="kw">Sys.sleep</span>(<span class="dv">2</span>)
+  <span class="ot">TRUE</span>
+}</code></pre>
+<p>Now run this and interrupt it immediately. We do see cleanup printed. However, the function did not complete.</p>
+</body>
+</html>

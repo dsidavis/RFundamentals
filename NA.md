@@ -54,7 +54,7 @@ for state abbreviations!
 
 What is  the value of 
 ```r
-1  + NA
+1 + NA
 ```
 What is the result of adding one to a number I don't know?  I still don't know.
 So the result is NA.
@@ -96,7 +96,7 @@ What about
 NA == NA
 ```
 Is the value I don't know equal to the other value I don't know?
-How can I know? So it is also NA.
+How can I know? They are both unknown but can be different. So the result is also NA.
 
 So 
 ```r
