@@ -8,7 +8,8 @@
 <div>
 <table>
 <tr>
-<th>[Day1](Day1.md)</th><th>[Day2](Day2.md)</th><th>[Day3](Day3.md)</th><th>[Day4](Day4.md)</th>
+<th><a href="Day1.md">Day1</a></th><th><a href="Day2.md">Day2</a></th><th><a
+href="Day3.md">Day3</a></th><th><a href="Day4.md">Day4</a></th>
 </tr>
 </table>
 </div>
