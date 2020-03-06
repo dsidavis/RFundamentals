@@ -1,5 +1,5 @@
 f =
-function(x, y, )
+function(x, y)
 {
   na = is.na(x)
   if(any(na)) {
@@ -7,5 +7,5 @@ function(x, y, )
      y = y[!na]
   }
 
-  plot()
+  plot(x, y)
 }
