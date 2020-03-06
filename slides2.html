@@ -20,7 +20,7 @@
     <textarea id="source">
 class: center, middle
 
-# R Fundamentals
+# R Fundamentals  (Day 2)
 
 ## [https://github.com/dsidavis/RFundamentals](https://github.com/dsidavis/RFundamentals)
 
@@ -36,23 +36,230 @@ layout: true
 <img style="float: right" src="dsi_brand_logo.png"></img>
 
 ---
+# Brief Recap
 
++ REPL
++ syntax errors versus run-time/evaluation errors.
++ literal values
++ lookup of symbols
+  + name  - `pi`
+  + name of function in call - `sum()`
++ function calls
+  + matching arguments to parameters
+    + full name
+    + partial name
+    + position, for remaining parameters
++ "scope" - finding symbols in body of function
++ lazy evaluation
+
+---
 
 # Use RStudio. It is more common.
 
 + Totally understand.
+--
+
 + And also, totally the point of the "Fundamentals".
-  + Abstract concepts away from a point-and-click interface.
-  + Understand the many ways to communicate with R.
-    + e.g., Shiny
+
+--
+
++ Abstract concepts away from a point-and-click interface.
+
++ Focus on the language concepts, not the way it is presented to us.
+
+--
+
++ Understand the many ways to communicate with R.
+    + e.g., Rscript, littleR, Shiny, ...
 
 ---
 
-# 
+# More powerpoint
+
+--
++ Can be useful
++ Can significantly alter the way we hear and think
+   + Negatively
+---
+
+# Recap
+
+[Call Stack & Search Path](callStackSearchPath.pdf)
+
+---
+# Non-standard Evaluation
+
++ `library(stats)`
+--
+   + library("stats")
+
+--
+
++ rm(a, b)
+
+--
+   + rm(list = c("a", "b"))
+   + Note that rm(li = c("a", "b")) won't work.
+      + ... is first parameter, so partial name matching doesn't match `list`.
+
+--
++ quote(), substitute()
+```
+f = function(x)
+{
+    e = substitute(x)
+    plot(x, ylab = deparse(e))
+}
+```
+---
+# Scope: Where are variables found.
+## Question 1
+
++ What are the similarities and difference between these three implementations
+  of essentially the same thing:
+
+```
+lapply(x, function(x)
+            identical(x, target))
+```
+
+```
+check = function(x)
+           identical(x, target)
+lapply(x, check)
+```
+
+```
+lapply(x, function(x, a)
+            identical(x, a),
+          target)
+```
+
+--
++ Where is `target` found?
 
 ---
 
+# Question 2
 
+```
+do = 
+function(x, y)
+{
+  med = median(y)
+  lapply(x, function(x) {
+               x = x[!is.na(x)]
+               x > med
+            })
+}
+```
+
++ Where/how is med found?
+
+---
+
+```
+f = function() i <<- 1
+f()
+```
+Where is `i`?
+
+---
+
+```
+f = function(j) j <<- j + 1
+f()
+```
+Where's `j` ?
+
+
+---
+# Computing the Likelihood 
+
++ Doing this explicitly for emphasis
+   + See "natural" way next.
+   + [See Closures.md](Closures.md)
+
+--
+
+```
+lik = function(mu, sd)
+         dnorm(x, mu, sd)
+lik
+```
++ Where's x?
+
+--
+
+```
+e = new.env()
+e$x = rnorm(100, .5, 1)
+environment(lik) = e
+lik
+```
++ Note the environment.
+
+```
+ls(environment(lik))
+```
+---
+
+# Closures - "natural" way.
+
+```
+
+```
+
+---
+# Defining functions inside functions
+
+
++ Avoid
+  + Can't reuse them outside of the host function.
+  + Can't test them separately from the host function.
++ Use if updating non-local variable across calls
+   +  possibly shared with other functions defined in same scope.
++ Does make them invisible to other functions and users 
+   + so less clutter
+   + but can do that via a package and not exporting the helper/inside function.
+
+---
+
+# Formulae
+
+```
+f = mpg ~ cyl
+```
+
+```
+str(f)
+```
+
+---
+```
+a = runif(10)
+b = 5 + 2.34*a + rnorm(length(a))
+lm(b ~ a)
+```
+
+```
+f = function(x, y)   y ~ x
+```
+
+```
+frm = f(a, b)
+y ~ x
+<environment: 0x7fa27c966da8>
+lm(frm)
+```
+
+---
+
+# Writing Functions
+
+    ---
+
+    
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
