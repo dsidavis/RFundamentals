@@ -12,7 +12,7 @@ For example, the result of a call to lm() is a linear model and has class `lm`.
 The actual object is a list, but we are to think of it as an lm object.
 
 The typeof() function tells us the fundamental type of the object,
-in other words, how it is constructred.
+in other words, how it is constructed.
 
 The function str() is also useful for seeing the structure of an object and an overview of its
 contents.

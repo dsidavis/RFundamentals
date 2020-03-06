@@ -9,6 +9,7 @@ or worse, use the name of a variable  that has another existing purpose.
 We can either use that variable with the wrong value, or overwrite it!
 
 Use codetools::findGlobals(, FALSE)
+or CodeAnalysis::getGlobals() which is slightly more accurate.
 
 + when writing functions
 + when refactoring/reorganizing code

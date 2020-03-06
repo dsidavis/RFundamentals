@@ -21,8 +21,9 @@ auto-completion.
 The R part in the REPL comes in when we hit the **return** key.
 The REPL attempts to **parse** the text.
 There are three possibilities: 
-1) the line makes complete sense as a command, 2) contains a syntax error, or 
-3) forms an incomplete command that makes partial sense and that needs to be completed.
+1. the line makes complete sense as a command, 
+2. contains a syntax error, or 
+3. forms an incomplete command that makes partial sense and that needs to be completed.
 
 There are two steps in an R command - checking it is syntactically correct,
 and then if it makes sense - evaluating it.
@@ -49,6 +50,28 @@ That's pretty much all there is to the R language.
 It may seem that there is a lot more to the language, e.g.  math operators, logic operators,
 sequence operator (a:b), subsetting
 ([, [[, $), assignments, for and while loops, if statements.  But in fact, these are all function calls.  That is one of the elegant aspects of the R language. Master function calls and you master the language. However, function calls are rich.
+
+
+# The `parse()` and `eval()` functions
+The REPL steps happen somewhat transparently. R reads the input
+and evaluates the command and prints.
+The REPL doesn't mention parsing.
+Sometimes it can be useful to actually parse the command explicitly.
+We can use
+```
+e = parse("nameOfFile")
+```
+or
+```
+e = parse(text = "text of R command")
+```
+This can help us verify the code is syntactically correct.
+
+We can evaluate the parsed expressions with
+```
+eval(e)
+```
+And we can control the environment in which it is evaluated.
 
 
 
