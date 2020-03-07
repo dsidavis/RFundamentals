@@ -445,6 +445,19 @@ and we get <r:true/>.
 <figure>
   <title>Call Stack, Call Frames and their Environment Chains/Search Paths</title>
 <graphic fileref="callStackSearchPathFig.png" format="png"/>
+<caption>
+<p>This shows the call stack for <r:expr>scatter.smooth(mtcars[, c(1, 2)])</r:expr>.
+<r:func>scatter.smooth</r:func> calls <r:func>xy.coords</r:func> and finally the argument for <r:arg>x</r:arg> in 
+<r:func>scatter.smooth</r:func> is needed.
+Due to <r/>'s lazy evaluation, this is evaluated next,
+hence the call the <r:expr>[(mtcars, c(1, 2))</r:expr>.
+Within each of the three call frames, 
+<r/> searches for symbols by looking first in the 
+call frame and then in its parent environment, and its parent environment,
+and so on.
+These  environments are displayed moving from left to right and show
+the search through packages and their imports and their parents.
+</p></caption>
 </figure>
 
 <!--

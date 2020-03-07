@@ -1,3 +1,6 @@
+## Update
++ See Eval.html (clone the repository and view locally in your browser).
+
 
 This brief mini-course focuses on explaining the computational model that underlies R.  I believe
 that if you understand this, you can **reason** about the R code and the language and can more
