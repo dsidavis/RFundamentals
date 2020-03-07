@@ -1,0 +1,426 @@
+<section
+	 xmlns:r="http://www.r-project.org">
+<title>Formula and Environments</title>
+
+<para>
+Like functions, model formula such as <r:expr>mpg ~ wt + cyl</r:expr>  
+also have an associated formula.
+We can create a formula as a stand-alone object with, e.g.,
+<r:code>
+frm = b ~ a
+</r:code>
+We can examine its structure with 
+<r:code>
+str(frm)
+<r:output><![CDATA[
+Class 'formula'  language b ~ a
+  ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
+]]></r:output>
+</r:code>
+We see that there is an attribute associated with the formula
+and in this case it is the global environment.
+Like functions, the environment of a formula is the environment
+in which it is defined (unless explicitly set to be different.)
+So if a formula was created in a call to a function, its environment
+would be the call frame in which it was created.
+</para>
+
+<para>
+Environments on formula allow functions manipulating a
+formula to find the associated variables referenced
+in the formula.
+We'll look at this and how it can be somewhat surprising in some
+respects.
+Again, we'll construct an experiment we can explicitly debug
+and understand in <r/>, rather than just stating the rules.
+Let's create two variables <r:var>a</r:var> and <r:var>b</r:var>:
+<r:code>
+set.seed(12312)
+a = runif(10)
+b = 5 + 2.34*a + rnorm(length(a))
+</r:code>
+Now, consider the formula
+<r:code>
+b ~ a
+</r:code>
+As we saw, this has the global environment associated with it.
+</para>
+
+<para>
+  Note also that <r:expr>b ~ a</r:expr>
+  doesn't actually use the values of <r:var>a</r:var> and <r:var>b</r:var>.
+  The formula is symbolic and will its contents will be evaluated
+  later. It is like the <r:func>quote</r:func> function
+  which doesn't evaluate its argument.  It is like (but not the same as) <r:func>parse</r:func>  in that it's contents will be
+  used later. The expression <r:expr>b ~ a</r:expr>
+  is a call to the function <r:func>~</r:func>
+  which is a .Primitive function. That means it immediately
+  passes its un-evaluated arguments to <c/> code
+  and does not follow <r/>'s standard evaluation
+  model.  In other words, it uses non-standard evaluation!
+  So it doesn't actually get the value of <r:var>a</r:var>
+  or <r:var>b</r:var>.
+</para>
+
+
+
+<para>
+Consider the call
+<r:code>
+coef(lm(b ~ a))
+</r:code>
+This calls <r:func>coef</r:func> which <r/> locates
+on the search path and matches the arguments to the parameters.
+The call to <r:func>lm</r:func> is also evaluated in the global
+environment and the same rules apply.
+The formula <r:expr>b ~ a</r:expr> is also evaluated in the global
+environment since this is a top-level expression.
+So the formula's environment is the global environment just
+as it would be if we had done this in two steps
+<r:code>
+frm = b ~ a
+coef(lm(frm))  
+</r:code>
+The answer we get is
+<r:output><![CDATA[
+(Intercept)           a 
+   5.097029    2.618424 
+]]></r:output>
+</para>
+
+<para>
+  How does <r/> evaluate the call to <r:expr>lm(b ~ a)</r:expr>.
+  We have described the general rules of finding the
+  function (<r:var>lm</r:var>), creating
+  the call frame with a variable for each parameter,
+  matching the arguments to the parameters, and evaluating
+  the expressions in the body of the function with the call frame
+  as the environment for the evaluation.
+  However, like <r:func>library</r:func>, <r:func>rm</r:func>,
+  <r:func>?</r:func>, and a few more,  <r:func>lm</r:func>
+  uses non-standard evaluation (NSE).
+  And this is made more complicated by how formulae work.
+</para>
+
+
+<para>
+The call <r:expr>lm(b ~ a)</r:expr>
+passes the formula to <r:func>lm</r:func>.
+<r:func>lm</r:func> uses an explicit call to the <r:func>eval</r:func>
+function to create the design/model matrix for the regression.
+Actually, <r:func>lm</r:func> behaves even more unusually
+in that it constructs the call it passes to <r:func>eval</r:func>
+by adapting how it itself was called.
+We can see this by debugging the call to <r:func>lm</r:func>
+<r:code>
+debug(lm)
+lm(b ~ a)  
+</r:code>
+After stepping through the initial expressions,
+we see the sequence of commands
+<r:code><![CDATA[
+mf <- match.call(expand.dots = FALSE)
+m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"), names(mf), 0L)
+mf <- mf[c(1L, m)]
+mf$drop.unused.levels <- TRUE
+mf[[1L]] <- quote(stats::model.frame)
+]]></r:code>
+We have seen <r:func>match.call</r:func>.
+This returns are original call with the parameter names explicitly matched
+and added, i.e.,
+<r:code>
+lm(formula = b ~ a)
+</r:code>
+Next, we match the parameter names in the call to find formula, data, subset, etc.
+and we then keep only those elements of the call, discarding any other arguments.
+Why, because we are the arguments in the call to <r:func>lm</r:func>
+to actually call <r:func>model.frame</r:func> in the <r:pkg>stats</r:pkg>
+package. And <r:func>lm</r:func> doesn't want to have to check which arguments
+were passed to it and pass those on to <r:func>model.frame</r:func>. Instead
+it does this meta-programming on how it was invoked/called to create
+the corresponding call to <r:func>model.frame</r:func>.
+So the next two expressiins add a named argument <r:arg>drop.unused.levels</r:arg>
+with a value of <r:true/>
+and changing the function being invoked in this call object
+t <r:expr>stats::model.frame</r:expr>.
+So at the end of this sequence of expressions, we can see
+that <r:var>mf</r:var> is
+<r:output><![CDATA[
+stats::model.frame(formula = b ~ a, drop.unused.levels = TRUE)
+]]></r:output>
+and has class <r:class>call</r:class>.
+</para>
+
+<para>
+  Next, <r:func>lm</r:func> evaluates this call with
+<r:code><![CDATA[
+mf <- eval(mf, parent.frame())
+]]></r:code>  
+This explicitly calls <r:func>eval</r:func>
+and specifies an environment in which to evaluate that call.
+This environment – computed as <r:expr>parent.frame()</r:expr> –
+controls where <r/> will look for variables in the call.
+<r:func>parent.frame</r:func> looks along the call stack,
+not the search path of this call frame.
+In our case, <r:func>parent.frame</r:func> is the global environment
+since our call to <r:func>lm</r:func> is the only call in the current
+call stack.
+</para>
+
+<para>
+  So let's debug the call to <r:func>model.frame</r:func>
+<r:code>
+debug(model.frame)
+</r:code>
+This stops in
+<r:output><![CDATA[
+debugging in: stats::model.frame(formula = b ~ a, drop.unused.levels = TRUE)
+debug: UseMethod("model.frame")
+]]></r:output>
+This is the <s3/> method and <r/> will dispatch to <r:func>model.frame.default</r:func>
+and will debug that for us as it is related to <r:func>model.frame</r:func>.
+We step through the expressions in <r:func>model.frame.default</r:func>
+and we get to
+<r:code><![CDATA[
+if (missing(data) && inherits(formula, "data.frame")) {
+    if (length(attr(formula, "terms"))) 
+        return(formula)
+    data <- formula
+    formula <- as.formula(data)
+}
+]]></r:code>
+We didn't provide a value for the <r:arg>data</r:arg>
+parameter in our call (to <r:func>lm</r:func> that was mimiced to call <r:func>model.frame</r:func>). But
+<r:var>formula</r:var> does not inherit from <r:class>data.frame</r:class>,
+so this condition is false. And then we get to
+<r:code><![CDATA[
+formula <- as.formula(formula)
+]]></r:code>
+and then
+<r:code><![CDATA[
+data <- environment(formula)
+]]></r:code>
+So model.frame will use the environment of the formula as the source
+of the data, i.e., the place in which to look for symbols.
+Recall that the environment of our formula is the global environment.
+And after a few more expressions, we get to
+<r:code><![CDATA[
+variables <- eval(predvars, data, env)
+]]></r:code>
+<r:var>predvars</r:var> is 
+<r:output><![CDATA[
+list(b, a)
+]]></r:output>
+and <r:var>data</r:var> and <r:var>env</r:var> are the global environment.
+So this call to evaluate will find <r:var>a</r:var> and <r:var>b</r:var>
+in the global environment.
+</para>
+
+
+<para>
+What would happen in the following
+<r:code>
+f = function() lm(b ~ a)
+f()
+</r:code>  
+Where would <r/> find <r:var>b</r:var> and <r:var>a</r:var> and how?
+</para>
+
+<para>
+What about
+<r:code>
+f = function() {
+  a = runif(10)
+  b = pi * a + rnorm(10)  
+  lm(b ~ a)
+}
+f()
+</r:code>  
+</para>
+
+
+
+<para>
+  Now, we will switch from finding the values for <r:var>a</r:var>
+  and <r:var>b</r:var> in the global environment
+  to providing them in a <r:class>data.frame</r:class>.
+<r:code>
+d = data.frame(a = a, b = b)
+coef(lm(b ~ a, d))
+</r:code>
+We actually have two instances of <r:var>a</r:var> –
+one in the global environment and one as an element in the
+<r:class>data.frame</r:class>.
+Which one did <r/> use?  It doesn't matter, in this case, since they are
+the same. But it would matter if they were different.
+So which did it use? We can read the help file,
+or simply know, or use the debugger to step through the computations
+as we did before.
+<r/>, and <r:func>model.frame.default</r:func> specifically, will use
+the values in the <r:class>data.frame</r:class>,
+not those in the global environment.
+We can also verify this by removing <r:var>a</r:var>
+from the global environment and seeing if there is an error
+about not finding <r:var>a</r:var>:
+<r:code>
+a1 = a
+rm(a)
+coef(lm(b ~ a, d))
+</r:code>
+This succeeds and gives us the same answer as we originally got.
+</para>
+
+
+<para>
+  We'll now make this a little more interesting.
+  We'll use <r:func>lm</r:func>'s <r:arg>weights</r:arg> parameter
+  to do weighted least squares.
+  We'll use two sets of weights, one where all observations
+  have weight 1 and another which are random numbers between
+  1 and 2, i.e.,
+<r:code>
+w1 = rep(1, length(b))
+w2 = runif(length(b), 1, 2)
+</r:code>
+When we use these
+<r:code>
+coef(lm(b ~ a, weights = w1))
+coef(lm(b ~ a, weights = w2))
+</r:code>
+we get
+<r:output><![CDATA[
+ (Intercept)           a 
+    5.097029    2.618424 
+ (Intercept)           a 
+    5.305530    2.194265
+]]></r:output>
+respectively.
+So we get different estimates for a (and the intercept)
+as we expect.
+</para>
+<para>
+We might expect <r/>'s usual computational model
+is in effect here. Specifically,
+in the call to <r:func>lm</r:func>,
+<r/> matches the expression <r:var>w1</r:var>
+to the <r:arg>weights</r:arg> parameter
+and creates a promise to evaluate <r:expr>w1</r:expr>
+in the global environment in which we made the call to <r:func>lm</r:func>.
+And certainly, the result we got are consistent with this.
+However, it is not the case. We are finding <r:var>w1</r:var>
+via a slightly different mechanism which happens to give the same
+result – in this case.
+</para>
+
+
+<para>
+  Let's create a new column in our <r:class>data.frame</r:class>
+  <r:var>d</r:var> and we'll name it <r:el>w1</r:el>
+<r:code>
+d$w1 = w1
+</r:code>
+Again, we call <r:func>lm</r:func>
+<r:code>
+coef(lm(b ~ a, d, weights = w1))
+</r:code>
+and we get the same answer.
+</para>
+<para>
+Now, let's set the <r:el>w1</r:el> to have the other weights
+<r:code>
+d$w1 = w2
+</r:code>
+and call <r:func>lm</r:func>
+<r:code>
+coef(lm(b ~ a, d, weights = w1))
+</r:code>
+Now we get
+<r:output><![CDATA[
+(Intercept)           a 
+   5.305530    2.194265 
+]]></r:output>
+So we are using the weights from <r:var>w2</r:var>.
+This indicates that <r:func>lm</r:func> and <r:func>model.frame.default</r:func>
+are looking in the <r:class>data.frame</r:class>
+when evaluating <r:expr>w1</r:expr>.
+This is very different from <r/>'s standard computational
+model we described.
+</para>
+
+
+<para>
+Let's create our formula more explicitly and
+give it its own environment (just like we can for a function.)
+We create an environment and create
+variables in it named <r:var>x</r:var> and <r:var>y</r:var>,
+using the original values of <r:var>a</r:var> and <r:var>b</r:var>
+from the global environment.
+<r:code>
+e = new.env()
+e$x = a1
+e$y = b
+</r:code>
+We create our formula and  examine its environment
+<r:code>
+frm = y ~ x
+environment(frm)
+</r:code>
+It is the global environment.
+We now change this to be 
+<r:code>
+environment(frm) = e
+<r:output><![CDATA[
+y ~ x
+<environment: 0x7fd22963a238>
+]]></r:output>
+</r:code>
+We can now use this formula without specifying the
+<r:arg>data</r:arg> argument as <r:func>model.frame.default</r:func>
+will use this environment to find <r:var>x</r:var> and <r:var>y</r:var>
+<r:code>
+coef(lm(frm))
+<r:output><![CDATA[
+(Intercept)           x 
+   5.097029    2.618424 
+]]></r:output>
+</r:code>
+And again, we'll create a variable named w1, this time
+in <r:var>e</r:var> with weights from <r:var>w2</r:var>
+<r:code>
+e$w1 = w2
+</r:code>
+And now
+<r:code>
+coef(lm(frm, weights = w1))
+</r:code>
+gives
+<r:output><![CDATA[
+(Intercept)           x 
+   5.305530    2.194265 
+]]></r:output>
+showing that it used the weights from <r:var>w1</r:var> in <r:var>e</r:var>
+rather than those in <r:var>w1</r:var> in the global environment.
+</para>
+
+<para>
+  This is non-standard evaluation and it means we don't use the regular
+  rules for evaluation.
+  So now we have at least two computational models.
+  This makes it hard to reason about <r/> code.
+  If you are luck, you get an error when you do the wrong thing.
+  Often, you get the wrong answer and that is much worse than an error.
+</para>
+
+
+<para>
+  NSE is a powerful feature. But it needs to be used wisely and sparingly.  
+  NSE is convenient for programmers to do interesting things.
+  However, it places a significant burden on the users
+  of functions that use NSE
+  because they cannot reason about what will happen
+  using a single, familiar computational model.
+  Instead, they have to carefully learn how each
+  function that uses NSE will actually behave.
+</para>
+
+</section>

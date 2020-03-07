@@ -1,0 +1,653 @@
+<section
+	 xmlns:r="http://www.r-project.org"
+	 xmlns:xi="http://www.w3.org/2003/XInclude">
+<title></title>
+
+<para>
+The purpose of this is to coalesce some of the material we discussed in the first two days (Feb/March 2020),
+focusing primarily on how <r/> finds variables when evaluating functions.
+And environments are key to this.
+An environment is a just a container for variables,
+that is names bound to values/<r/> objects.
+And each environment has a parent-environment and so an environment
+is part of list/chain of environments.
+When we look for a variable, we look along this list of environments.
+The nature of environments is the same throughout <r/>,
+but which chain of environments we search differs slightly
+by whether we are evaluating code in the body of a function in a package
+or at the top-level prompt or related to a (model) formula.
+</para>
+
+<para>
+Consider the call  
+<r:code>
+scatter.smooth(mtcars[, c("mpg", "wt")], , .75, xlab = "Weight", yla = "Miles per gallon",
+                  main = "Motor Trend Cars Data")
+</r:code>
+issued at the <r/> prompt.
+<r/> parses this and we have the language object that is a
+<r:class>call</r:class> to <r:func>scatter.smooth</r:func>.
+So <r/> has to find that function.
+Since this is being evaluated at the prompt, <r/> looks in the global
+environment and its chain of parent environments.
+We can use <r:func>find</r:func> to see where this is located:
+<r:code>
+find("scatter.smooth")
+<r:output><![CDATA[
+[1] "package:stats"
+]]></r:output>
+</r:code>
+This is on the search path as we can see with
+<r:code>
+search()
+<r:output><![CDATA[
+[1] ".GlobalEnv"        "package:stats"     "package:graphics" 
+[4] "package:grDevices" "package:datasets"  "package:utils"    
+[7] "package:methods"   "Autoloads"         "package:base"     
+]]></r:output>
+</r:code>
+So <r:func>scatter.smooth</r:func> is in the second element of the search path,
+package:stats.
+</para>
+
+<para>
+  While we can use <r:func>search</r:func> to locate the function,
+  let's introduce a function <r:func>getEnvChain</r:func>   in
+  <ulink url="showEnv.R"><file>showEnv.R</file></ulink>
+  that shows the chain of environments generally, not just the search path.
+<r:code>
+source("showEnv.R")
+names(getEnvChain(globalenv()))
+<r:output><![CDATA[
+ [1] "globalenv"         "package:stats"     "package:graphics" 
+ [4] "package:grDevices" "package:datasets"  "package:utils"    
+ [7] "package:methods"   "Autoloads"         "<base>"           
+[10] "emptyenv"         
+]]></r:output>
+</r:code>  
+We've included the empty environment at the end.
+We'll use this for more interesting cases than the global environment.
+</para>
+
+
+<para>
+ Having found the function <r:func>scatter.smooth</r:func> function,
+ <r/> prepares to call it.
+<ol> 
+<li> <r/> creates a call frame which is an environment.</li>
+<li> creates a variable in the call frame for each of the parameters/formal arguments in the
+definition of the function, i.e., <r:expr>names(formals(scatter.smooth))</r:expr></li>
+<li> matches the arguments in the call to the parameters in the function definition
+<ol>
+  <li> matching named arguments by that correspond exactly to names of parameters</li>
+  <li> matching remaining named arguments by partial name matching, except to
+     parameters  after <r:dots/> in the function definition</li>
+  <li> matching the remaining arguments by position to the remaining parameters.</li>
+</ol>
+</li>
+</ol>
+To see how <r/> matches arguments in a particular call, we can use
+<r:func>match.call</r:func>.
+<r:code>
+match.call(scatter.smooth,
+           quote(scatter.smooth(mtcars[, c("mpg", "wt")], , .75,
+                                xlab = "Weight", yla = "Miles per gallon",
+                                main = "Motor Trend Cars Data")))
+<r:output><![CDATA[
+scatter.smooth(x = mtcars[, c("mpg", "wt")], xlab = "Weight", 
+    ylab = "Miles per gallon", main = "Motor Trend Cars Data")
+]]></r:output>
+</r:code>
+</para>
+
+<para>
+<r/> doesn't evaluate any of the arguments in the call at this point due to
+<i>lazy evaluation</i>. The value of each variable in the call
+frame at this point is a <i>promise</i>. This is the code corresponding
+to that argument in the call, along with the environment in which that code needs
+to be evaluated.  When the function first asks for the value of the variable in the call
+frame, that will trigger <r/> to evaluate the promise and that is when the argument will be
+actually evaluated.  And it will be evaluated in the environment in which the function
+(<r:func>scatter.smooth</r:func>)
+was called. In our case, this is the global environment since we call <r:func>scatter.smooth</r:func>
+from the <r/> prompt.
+</para>
+
+
+<para>
+  Now with the call frame constructed and the arguments matched to parameters,
+  <r/> is ready to evaluate the body of the function being called, <r:func>scatter.smooth</r:func>.
+  We can see the expressions in the body of the function with
+  <r:code>
+body(scatter.smooth)
+<r:output><![CDATA[
+{
+    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+    xy <- xy.coords(x, y, xlabel, ylabel)
+    x <- xy$x
+    y <- xy$y
+    xlab <- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab <- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    pred <- loess.smooth(x, y, span, degree, family, evaluation)
+    plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    do.call(lines, c(list(pred), lpars))
+    invisible()
+}
+]]></r:output>
+  </r:code>
+  <r/> now loops over these expressions and  uses
+  the call frame as the environment in which to evaluate each expression.
+  <r:func>missing</r:func> and <r:func>substitute</r:func>
+  are two functions that use non-standard evaluation. So let's ignore these
+  for now. Just know that <r:func>missing</r:func> is used
+  to determine if that parameter (e.g. <r:arg>x</r:arg>) was explicitly
+  provided a value in this call to the <r:func>scatter.smooth</r:func>;
+  and, in this use of <r:func>substitute</r:func>, it returns the <r/> code corresponding to the
+  specified parameter (e.g., by looking inside the promise).
+</para>
+
+
+<para>
+So let's consider the third expression
+<r:code><![CDATA[
+xy <- xy.coords(x, y, xlabel, ylabel)
+]]></r:code>  
+This is an assignment. Since it is evaluated in the call frame,
+the assignment will be in this call frame (an environment).
+There is no parameter named <r:var>xy</r:var>, so this will create
+a new variable in the call frame named <r:var>xy</r:var>,
+if evaluating the right-hand side succeeds and does not throw an error.
+<r/> evaluates the righ-hand side of the assignment before trying to make the
+assignment. So it evaluates
+<r:code>
+xy.coords(x, y, xlabel, ylabel)
+</r:code>
+This is a function call, so <r/> first looks for <r:var>xy.coords</r:var>.
+It looks first in the current environment, the call frame for our call to <r:func>scatter.smooth</r:func>.
+It is not there. So it looks in the parent environment, just it did when looking for
+<r:func>scatter.smooth</r:func>. But what is the parent environment of the call frame for
+our call to <r:func>scatter.smooth</r:func>.
+While I could tell you, let's actually find it.
+We'll debug the call to <r:func>scatter.smooth</r:func>
+and then get the call frame and ask for its <r:func>parent.env</r:func>
+<r:code>
+debug(scatter.smooth)
+scatter.smooth(mtcars[, c(1, 2)])
+</r:code>
+At the Browse prompt, we can get the call frame with
+<r:code>
+environment()
+<r:output><![CDATA[
+<environment: 0x7fd23971cda0>
+]]></r:output>  
+</r:code>
+The display is a hexadecimal number. It represents the location in memory of the call frame.
+It will be different on your machine. The important thing to know is that it is not a named
+environment such as R_GlobalEnv or package:stats, or package:base. It is an <i>ad hoc</i>,
+short-lived environment.
+</para>
+
+<para>
+We can list the names of the variables in this environment/call frame with
+<r:code>
+ls(environment(), all = TRUE)
+<r:output><![CDATA[
+ [1] "..."        "degree"     "evaluation" "family"     "lpars"     
+ [6] "span"       "x"          "xlab"       "y"          "ylab"      
+[11] "ylim"      
+]]></r:output>  
+</r:code>  
+We can manually see that these are the same names as those of the parameters
+for <r:func>scatter.smooth</r:func>. We can also verify this programmatically
+with
+<r:code>
+setdiff(names(formals()), ls(environment(), all = TRUE))
+</r:code>
+and this returns the empty character vector.
+We could also get the call frame with
+<r:code>
+sys.frames()[[1]]
+</r:code>
+in this specific case, but this is more complex in more nested calls.
+So note that <r:expr>environment()</r:expr> and <r:func>formals()</r:func>
+know which call frame and function being called they are currently working on.
+</para>
+
+<para>
+So now that we have the call frame, let's look along its chain of environments
+to find <r:var>xy.coords</r:var>.
+We can use our <r:func>showEnv</r:func> function to show the chain of environments
+<r:code>
+names(getEnvChain(environment()))
+<r:output><![CDATA[
+ [1] "<0x7fd23971d3c0>"  "<namespace:stats>" "imports:stats"    
+ [4] "<namespace:base>"  "globalenv"         "package:stats"    
+ [7] "package:graphics"  "package:grDevices" "package:datasets" 
+[10] "package:utils"     "package:methods"   "Autoloads"        
+[13] "<base>"            "emptyenv"         
+]]></r:output>
+</r:code>
+We can use <r:func>efind</r:func>, a variant of <r:func>find</r:func> we wrote for this exposition,
+to find which of these environments in the chain contain a variable with a given name
+<r:code>
+z = efind("xy.coords", environment(), FALSE)
+<r:output><![CDATA[
+[1] "imports:stats"     "package:grDevices"
+]]></r:output>
+</r:code>
+If we look in each of these environments for <r:var>xy.coords</r:var>,
+we'll find exactly the same function (as the <r:pkg>stats</r:pkg>
+package imports the <r:pkg>grDevices</r:pkg> packages):
+<r:code>
+a = lapply(z, function(e) e$xy.coords)
+identical(a[[1]], a[[2]])
+</r:code>
+</para>
+
+
+<para>
+So now we have found the <r:func>xy.coords</r:func> function.
+With this,  <r/> starts the same preparation for the call to this function
+by creating a call frame, creating variables within it for each of the
+parameters in the definition of the function, and then matching
+the arguments in the call.
+Again, we can use <r:func>match.call</r:func> to see how the call
+matches the arguments to the parameters:
+<r:code>
+match.call(xy.coords, quote(xy.coords(x, y, xlabel, ylabel)))
+<r:output><![CDATA[
+xy.coords(x = x, y = y, xlab = xlabel, ylab = ylabel)
+]]></r:output>
+</r:code>
+So the parameter <r:arg>x</r:arg> in the call frame for
+<r:func>xy.coords</r:func> is assigned (bound to) a promise
+to compute the expression <r:expr>x</r:expr>
+which will be evaluated in the environment
+in which we called <r:func>xy.coords</r:func> and this is the call frame of our call to
+<r:func>scatter.smooth</r:func>.
+</para>
+
+<para>
+Note that because of the non-standard evaluation of
+<r:code><![CDATA[
+    xlabel <- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel <- if (!missing(y)) 
+        deparse(substitute(y))
+]]></r:code>  
+we have yet to actually use the values of <r:var>x</r:var> and <r:var>y</r:var>.
+So <r/> has not evaluated the values of these parameters due to lazy evaluation.
+Specifically, we have not evaluated, for example, the command <r:expr>mtcars[, c("mpg", "cyl")]</r:expr>.
+This will happen soon when the value is actually needed. And we will see this later in the call
+stack, i.e., the sequence of calls from one function to another, to another.
+</para>
+
+<para>
+  We can arrange to stop in the call to <r:func>xy.coords</r:func>
+  via <r:expr>debug(xy.coords)</r:expr>.
+  (BTW, to stop debugging each call to <r:func>xy.coords</r:func>,
+  we use <r:expr>undebug(xy.coords)</r:expr>. That is we use
+  <r:func>undebug</r:func> as the opposite of <r:func>debug</r:func>.)
+  Now we continue evaluating the next expression in the
+  body of <r:func>scatter.smooth</r:func> via stepping in the debugger.
+  This calls <r:func>xy.coords</r:func> and we stop at the start of
+  that function call.
+  Note that if we call <r:func>substitute(x)</r:func> here
+  it won't give us the code <r:expr>mtcars[, c("mpg", "wt")]</r:expr>
+  from the call to <r:func>scatter.smooth</r:func>.
+  Instead, it gives us simply <r:expr>x</r:expr>.
+  This is because the parameter <r:arg>x</r:arg> in the call
+  to <r:func>xy.coords</r:func> (from within <r:func>scatter.smooth</r:func>)
+  was specified in the call to <r:func>xy.coords</r:func> as simply
+  <r:expr>x</r:expr>, i.e., <r:expr>xy.coords(x, y, xlabel, ylabel)</r:expr>.
+  So the code for the argument is <r:expr>x</r:expr>.
+  When we evaluate that promise, it is the value of <r:var>x</r:var>
+  in the call frame of <r:func>scatter.smooth</r:func>.
+  And that is the promise with the code <r:expr>mtcars[, c("mpg", "wt")]</r:expr>
+  which will be evaluated in the global environment
+  since that is where we made the call to <r:func>scatter.smooth</r:func>.
+</para>
+
+<para>
+  Since we know we are interested in when
+  the call to <r:op>[</r:op> on <r:func>mtcars</r:func>
+  happens, we'll debug the <r:op>[</r:op> function.
+  We can't use
+<r:code>
+debug([)
+</r:code>  
+as that is a syntax error – <r/> is looking for a closing ].
+So we refer to the symbol [ with `[`, i.e.,
+<r:code>
+debug(`[`)
+</r:code>
+</para>
+
+<para>
+  Since <r:var>y</r:var>   is <r:null/>
+  in <r:func>xy.coords</r:func>,
+  we evaluate the body of the <r:func>if</r:func>
+  statement <r:expr>if(is.null(y))</r:expr>.
+  The second expression in this is
+  <r:expr>if(is.language(x))...</r:expr>
+  This uses the value of <r:arg>x</r:arg>
+  so <r/> needs to evaluate the promise
+  for that parameter value.
+  This is when <r:op>[</r:op> gets called
+  in the <r:expr>mtcars[, c("mpg", "wt")]</r:expr>.
+  So we step through this code in the debugger
+  and stop in the function <r:func>[.data.frame</r:func>.
+  We can inspect the call stack from within the debugger
+  using the debugger command <r:var>where</r:var>:
+<r:code>
+where
+<r:output><![CDATA[
+where 1 at #1: `[.data.frame`(mtcars, , c("mpg", "wt"))
+where 2 at #1: mtcars[, c("mpg", "wt")]
+where 3: xy.coords(x, y, xlabel, ylabel)
+where 4: scatter.smooth({
+    cat("evaluating now\n")
+    mtcars[, c("mpg", "wt")]
+})  
+]]></r:output>  
+</r:code>  
+We can also use <r:func>sys.calls()</r:func>
+to see the call stack, and this works when we are not in the debugger:
+<r:code>
+  sys.calls()
+<r:output><![CDATA[
+[[1]]
+scatter.smooth({
+    cat("evaluating now\n")
+    mtcars[, c("mpg", "wt")]
+})
+
+[[2]]
+xy.coords(x, y, xlabel, ylabel)
+
+[[3]]
+mtcars[, c("mpg","wt")]
+
+[[4]]
+mtcars[, c("mpg","wt")]
+]]></r:output>  
+</r:code>
+Note that a) this returns a list of language objects, and b)
+these are in the reverse order as shown by the debugger's <r:var>where</r:var>.
+</para>
+
+
+<para>
+  Why did we get to <r:func>[.data.frame</r:func>
+  and not <r:op>[</r:op>?
+  And why does <r:func>sys.calls</r:func> have
+  two identical elements <r:expr>mtcars[, c("mpg","wt")]</r:expr>?
+  The reason is the same for both questions
+  and relates to <r/>'s object oriented <s3/> method dispatch.
+  We called <r:op>[</r:op> and that looked for a method based on the cllass
+  of its first argument, <r:var>mtcars</r:var>,  which is a <r:class>data.frame</r:class>.  So <r/> passed the call to
+  to <r:op>[</r:op> to the more specific version <r:func>[.data.frame</r:func>.
+  We'll talk about this later.
+</para>
+
+
+<para>
+  The expression <r:expr>mtcars[, c("mpg", "wt")]</r:expr>
+  is interesting. Firstly, it is actually a call to <r:op>[</r:op>.
+  We can see this via
+<r:code>
+sys.call()
+<r:output><![CDATA[
+mtcars[, c("mpg","wt")]
+]]></r:output>
+</r:code>
+when we are debugging in the call frame for <r:func>[.data.frame</r:func>.
+Specifically,
+<r:code>
+sys.call()[[1]]
+</r:code>
+returns <literal>`[.data.frame`</literal>.
+The first argument is <r:var>mtcars</r:var>.
+The second, corresponding to the rows to subset,  is missing/not specified.
+The third is the function call <r:expr>c("mpg", "wt")</r:expr>.
+We can ask is the second argument missing with
+<r:code>
+missing(i)
+</r:code>
+and we get <r:true/>.
+</para>
+
+
+<para>
+  This has shown us that <r:expr>mtcars[, c("mpg", "wt")]</r:expr> is not
+  evaluated until we are in the body of <r:func>xy.coords</r:func>
+  called from <r:func>scatter.smooth</r:func>.
+  So we have witnessed and verified lazy evaluation via the call stack.
+</para>
+
+
+
+
+<!--
+<para>
+As we step through the code in the body <r:func>xy.coords</r:func>
+we get to
+<r:code><![CDATA[
+x <- data.matrix(x)
+]]></r:code>  
+Again, we find <r:func>data.matrix</r:func>:
+<r:code>
+efind("data.matrix", environment())
+<r:output><
+![CDATA[
+[1] "<namespace:base>" "<base>"          
+]]></r:output>
+</r:code>
+We create the call frame and match the sole argument.
+The parameter names for <r:func>data.matrix</r:func>
+are <r:arg>frame</r:arg> and <r:arg>rownames.force</r:arg>.
+So the value <r:expr>x</r:expr> is matched to <r:arg>frame</r:arg>.
+</para>
+<para>
+Again, we don't evaluate <r:expr>x</r:expr> but create a promise.
+And this still maps back to <r:expr>mtcars[, c("mpg", "wt")]</r:expr>
+in the call to <r:func>scatter.smooth</r:func>.
+But that promise has already been evaluated within <r:func>xy.coords</r:func>.
+We can  debug <r:func>data.matrix</r:func>
+and step through to that call.
+When we enter that function, we can look at the call stack with
+the debugging command <r:expr>where</r:expr> which shows
+<r:code>
+Browse[4]> where
+<r:output><![CDATA[
+where 1: data.matrix(x)
+where 2: xy.coords(x, y, xlabel, ylabel)
+where 3: scatter.smooth(mtcars[, c(1, 2)])
+]]></r:output>
+</r:code>
+</para>
+<para>
+The first   expression in the body of the
+<r:func>data.matrix</r:func> is
+<r:code>
+    if (!is.data.frame(frame)) 
+        return(as.matrix(frame))
+</r:code>
+</para>
+-->
+
+<section>
+<title></title>
+
+<para>
+We just looked at a call to <r:func>scatter.smooth</r:func>
+which is a function defined in a package.
+We saw how it found the functions it itself called (e.g. <r:func>xy.coords</r:func>)
+along its own search path, not the <r/> session search path.
+We found this chain of environments from within the call frame
+in our call to <r:func>scatter.smooth</r:func>.
+We could have also obtained the environment of the <r:func>scatter.smooth</r:func>
+function with
+<r:code>
+environment(scatter.smooth)
+<r:output><![CDATA[
+<environment: namespace:stats>
+]]></r:output>
+</r:code>
+A namespace is a specific type of environment
+and relates to packages.
+This is the parent environment of the call frame
+in our call to <r:func>scatter.smooth</r:func>.
+And this generality is true for all call frames –
+the parent environment of a call frame
+is the environment of the function (definition)
+being called.
+And what is the environment of a function?
+<i>The environment of a function is the
+environment in which that function is defined.</i>
+What does this mean?
+<ol>
+  <li>If the function is defined in a package,
+  the environment is the namespace of that package.
+  </li>
+  <li>
+If a function is defined at the <r/> prompt,
+the environment is the global environment
+since that is where the creation of the function is evaluated.
+  </li>
+  <li>
+If the function is defined via calling <r:func>source</r:func>,
+the environment is the one used in that call to the <r:func>source</r:func> function
+and, when called from the <r/> prompt, that defaults to the global environment.
+However, we can specify the environment in which <r:func>source</r:func>
+should evaluate the expressions.
+  </li>
+  <li>
+    If a function is defined within the body of a function,
+    then its environment is the call frame of in which it is defined.
+    This gives us closures.
+  </li>
+</ol>
+</para>
+
+
+<para>
+  Let's define a simple function at the <r/> prompt.
+<r:code>
+f = function(n) median(rnorm(n))
+</r:code>  
+What is its environment?
+<r:code>
+environment(f)
+<r:output><![CDATA[
+<environment: R_GlobalEnv>
+]]></r:output>
+</r:code>
+When we call <r:func>f</r:func>, <r/> will
+create a call frame and match the argument to the parameter
+and evaluate the expressions in the body.
+It will look for <r:func>rnorm</r:func>
+in the call frame and then in the parent environment and so on.
+The parent environment of the call frame will
+be <r:expr>environment(f)</r:expr>, that is the global environment
+as we just determined.
+</para>
+
+
+<para>
+  Let's write another function, again at the top-level <r/> prompt.
+  This one defines and returns a function
+<r:code>
+gen = function(n) {
+         function(mu) rnorm(n, mu)
+} 
+</r:code>
+This function has one parameter <r:arg>n</r:arg>.
+It returns a function which itself has only parameter
+<r:arg>mu</r:arg>.
+We can call <r:func>gen</r:func> with an integer
+giving the sample size
+<r:code>
+f1 = gen(10)
+</r:code>
+<r:var>f1</r:var> is now a function
+<r:output><![CDATA[
+function(mu) rnorm(n, mu)
+<environment: 0x7fd24a150308>
+]]></r:output>
+Note the environment displayed.
+We won't see this on our function <r:func>gen</r:func>
+when we print it. That is because it is the global environment
+and <r/> doesn't show that environment when display a function.
+But we see an environment on all other functions, e.g.,
+<r:func>scatter.smoooth</r:func> shows
+<r:output><![CDATA[
+<environment: namespace:stats>
+]]></r:output>
+</para>
+<para>
+  In the case of <r:var>f</r:var>,
+  the environment is the call frame for our call to <r:expr>gen(10)</r:expr>
+  in which the function was created.
+  Let's debug another call to <r:func>gen</r:func>
+<r:code>
+debug(gen)
+f2 = gen(13)
+</r:code>
+Let's get the identifier for the call frame with
+<r:code>
+environment()
+<r:output><![CDATA[
+<environment: 0x7fd2598ede10>
+]]></r:output>
+</r:code>
+(This will be a different hexadecimal value  in your <r/> session.)
+Now we'll continue the evaluation of the function call and return.
+What is the environment of <r:var>f2</r:var>?
+<r:code>
+environment(f2)
+<r:output><![CDATA[
+<environment: 0x7fd2598ede10>
+]]></r:output>
+</r:code>
+It is the call frame in which the function object was defined.
+</para>
+<para>
+  What are the variables in that environment?
+<r:code>
+ls(environment(f2), all = TRUE)
+<r:output><![CDATA[
+[1] "n"
+]]></r:output>
+</r:code>
+What is the value of that <r:var>n</r:var>?
+<r:code>
+environment(f2)$n  
+<r:output><![CDATA[
+[1] 13
+]]></r:output>
+</r:code>
+i.e.,  the value of <r:var>n</r:var> in our call to <r:func>gen</r:func>
+that created the function we assigned to <r:var>f2</r:var>.
+</para>
+<para>
+  What's the value of n in the environment of <r:var>f1</r:var> ?
+  That is 10 since we created <r:var>f1</r:var>
+  with the call <r:expr>f1 = gen(10)</r:expr>.
+</para>
+
+
+
+</section>
+
+
+<xi:include href="Formula.xml"/>
+</section>
+
