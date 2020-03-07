@@ -442,6 +442,10 @@ and we get <r:true/>.
 </para>
 
 
+<figure>
+  <title>Call Stack, Call Frames and their Environment Chains/Search Paths</title>
+<graphic fileref="callStackSearchPathFig.png" format="png"/>
+</figure>
 
 <!--
 <para>
