@@ -1,7 +1,7 @@
 <section
 	 xmlns:r="http://www.r-project.org"
 	 xmlns:xi="http://www.w3.org/2003/XInclude">
-<title></title>
+<title><r/>'s Evaluation Rules and Environments</title>
 
 <para>
 The purpose of this is to coalesce some of the material we discussed in the first two days (Feb/March 2020),
@@ -484,7 +484,7 @@ The first   expression in the body of the
 -->
 
 <section>
-<title></title>
+<title>Environment of a Function Defined Inside a Function</title>
 
 <para>
 We just looked at a call to <r:func>scatter.smooth</r:func>
@@ -642,9 +642,6 @@ that created the function we assigned to <r:var>f2</r:var>.
   That is 10 since we created <r:var>f1</r:var>
   with the call <r:expr>f1 = gen(10)</r:expr>.
 </para>
-
-
-
 </section>
 
 
