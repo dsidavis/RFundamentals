@@ -1,7 +1,15 @@
-<section
-	 xmlns:r="http://www.r-project.org"
+<article xmlns:r="http://www.r-project.org"
 	 xmlns:xi="http://www.w3.org/2003/XInclude">
-<title><r/>'s Evaluation Rules and Environments</title>
+<articleinfo>
+<title><r/>'s Evaluation Rules and Environments</title>  
+<author>
+  <firstname>Duncan</firstname>
+  <surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Graduate Studies and Department of Statistics</orgdiv>
+  </affiliation>  
+</author>
+</articleinfo>
 
 <para>
 The purpose of this is to coalesce some of the material we discussed in the first two days (Feb/March 2020),
@@ -18,6 +26,9 @@ by whether we are evaluating code in the body of a function in a package
 or at the top-level prompt or related to a (model) formula.
 </para>
 
+
+<section>
+<title>Calling a Function in a Package</title>
 <para>
 Consider the call  
 <r:code>
@@ -50,6 +61,7 @@ So <r:func>scatter.smooth</r:func> is in the second element of the search path,
 package:stats.
 </para>
 
+
 <para>
   While we can use <r:func>search</r:func> to locate the function,
   let's introduce a function <r:func>getEnvChain</r:func>   in
@@ -68,7 +80,6 @@ names(getEnvChain(globalenv()))
 We've included the empty environment at the end.
 We'll use this for more interesting cases than the global environment.
 </para>
-
 
 <para>
  Having found the function <r:func>scatter.smooth</r:func> function,
@@ -152,7 +163,6 @@ body(scatter.smooth)
   and, in this use of <r:func>substitute</r:func>, it returns the <r/> code corresponding to the
   specified parameter (e.g., by looking inside the promise).
 </para>
-
 
 <para>
 So let's consider the third expression
@@ -251,7 +261,6 @@ identical(a[[1]], a[[2]])
 </r:code>
 </para>
 
-
 <para>
 So now we have found the <r:func>xy.coords</r:func> function.
 With this,  <r/> starts the same preparation for the call to this function
@@ -273,6 +282,7 @@ which will be evaluated in the environment
 in which we called <r:func>xy.coords</r:func> and this is the call frame of our call to
 <r:func>scatter.smooth</r:func>.
 </para>
+
 
 <para>
 Note that because of the non-standard evaluation of
@@ -397,11 +407,10 @@ these are in the reverse order as shown by the debugger's <r:var>where</r:var>.
   We'll talk about this later.
 </para>
 
-
 <para>
-  The expression <r:expr>mtcars[, c("mpg", "wt")]</r:expr>
-  is interesting. Firstly, it is actually a call to <r:op>[</r:op>.
-  We can see this via
+The expression <r:expr>mtcars[, c("mpg", "wt")]</r:expr>
+is interesting. Firstly, it is actually a call to <r:op>[</r:op>.
+We can see this via
 <r:code>
 sys.call()
 <r:output><![CDATA[
@@ -413,7 +422,7 @@ Specifically,
 <r:code>
 sys.call()[[1]]
 </r:code>
-returns <literal>`[.data.frame`</literal>.
+returns <r:var>[.data.frame</r:var>.
 The first argument is <r:var>mtcars</r:var>.
 The second, corresponding to the rows to subset,  is missing/not specified.
 The third is the function call <r:expr>c("mpg", "wt")</r:expr>.
@@ -431,7 +440,6 @@ and we get <r:true/>.
   called from <r:func>scatter.smooth</r:func>.
   So we have witnessed and verified lazy evaluation via the call stack.
 </para>
-
 
 
 
@@ -482,6 +490,7 @@ The first   expression in the body of the
 </r:code>
 </para>
 -->
+</section>
 
 <section>
 <title>Environment of a Function Defined Inside a Function</title>
@@ -646,5 +655,5 @@ that created the function we assigned to <r:var>f2</r:var>.
 
 
 <xi:include href="Formula.xml"/>
-</section>
+</article>
 
