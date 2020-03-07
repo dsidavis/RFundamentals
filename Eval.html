@@ -1,0 +1,1112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>R's Evaluation Rules and Environments</title><link rel="stylesheet" type="text/css" href="OmegaTech.css"></link><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"></meta></head><body class="yui-skin-sam"><div class="article"><div class="titlepage"><div><div><h2 class="title"><a id="idm317968964816"></a><b xmlns="" class="proglang">R</b>'s Evaluation Rules and Environments</h2></div><div><div class="author"><h3 class="author"><span class="firstname">Duncan</span> <span class="surname">Temple Lang</span></h3><div class="affiliation"><span class="orgname">University of California at Davis<br></br></span> <span class="orgdiv">Graduate Studies and Department of Statistics<br></br></span></div></div></div></div><hr></hr></div><p>
+The purpose of this is to coalesce some of the material we discussed in the first two days (Feb/March 2020),
+focusing primarily on how <b xmlns="" class="proglang">R</b> finds variables when evaluating functions.
+And environments are key to this.
+An environment is a just a container for variables,
+that is names bound to values/<b xmlns="" class="proglang">R</b> objects.
+And each environment has a parent-environment and so an environment
+is part of list/chain of environments.
+When we look for a variable, we look along this list of environments.
+The nature of environments is the same throughout <b xmlns="" class="proglang">R</b>,
+but which chain of environments we search differs slightly
+by whether we are evaluating code in the body of a function in a package
+or at the top-level prompt or related to a (model) formula.
+</p><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idm318701658656"></a>Calling a Function in a Package</h2></div></div></div><p>
+Consider the call  
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701657760"><div><pre class="rcode" title="R code">
+scatter.smooth(mtcars[, c("mpg", "wt")], , .75, xlab = "Weight", yla = "Miles per gallon",
+                  main = "Motor Trend Cars Data")
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+issued at the <b xmlns="" class="proglang">R</b> prompt.
+<b xmlns="" class="proglang">R</b> parses this and we have the language object that is a
+<i xmlns=""><a href="Help/call-class.html">call</a></i> to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+So <b xmlns="" class="proglang">R</b> has to find that function.
+Since this is being evaluated at the prompt, <b xmlns="" class="proglang">R</b> looks in the global
+environment and its chain of parent environments.
+We can use <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">find()</i> to see where this is located:
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701654544"><div><pre class="rcode" title="R code">
+find("scatter.smooth")
+<pre class="routput">
+[1] "package:stats"
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+This is on the search path as we can see with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701653776"><div><pre class="rcode" title="R code">
+search()
+<pre class="routput">
+[1] ".GlobalEnv"        "package:stats"     "package:graphics" 
+[4] "package:grDevices" "package:datasets"  "package:utils"    
+[7] "package:methods"   "Autoloads"         "package:base"     
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+So <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i> is in the second element of the search path,
+package:stats.
+</p><p>
+  While we can use <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">search()</i> to locate the function,
+  let's introduce a function <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">getEnvChain()</i>   in
+  <a class="ulink" href="showEnv.R" target="_top"><code class="filename">showEnv.R</code></a>
+  that shows the chain of environments generally, not just the search path.
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701650176"><div><pre class="rcode" title="R code">
+source("showEnv.R")
+names(getEnvChain(globalenv()))
+<pre class="routput">
+ [1] "globalenv"         "package:stats"     "package:graphics" 
+ [4] "package:grDevices" "package:datasets"  "package:utils"    
+ [7] "package:methods"   "Autoloads"         "&lt;base&gt;"           
+[10] "emptyenv"         
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>  
+We've included the empty environment at the end.
+We'll use this for more interesting cases than the global environment.
+</p><p>
+ Having found the function <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i> function,
+ <b xmlns="" class="proglang">R</b> prepares to call it.
+</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p> <b xmlns="" class="proglang">R</b> creates a call frame which is an environment.</p></li><li class="listitem"><p> creates a variable in the call frame for each of the parameters/formal arguments in the
+definition of the function, i.e., <code xmlns="" class="Sexpression">names(formals(scatter.smooth))</code></p></li><li class="listitem"><p> matches the arguments in the call to the parameters in the function definition
+</p><div class="orderedlist"><ol class="orderedlist" type="a"><li class="listitem"><p> matching named arguments by that correspond exactly to names of parameters</p></li><li class="listitem"><p> matching remaining named arguments by partial name matching, except to
+     parameters  after <b xmlns="">...</b> in the function definition</p></li><li class="listitem"><p> matching the remaining arguments by position to the remaining parameters.</p></li></ol></div><p>
+</p></li></ol></div><p>
+To see how <b xmlns="" class="proglang">R</b> matches arguments in a particular call, we can use
+<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">match.call()</i>.
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701642128"><div><pre class="rcode" title="R code">
+match.call(scatter.smooth,
+           quote(scatter.smooth(mtcars[, c("mpg", "wt")], , .75,
+                                xlab = "Weight", yla = "Miles per gallon",
+                                main = "Motor Trend Cars Data")))
+<pre class="routput">
+scatter.smooth(x = mtcars[, c("mpg", "wt")], xlab = "Weight", 
+    ylab = "Miles per gallon", main = "Motor Trend Cars Data")
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+</p><p>
+<b xmlns="" class="proglang">R</b> doesn't evaluate any of the arguments in the call at this point due to
+<i xmlns="">lazy evaluation</i>. The value of each variable in the call
+frame at this point is a <i xmlns="">promise</i>. This is the code corresponding
+to that argument in the call, along with the environment in which that code needs
+to be evaluated.  When the function first asks for the value of the variable in the call
+frame, that will trigger <b xmlns="" class="proglang">R</b> to evaluate the promise and that is when the argument will be
+actually evaluated.  And it will be evaluated in the environment in which the function
+(<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>)
+was called. In our case, this is the global environment since we call <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>
+from the <b xmlns="" class="proglang">R</b> prompt.
+</p><p>
+  Now with the call frame constructed and the arguments matched to parameters,
+  <b xmlns="" class="proglang">R</b> is ready to evaluate the body of the function being called, <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+  We can see the expressions in the body of the function with
+  </p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701635952"><div><pre class="rcode" title="R code">
+body(scatter.smooth)
+<pre class="routput">
+{
+    xlabel &lt;- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel &lt;- if (!missing(y)) 
+        deparse(substitute(y))
+    xy &lt;- xy.coords(x, y, xlabel, ylabel)
+    x &lt;- xy$x
+    y &lt;- xy$y
+    xlab &lt;- if (is.null(xlab)) 
+        xy$xlab
+    else xlab
+    ylab &lt;- if (is.null(ylab)) 
+        xy$ylab
+    else ylab
+    pred &lt;- loess.smooth(x, y, span, degree, family, evaluation)
+    plot(x, y, ylim = ylim, xlab = xlab, ylab = ylab, ...)
+    do.call(lines, c(list(pred), lpars))
+    invisible()
+}
+</pre>
+  </pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+  <b xmlns="" class="proglang">R</b> now loops over these expressions and  uses
+  the call frame as the environment in which to evaluate each expression.
+  <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">missing()</i> and <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">substitute()</i>
+  are two functions that use non-standard evaluation. So let's ignore these
+  for now. Just know that <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">missing()</i> is used
+  to determine if that parameter (e.g. <i xmlns="" class="rarg">x</i>) was explicitly
+  provided a value in this call to the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>;
+  and, in this use of <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">substitute()</i>, it returns the <b xmlns="" class="proglang">R</b> code corresponding to the
+  specified parameter (e.g., by looking inside the promise).
+</p><p>
+So let's consider the third expression
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701631360"><div><pre class="rcode" title="R code">
+xy &lt;- xy.coords(x, y, xlabel, ylabel)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>  
+This is an assignment. Since it is evaluated in the call frame,
+the assignment will be in this call frame (an environment).
+There is no parameter named <b xmlns="" class="S" title="">xy</b>, so this will create
+a new variable in the call frame named <b xmlns="" class="S" title="">xy</b>,
+if evaluating the right-hand side succeeds and does not throw an error.
+<b xmlns="" class="proglang">R</b> evaluates the righ-hand side of the assignment before trying to make the
+assignment. So it evaluates
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701629376"><div><pre class="rcode" title="R code">
+xy.coords(x, y, xlabel, ylabel)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+This is a function call, so <b xmlns="" class="proglang">R</b> first looks for <b xmlns="" class="S" title="">xy.coords</b>.
+It looks first in the current environment, the call frame for our call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+It is not there. So it looks in the parent environment, just it did when looking for
+<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>. But what is the parent environment of the call frame for
+our call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+While I could tell you, let's actually find it.
+We'll debug the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>
+and then get the call frame and ask for its <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">parent.env()</i>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701625968"><div><pre class="rcode" title="R code">
+debug(scatter.smooth)
+scatter.smooth(mtcars[, c(1, 2)])
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+At the Browse prompt, we can get the call frame with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701625584"><div><pre class="rcode" title="R code">
+environment()
+<pre class="routput">
+&lt;environment: 0x7fd23971cda0&gt;
+</pre>  
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+The display is a hexadecimal number. It represents the location in memory of the call frame.
+It will be different on your machine. The important thing to know is that it is not a named
+environment such as R_GlobalEnv or package:stats, or package:base. It is an <i xmlns="">ad hoc</i>,
+short-lived environment.
+</p><p>
+We can list the names of the variables in this environment/call frame with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701623616"><div><pre class="rcode" title="R code">
+ls(environment(), all = TRUE)
+<pre class="routput">
+ [1] "..."        "degree"     "evaluation" "family"     "lpars"     
+ [6] "span"       "x"          "xlab"       "y"          "ylab"      
+[11] "ylim"      
+</pre>  
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>  
+We can manually see that these are the same names as those of the parameters
+for <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>. We can also verify this programmatically
+with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701622144"><div><pre class="rcode" title="R code">
+setdiff(names(formals()), ls(environment(), all = TRUE))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+and this returns the empty character vector.
+We could also get the call frame with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701621600"><div><pre class="rcode" title="R code">
+sys.frames()[[1]]
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+in this specific case, but this is more complex in more nested calls.
+So note that <code xmlns="" class="Sexpression">environment()</code> and <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">formals()</i>
+know which call frame and function being called they are currently working on.
+</p><p>
+So now that we have the call frame, let's look along its chain of environments
+to find <b xmlns="" class="S" title="">xy.coords</b>.
+We can use our <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">showEnv()</i> function to show the chain of environments
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701619008"><div><pre class="rcode" title="R code">
+names(getEnvChain(environment()))
+<pre class="routput">
+ [1] "&lt;0x7fd23971d3c0&gt;"  "&lt;namespace:stats&gt;" "imports:stats"    
+ [4] "&lt;namespace:base&gt;"  "globalenv"         "package:stats"    
+ [7] "package:graphics"  "package:grDevices" "package:datasets" 
+[10] "package:utils"     "package:methods"   "Autoloads"        
+[13] "&lt;base&gt;"            "emptyenv"         
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+We can use <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">efind()</i>, a variant of <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">find()</i> we wrote for this exposition,
+to find which of these environments in the chain contain a variable with a given name
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701616608"><div><pre class="rcode" title="R code">
+z = efind("xy.coords", environment(), FALSE)
+<pre class="routput">
+[1] "imports:stats"     "package:grDevices"
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+If we look in each of these environments for <b xmlns="" class="S" title="">xy.coords</b>,
+we'll find exactly the same function (as the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns=""><a href="http://cran.r-project.org/web/packages/stats/index.html">stats</a></i>
+package imports the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns=""><a href="http://cran.r-project.org/web/packages/grDevices/index.html">grDevices</a></i> packages):
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701614688"><div><pre class="rcode" title="R code">
+a = lapply(z, function(e) e$xy.coords)
+identical(a[[1]], a[[2]])
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+</p><p>
+So now we have found the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i> function.
+With this,  <b xmlns="" class="proglang">R</b> starts the same preparation for the call to this function
+by creating a call frame, creating variables within it for each of the
+parameters in the definition of the function, and then matching
+the arguments in the call.
+Again, we can use <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">match.call()</i> to see how the call
+matches the arguments to the parameters:
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701612384"><div><pre class="rcode" title="R code">
+match.call(xy.coords, quote(xy.coords(x, y, xlabel, ylabel)))
+<pre class="routput">
+xy.coords(x = x, y = y, xlab = xlabel, ylab = ylabel)
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+So the parameter <i xmlns="" class="rarg">x</i> in the call frame for
+<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i> is assigned (bound to) a promise
+to compute the expression <code xmlns="" class="Sexpression">x</code>
+which will be evaluated in the environment
+in which we called <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i> and this is the call frame of our call to
+<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+</p><p>
+Note that because of the non-standard evaluation of
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701608992"><div><pre class="rcode" title="R code">
+    xlabel &lt;- if (!missing(x)) 
+        deparse(substitute(x))
+    ylabel &lt;- if (!missing(y)) 
+        deparse(substitute(y))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>  
+we have yet to actually use the values of <b xmlns="" class="S" title="">x</b> and <b xmlns="" class="S" title="">y</b>.
+So <b xmlns="" class="proglang">R</b> has not evaluated the values of these parameters due to lazy evaluation.
+Specifically, we have not evaluated, for example, the command <code xmlns="" class="Sexpression">mtcars[, c("mpg", "cyl")]</code>.
+This will happen soon when the value is actually needed. And we will see this later in the call
+stack, i.e., the sequence of calls from one function to another, to another.
+</p><p>
+  We can arrange to stop in the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i>
+  via <code xmlns="" class="Sexpression">debug(xy.coords)</code>.
+  (BTW, to stop debugging each call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i>,
+  we use <code xmlns="" class="Sexpression">undebug(xy.coords)</code>. That is we use
+  <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">undebug()</i> as the opposite of <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">debug()</i>.)
+  Now we continue evaluating the next expression in the
+  body of <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i> via stepping in the debugger.
+  This calls <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i> and we stop at the start of
+  that function call.
+  Note that if we call <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">substitute(x)()</i> here
+  it won't give us the code <code xmlns="" class="Sexpression">mtcars[, c("mpg", "wt")]</code>
+  from the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+  Instead, it gives us simply <code xmlns="" class="Sexpression">x</code>.
+  This is because the parameter <i xmlns="" class="rarg">x</i> in the call
+  to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i> (from within <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>)
+  was specified in the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i> as simply
+  <code xmlns="" class="Sexpression">x</code>, i.e., <code xmlns="" class="Sexpression">xy.coords(x, y, xlabel, ylabel)</code>.
+  So the code for the argument is <code xmlns="" class="Sexpression">x</code>.
+  When we evaluate that promise, it is the value of <b xmlns="" class="S" title="">x</b>
+  in the call frame of <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+  And that is the promise with the code <code xmlns="" class="Sexpression">mtcars[, c("mpg", "wt")]</code>
+  which will be evaluated in the global environment
+  since that is where we made the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+</p><p>
+  Since we know we are interested in when
+  the call to <code xmlns="" class="sfunction">[</code> on <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">mtcars()</i>
+  happens, we'll debug the <code xmlns="" class="sfunction">[</code> function.
+  We can't use
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701595424"><div><pre class="rcode" title="R code">
+debug([)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>  
+as that is a syntax error - <b xmlns="" class="proglang">R</b> is looking for a closing ].
+So we refer to the symbol [ with `[`, i.e.,
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701594576"><div><pre class="rcode" title="R code">
+debug(`[`)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+</p><p>
+  Since <b xmlns="" class="S" title="">y</b>   is <i xmlns=""><code>NULL</code></i>
+  in <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i>,
+  we evaluate the body of the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">if()</i>
+  statement <code xmlns="" class="Sexpression">if(is.null(y))</code>.
+  The second expression in this is
+  <code xmlns="" class="Sexpression">if(is.language(x))...</code>
+  This uses the value of <i xmlns="" class="rarg">x</i>
+  so <b xmlns="" class="proglang">R</b> needs to evaluate the promise
+  for that parameter value.
+  This is when <code xmlns="" class="sfunction">[</code> gets called
+  in the <code xmlns="" class="Sexpression">mtcars[, c("mpg", "wt")]</code>.
+  So we step through this code in the debugger
+  and stop in the function <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">[.data.frame()</i>.
+  We can inspect the call stack from within the debugger
+  using the debugger command <b xmlns="" class="S" title="">where</b>:
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701589072"><div><pre class="rcode" title="R code">
+where
+<pre class="routput">
+where 1 at #1: `[.data.frame`(mtcars, , c("mpg", "wt"))
+where 2 at #1: mtcars[, c("mpg", "wt")]
+where 3: xy.coords(x, y, xlabel, ylabel)
+where 4: scatter.smooth({
+    cat("evaluating now\n")
+    mtcars[, c("mpg", "wt")]
+})  
+</pre>  
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>  
+We can also use <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">sys.calls()()</i>
+to see the call stack, and this works when we are not in the debugger:
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701587600"><div><pre class="rcode" title="R code">
+  sys.calls()
+<pre class="routput">
+[[1]]
+scatter.smooth({
+    cat("evaluating now\n")
+    mtcars[, c("mpg", "wt")]
+})
+
+[[2]]
+xy.coords(x, y, xlabel, ylabel)
+
+[[3]]
+mtcars[, c("mpg","wt")]
+
+[[4]]
+mtcars[, c("mpg","wt")]
+</pre>  
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+Note that a) this returns a list of language objects, and b)
+these are in the reverse order as shown by the debugger's <b xmlns="" class="S" title="">where</b>.
+</p><p>
+  Why did we get to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">[.data.frame()</i>
+  and not <code xmlns="" class="sfunction">[</code>?
+  And why does <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">sys.calls()</i> have
+  two identical elements <code xmlns="" class="Sexpression">mtcars[, c("mpg","wt")]</code>?
+  The reason is the same for both questions
+  and relates to <b xmlns="" class="proglang">R</b>'s object oriented S3 method dispatch.
+  We called <code xmlns="" class="sfunction">[</code> and that looked for a method based on the cllass
+  of its first argument, <b xmlns="" class="S" title="">mtcars</b>,  which is a <i xmlns=""><a href="Help/data.frame-class.html">data.frame</a></i>.  So <b xmlns="" class="proglang">R</b> passed the call to
+  to <code xmlns="" class="sfunction">[</code> to the more specific version <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">[.data.frame()</i>.
+  We'll talk about this later.
+</p><p>
+The expression <code xmlns="" class="Sexpression">mtcars[, c("mpg", "wt")]</code>
+is interesting. Firstly, it is actually a call to <code xmlns="" class="sfunction">[</code>.
+We can see this via
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701579904"><div><pre class="rcode" title="R code">
+sys.call()
+<pre class="routput">
+mtcars[, c("mpg","wt")]
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+when we are debugging in the call frame for <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">[.data.frame()</i>.
+Specifically,
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701578752"><div><pre class="rcode" title="R code">
+sys.call()[[1]]
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+returns <b xmlns="" class="S" title="">[.data.frame</b>.
+The first argument is <b xmlns="" class="S" title="">mtcars</b>.
+The second, corresponding to the rows to subset,  is missing/not specified.
+The third is the function call <code xmlns="" class="Sexpression">c("mpg", "wt")</code>.
+We can ask is the second argument missing with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701577040"><div><pre class="rcode" title="R code">
+missing(i)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+and we get <i xmlns=""><code>TRUE</code></i>.
+</p><p>
+  This has shown us that <code xmlns="" class="Sexpression">mtcars[, c("mpg", "wt")]</code> is not
+  evaluated until we are in the body of <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i>
+  called from <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+  So we have witnessed and verified lazy evaluation via the call stack.
+</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idm318701574000"></a>Environment of a Function Defined Inside a Function</h2></div></div></div><p>
+We just looked at a call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>
+which is a function defined in a package.
+We saw how it found the functions it itself called (e.g. <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">xy.coords()</i>)
+along its own search path, not the <b xmlns="" class="proglang">R</b> session search path.
+We found this chain of environments from within the call frame
+in our call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+We could have also obtained the environment of the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>
+function with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701570832"><div><pre class="rcode" title="R code">
+environment(scatter.smooth)
+<pre class="routput">
+&lt;environment: namespace:stats&gt;
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+A namespace is a specific type of environment
+and relates to packages.
+This is the parent environment of the call frame
+in our call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smooth()</i>.
+And this generality is true for all call frames -
+the parent environment of a call frame
+is the environment of the function (definition)
+being called.
+And what is the environment of a function?
+<i xmlns="">The environment of a function is the
+environment in which that function is defined.</i>
+What does this mean?
+</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>If the function is defined in a package,
+  the environment is the namespace of that package.
+  </p></li><li class="listitem"><p>
+If a function is defined at the <b xmlns="" class="proglang">R</b> prompt,
+the environment is the global environment
+since that is where the creation of the function is evaluated.
+  </p></li><li class="listitem"><p>
+If the function is defined via calling <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">source()</i>,
+the environment is the one used in that call to the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">source()</i> function
+and, when called from the <b xmlns="" class="proglang">R</b> prompt, that defaults to the global environment.
+However, we can specify the environment in which <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">source()</i>
+should evaluate the expressions.
+  </p></li><li class="listitem"><p>
+    If a function is defined within the body of a function,
+    then its environment is the call frame of in which it is defined.
+    This gives us closures.
+  </p></li></ol></div><p>
+</p><p>
+  Let's define a simple function at the <b xmlns="" class="proglang">R</b> prompt.
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701563264"><div><pre class="rcode" title="R code">
+f = function(n) median(rnorm(n))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>  
+What is its environment?
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701562880"><div><pre class="rcode" title="R code">
+environment(f)
+<pre class="routput">
+&lt;environment: R_GlobalEnv&gt;
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+When we call <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">f()</i>, <b xmlns="" class="proglang">R</b> will
+create a call frame and match the argument to the parameter
+and evaluate the expressions in the body.
+It will look for <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">rnorm()</i>
+in the call frame and then in the parent environment and so on.
+The parent environment of the call frame will
+be <code xmlns="" class="Sexpression">environment(f)</code>, that is the global environment
+as we just determined.
+</p><p>
+  Let's write another function, again at the top-level <b xmlns="" class="proglang">R</b> prompt.
+  This one defines and returns a function
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701559296"><div><pre class="rcode" title="R code">
+gen = function(n) {
+         function(mu) rnorm(n, mu)
+} 
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+This function has one parameter <i xmlns="" class="rarg">n</i>.
+It returns a function which itself has only parameter
+<i xmlns="" class="rarg">mu</i>.
+We can call <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">gen()</i> with an integer
+giving the sample size
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701557632"><div><pre class="rcode" title="R code">
+f1 = gen(10)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+<b xmlns="" class="S" title="">f1</b> is now a function
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+function(mu) rnorm(n, mu)
+&lt;environment: 0x7fd24a150308&gt;
+</pre>
+<p>
+Note the environment displayed.
+We won't see this on our function <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">gen()</i>
+when we print it. That is because it is the global environment
+and <b xmlns="" class="proglang">R</b> doesn't show that environment when display a function.
+But we see an environment on all other functions, e.g.,
+<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">scatter.smoooth()</i> shows
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+&lt;environment: namespace:stats&gt;
+</pre>
+<p>
+</p><p>
+  In the case of <b xmlns="" class="S" title="">f</b>,
+  the environment is the call frame for our call to <code xmlns="" class="Sexpression">gen(10)</code>
+  in which the function was created.
+  Let's debug another call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">gen()</i>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701552832"><div><pre class="rcode" title="R code">
+debug(gen)
+f2 = gen(13)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+Let's get the identifier for the call frame with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701552384"><div><pre class="rcode" title="R code">
+environment()
+<pre class="routput">
+&lt;environment: 0x7fd2598ede10&gt;
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+(This will be a different hexadecimal value  in your <b xmlns="" class="proglang">R</b> session.)
+Now we'll continue the evaluation of the function call and return.
+What is the environment of <b xmlns="" class="S" title="">f2</b>?
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701550592"><div><pre class="rcode" title="R code">
+environment(f2)
+<pre class="routput">
+&lt;environment: 0x7fd2598ede10&gt;
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+It is the call frame in which the function object was defined.
+</p><p>
+  What are the variables in that environment?
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701549280"><div><pre class="rcode" title="R code">
+ls(environment(f2), all = TRUE)
+<pre class="routput">
+[1] "n"
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+What is the value of that <b xmlns="" class="S" title="">n</b>?
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701548128"><div><pre class="rcode" title="R code">
+environment(f2)$n  
+<pre class="routput">
+[1] 13
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+i.e.,  the value of <b xmlns="" class="S" title="">n</b> in our call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">gen()</i>
+that created the function we assigned to <b xmlns="" class="S" title="">f2</b>.
+</p><p>
+  What's the value of n in the environment of <b xmlns="" class="S" title="">f1</b> ?
+  That is 10 since we created <b xmlns="" class="S" title="">f1</b>
+  with the call <code xmlns="" class="Sexpression">f1 = gen(10)</code>.
+</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idm318701544416"></a>Formulae, Environments and Non-Standard Evaluation</h2></div></div></div><p>
+Like functions, model formula such as <code xmlns="" class="Sexpression">mpg ~ wt + cyl</code>  
+also have an associated formula.
+We can create a formula as a stand-alone object with, e.g.,
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701542960"><div><pre class="rcode" title="R code">
+frm = b ~ a
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+We can examine its structure with 
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701542576"><div><pre class="rcode" title="R code">
+str(frm)
+<pre class="routput">
+Class 'formula'  language b ~ a
+  ..- attr(*, ".Environment")=&lt;environment: R_GlobalEnv&gt; 
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+We see that there is an attribute associated with the formula
+and in this case it is the global environment.
+Like functions, the environment of a formula is the environment
+in which it is defined (unless explicitly set to be different.)
+So if a formula was created in a call to a function, its environment
+would be the call frame in which it was created.
+</p><p>
+Environments on formula allow functions manipulating a
+formula to find the associated variables referenced
+in the formula.
+We'll look at this and how it can be somewhat surprising in some
+respects.
+Again, we'll construct an experiment we can explicitly debug
+and understand in <b xmlns="" class="proglang">R</b>, rather than just stating the rules.
+Let's create two variables <b xmlns="" class="S" title="">a</b> and <b xmlns="" class="S" title="">b</b>:
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701539392"><div><pre class="rcode" title="R code">
+set.seed(12312)
+a = runif(10)
+b = 5 + 2.34*a + rnorm(length(a))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+Now, consider the formula
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701538928"><div><pre class="rcode" title="R code">
+b ~ a
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+As we saw, this has the global environment associated with it.
+</p><p>
+  Note also that the formula <code xmlns="" class="Sexpression">b ~ a</code>
+  doesn't actually use the values of <b xmlns="" class="S" title="">a</b> and <b xmlns="" class="S" title="">b</b>.
+  The formula is symbolic and its contents will be evaluated
+  later. So the formula refers to some variables <b xmlns="" class="S" title="">a</b>
+  and <b xmlns="" class="S" title="">b</b> that will be resolved later when the formula
+  is used.  The <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">~()</i> is somewhat like the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">quote()</i> function
+  which doesn't evaluate its argument.  It is also like (but not the same as) <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">parse()</i>  in that it's contents will be
+  used later. The expression <code xmlns="" class="Sexpression">b ~ a</code>
+  is a call to the function <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">~()</i>
+  which is a .Primitive function. That means it immediately
+  passes its un-evaluated arguments to <b xmlns="" class="acronym" title="C programming language"><b class="proglang">C</b></b> (C programming language) code
+  and does not follow <b xmlns="" class="proglang">R</b>'s standard evaluation
+  model.  In other words, it uses non-standard evaluation!
+  So it doesn't actually get the value of <b xmlns="" class="S" title="">a</b>
+  or <b xmlns="" class="S" title="">b</b>.
+</p><p>
+Consider the call
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701531376"><div><pre class="rcode" title="R code">
+coef(lm(b ~ a))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+This calls <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">coef()</i> which <b xmlns="" class="proglang">R</b> locates
+on the search path and matches the arguments to the parameters.
+The call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i> is also evaluated in the global
+environment and the same rules apply.
+The formula <code xmlns="" class="Sexpression">b ~ a</code> is also evaluated in the global
+environment since this is a top-level expression.
+So the formula's environment is the global environment just
+as it would be if we had done this in two steps
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701529072"><div><pre class="rcode" title="R code">
+frm = b ~ a
+coef(lm(frm))  
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+The answer we get is
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+(Intercept)           a 
+   5.097029    2.618424 
+</pre>
+<p>
+</p><p>
+  How does <b xmlns="" class="proglang">R</b> evaluate the call to <code xmlns="" class="Sexpression">lm(b ~ a)</code>.
+  We have described the general rules of finding the
+  function (<b xmlns="" class="S" title="">lm</b>), creating
+  the call frame with a variable for each parameter,
+  matching the arguments to the parameters, and evaluating
+  the expressions in the body of the function with the call frame
+  as the environment for the evaluation.
+  However, like <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">library()</i>, <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">rm()</i>,
+  <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">?()</i>, and a few more,  <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>
+  uses non-standard evaluation (NSE).
+  And this is made more complicated by how formulae work.
+</p><p>
+The call <code xmlns="" class="Sexpression">lm(b ~ a)</code>
+passes the formula to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>.
+<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i> uses an explicit call to the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">eval()</i>
+function to create the design/model matrix for the regression.
+Actually, <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i> behaves even more unusually
+in that it constructs the call it passes to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">eval()</i>
+by adapting how it itself was called.
+We can see this by debugging the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701521392"><div><pre class="rcode" title="R code">
+debug(lm)
+lm(b ~ a)  
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+After stepping through the initial expressions,
+we see the sequence of commands
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701520912"><div><pre class="rcode" title="R code">
+mf &lt;- match.call(expand.dots = FALSE)
+m &lt;- match(c("formula", "data", "subset", "weights", "na.action", "offset"), names(mf), 0L)
+mf &lt;- mf[c(1L, m)]
+mf$drop.unused.levels &lt;- TRUE
+mf[[1L]] &lt;- quote(stats::model.frame)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+We have seen <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">match.call()</i>.
+This returns are original call with the parameter names explicitly matched
+and added, i.e.,
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701519664"><div><pre class="rcode" title="R code">
+lm(formula = b ~ a)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+Next, we match the parameter names in the call to find formula, data, subset, etc.
+and we then keep only those elements of the call, discarding any other arguments.
+Why, because we are the arguments in the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>
+to actually call <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame()</i> in the <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns=""><a href="http://cran.r-project.org/web/packages/stats/index.html">stats</a></i>
+package. And <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i> doesn't want to have to check which arguments
+were passed to it and pass those on to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame()</i>. Instead
+it does this meta-programming on how it was invoked/called to create
+the corresponding call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame()</i>.
+So the next two expressiins add a named argument <i xmlns="" class="rarg">drop.unused.levels</i>
+with a value of <i xmlns=""><code>TRUE</code></i>
+and changing the function being invoked in this call object
+t <code xmlns="" class="Sexpression">stats::model.frame</code>.
+So at the end of this sequence of expressions, we can see
+that <b xmlns="" class="S" title="">mf</b> is
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+stats::model.frame(formula = b ~ a, drop.unused.levels = TRUE)
+</pre>
+<p>
+and has class <i xmlns=""><a href="Help/call-class.html">call</a></i>.
+</p><p>
+  Next, <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i> evaluates this call with
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701513312"><div><pre class="rcode" title="R code">
+mf &lt;- eval(mf, parent.frame())
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>  
+This explicitly calls <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">eval()</i>
+and specifies an environment in which to evaluate that call.
+This environment - computed as <code xmlns="" class="Sexpression">parent.frame()</code> -
+controls where <b xmlns="" class="proglang">R</b> will look for variables in the call.
+<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">parent.frame()</i> looks along the call stack,
+not the search path of this call frame.
+In our case, <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">parent.frame()</i> is the global environment
+since our call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i> is the only call in the current
+call stack.
+</p><p>
+  So let's debug the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame()</i>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701509344"><div><pre class="rcode" title="R code">
+debug(model.frame)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+This stops in
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+debugging in: stats::model.frame(formula = b ~ a, drop.unused.levels = TRUE)
+debug: UseMethod("model.frame")
+</pre>
+<p>
+This is the S3 method and <b xmlns="" class="proglang">R</b> will dispatch to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame.default()</i>
+and will debug that for us as it is related to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame()</i>.
+We step through the expressions in <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame.default()</i>
+and we get to
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701506352"><div><pre class="rcode" title="R code">
+if (missing(data) &amp;&amp; inherits(formula, "data.frame")) {
+    if (length(attr(formula, "terms"))) 
+        return(formula)
+    data &lt;- formula
+    formula &lt;- as.formula(data)
+}
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+We didn't provide a value for the <i xmlns="" class="rarg">data</i>
+parameter in our call (to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i> that was mimiced to call <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame()</i>). But
+<b xmlns="" class="S" title="">formula</b> does not inherit from <i xmlns=""><a href="Help/data.frame-class.html">data.frame</a></i>,
+so this condition is false. And then we get to
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701503456"><div><pre class="rcode" title="R code">
+formula &lt;- as.formula(formula)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+and then
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701502960"><div><pre class="rcode" title="R code">
+data &lt;- environment(formula)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+So model.frame will use the environment of the formula as the source
+of the data, i.e., the place in which to look for symbols.
+Recall that the environment of our formula is the global environment.
+And after a few more expressions, we get to
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701502240"><div><pre class="rcode" title="R code">
+variables &lt;- eval(predvars, data, env)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+<b xmlns="" class="S" title="">predvars</b> is 
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+list(b, a)
+</pre>
+<p>
+and <b xmlns="" class="S" title="">data</b> and <b xmlns="" class="S" title="">env</b> are the global environment.
+So this call to evaluate will find <b xmlns="" class="S" title="">a</b> and <b xmlns="" class="S" title="">b</b>
+in the global environment.
+</p><div xmlns="" class="question" id="q10">
+<font size="+2">Q.</font><p xmlns="http://www.w3.org/1999/xhtml">
+  Where and how will <b xmlns="" class="proglang">R</b> find the variables <b xmlns="" class="S" title="">a</b>
+  and <b xmlns="" class="S" title="">b</b> referenced in the formula?
+</p><div class="codeToggle"><div class="unhidden" id="idm318701497280"><div><pre class="rcode" title="R code">
+f = function() {
+  set.seed(12314)
+  a = runif(30)
+  b = pi * a + rnorm(30)  
+  lm(b ~ a)
+}
+f()
+</pre></div></div></div>
+<div class="clearFloat"></div>
+<p xmlns="http://www.w3.org/1999/xhtml">
+</p><button class="collapsible">answer</button><div class="answerOuter"><div class="answer"><p xmlns="http://www.w3.org/1999/xhtml">
+<i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame.default()</i> will call <code xmlns="" class="Sexpression">eval(predvars, data, env)</code>
+with <b xmlns="" class="S" title="">data</b> and <b xmlns="" class="S" title="">env</b> being the environment of the formula.
+This will be the call frame for the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">f()</i>.
+So <b xmlns="" class="proglang">R</b> will find the variables <b xmlns="" class="S" title="">a</b> and <b xmlns="" class="S" title="">b</b>
+in that call frame.    
+  </p></div></div>
+</div>
+<div xmlns="" class="question" id="q11">
+<font size="+2">Q.</font><p xmlns="http://www.w3.org/1999/xhtml">
+What would happen in the following
+</p><div class="codeToggle"><div class="unhidden" id="idm318701491808"><div><pre class="rcode" title="R code">
+f = function() lm(b ~ a)
+f()
+</pre></div></div></div>
+<div class="clearFloat"></div>
+<p xmlns="http://www.w3.org/1999/xhtml">  
+Where would <b xmlns="" class="proglang">R</b> find <b xmlns="" class="S" title="">b</b> and <b xmlns="" class="S" title="">a</b> and how/why?
+</p><button class="collapsible">answer</button><div class="answerOuter"><div class="answer">
+<p xmlns="http://www.w3.org/1999/xhtml">  
+  This  looks simpler than the previous question
+  but is actually slightly more complicated, but 
+  builds on the rules we saw earlier.
+Again, <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame.default()</i> will get to 
+</p><div class="codeToggle"><div class="unhidden" id="idm318701488944"><div><pre class="rcode" title="R code">
+variables &lt;- eval(predvars, data, env)
+</pre></div></div></div>
+<div class="clearFloat"></div>
+<p xmlns="http://www.w3.org/1999/xhtml">
+with <b xmlns="" class="S" title="">data</b> and <b xmlns="" class="S" title="">env</b> coming from the
+environment on the formula.
+That will be the call frame from the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">f()</i>.
+However, <b xmlns="" class="S" title="">a</b> and <b xmlns="" class="S" title="">b</b> are not in that call frame,
+whereas they were in the previous question.
+So the evaluation uses <b xmlns="" class="proglang">R</b>'s regular rules to search for the variables
+along the chain of environments.
+We can look at this chain with
+</p><div class="codeToggle"><div class="unhidden" id="idm318701485744"><div><pre class="rcode" title="R code">
+names(getEnvChain(env))
+<pre class="routput">
+ [1] "&lt;0x7fd259232f08&gt;"  "globalenv"         "package:stats"    
+ [4] "package:graphics"  "package:grDevices" "package:datasets" 
+ [7] "package:utils"     "package:methods"   "Autoloads"        
+[10] "&lt;base&gt;"            "emptyenv"         
+</pre>
+</pre></div></div></div>
+<div class="clearFloat"></div>
+<p xmlns="http://www.w3.org/1999/xhtml">
+So we see the global environment is next on the chain after
+the call frame for <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">f()</i>.
+This is, as we know, because the environment of <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">()</i>
+is the global environment since that is where <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">f()</i>
+was defined. And the parent environment of a call frame is the environment
+of that function being called. (Don't confuse this with <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">sys.parent()</i>
+which refers to call frames on the call stack.)
+</p>
+</div></div>
+</div>
+<p>
+Now, we will switch from finding the values for <b xmlns="" class="S" title="">a</b>
+and <b xmlns="" class="S" title="">b</b> in the global environment
+to providing them in a <i xmlns=""><a href="Help/data.frame-class.html">data.frame</a></i>.
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701480656"><div><pre class="rcode" title="R code">
+d = data.frame(a = a, b = b)
+coef(lm(b ~ a, d))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+We actually have two instances of <b xmlns="" class="S" title="">a</b> -
+one in the global environment and one as an element in the
+<i xmlns=""><a href="Help/data.frame-class.html">data.frame</a></i>.
+Which one did <b xmlns="" class="proglang">R</b> use?  It doesn't matter, in this case, since they are
+the same. But it would matter if they were different.
+So which did it use? We can read the help file,
+or simply know, or use the debugger to step through the computations
+as we did before.
+<b xmlns="" class="proglang">R</b>, and <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame.default()</i> specifically, will use
+the values in the <i xmlns=""><a href="Help/data.frame-class.html">data.frame</a></i>,
+not those in the global environment.
+We can also verify this by removing <b xmlns="" class="S" title="">a</b>
+from the global environment and seeing if there is an error
+about not finding <b xmlns="" class="S" title="">a</b>:
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701476448"><div><pre class="rcode" title="R code">
+a1 = a
+rm(a)
+coef(lm(b ~ a, d))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+This succeeds and gives us the same answer as we originally got.
+</p><p>
+  We'll now make this a little more interesting.
+  We'll use <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>'s <i xmlns="" class="rarg">weights</i> parameter
+  to do weighted least squares.
+  We'll use two sets of weights, one where all observations
+  have weight 1 and another which are random numbers between
+  1 and 2, i.e.,
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701474512"><div><pre class="rcode" title="R code">
+w1 = rep(1, length(b))
+w2 = runif(length(b), 1, 2)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+When we use these
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701474032"><div><pre class="rcode" title="R code">
+coef(lm(b ~ a, weights = w1))
+coef(lm(b ~ a, weights = w2))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+we get
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+ (Intercept)           a 
+    5.097029    2.618424 
+ (Intercept)           a 
+    5.305530    2.194265
+</pre>
+<p>
+respectively.
+So we get different estimates for a (and the intercept)
+as we expect.
+</p><p>
+We might expect <b xmlns="" class="proglang">R</b>'s usual computational model
+is in effect here. Specifically,
+in the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>,
+<b xmlns="" class="proglang">R</b> matches the expression <b xmlns="" class="S" title="">w1</b>
+to the <i xmlns="" class="rarg">weights</i> parameter
+and creates a promise to evaluate <code xmlns="" class="Sexpression">w1</code>
+in the global environment in which we made the call to <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>.
+And certainly, the result we got are consistent with this.
+However, it is not the case. We are finding <b xmlns="" class="S" title="">w1</b>
+via a slightly different mechanism which happens to give the same
+result, but only in this case.
+</p><p>
+  Let's create a new column in our <i xmlns=""><a href="Help/data.frame-class.html">data.frame</a></i>
+  <b xmlns="" class="S" title="">d</b> and we'll name it <i xmlns="" class="relement">w1</i>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701467376"><div><pre class="rcode" title="R code">
+d$w1 = w1
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+Again, we call <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701466560"><div><pre class="rcode" title="R code">
+coef(lm(b ~ a, d, weights = w1))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+and we get the same answer.
+</p><p>
+Now, let's set the <i xmlns="" class="relement">w1</i> to have the other weights
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701465264"><div><pre class="rcode" title="R code">
+d$w1 = w2
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+and call <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701464464"><div><pre class="rcode" title="R code">
+coef(lm(b ~ a, d, weights = w1))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+Now we get
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+(Intercept)           a 
+   5.305530    2.194265 
+</pre>
+<p>
+So we are using the weights from <b xmlns="" class="S" title="">w2</b>.
+This indicates that <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">lm()</i> and <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame.default()</i>
+are looking in the <i xmlns=""><a href="Help/data.frame-class.html">data.frame</a></i>
+when evaluating <code xmlns="" class="Sexpression">w1</code>.
+This is very different from <b xmlns="" class="proglang">R</b>'s standard computational
+model we described.
+</p><p>
+Let's create our formula more explicitly and
+give it its own environment (just like we can for a function.)
+We create an environment and create
+variables in it named <b xmlns="" class="S" title="">x</b> and <b xmlns="" class="S" title="">y</b>,
+using the original values of <b xmlns="" class="S" title="">a</b> and <b xmlns="" class="S" title="">b</b>
+from the global environment.
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701458784"><div><pre class="rcode" title="R code">
+e = new.env()
+e$x = a1
+e$y = b
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+We create our formula and  examine its environment
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701458288"><div><pre class="rcode" title="R code">
+frm = y ~ x
+environment(frm)
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+It is the global environment.
+We now change this to be 
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701457808"><div><pre class="rcode" title="R code">
+environment(frm) = e
+<pre class="routput">
+y ~ x
+&lt;environment: 0x7fd22963a238&gt;
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+We can now use this formula without specifying the
+<i xmlns="" class="rarg">data</i> argument as <i xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="rfunc">model.frame.default()</i>
+will use this environment to find <b xmlns="" class="S" title="">x</b> and <b xmlns="" class="S" title="">y</b>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701455184"><div><pre class="rcode" title="R code">
+coef(lm(frm))
+<pre class="routput">
+(Intercept)           x 
+   5.097029    2.618424 
+</pre>
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+And again, we'll create a variable named w1, this time
+in <b xmlns="" class="S" title="">e</b> with weights from <b xmlns="" class="S" title="">w2</b>
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701453472"><div><pre class="rcode" title="R code">
+e$w1 = w2
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+And now
+</p><div xmlns="" class="codeToggle"><div class="unhidden" id="idm318701453056"><div><pre class="rcode" title="R code">
+coef(lm(frm, weights = w1))
+</pre></div></div></div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+gives
+</p><pre xmlns:r="http://www.r-project.org" xmlns:c="http://www.C.org" xmlns="" class="routput">
+(Intercept)           x 
+   5.305530    2.194265 
+</pre>
+<p>
+showing that it used the weights from <b xmlns="" class="S" title="">w1</b> in <b xmlns="" class="S" title="">e</b>
+rather than those in <b xmlns="" class="S" title="">w1</b> in the global environment.
+</p><p>
+  This is non-standard evaluation and it means we don't use the regular
+  rules for evaluation.
+  So now we have at least two computational models.
+  This makes it hard to reason about <b xmlns="" class="proglang">R</b> code.
+  If you are luck, you get an error when you do the wrong thing.
+  Often, you get the wrong answer and that is much worse than an error.
+</p><p>
+  NSE is a powerful feature. But it needs to be used wisely and sparingly.  
+  NSE is convenient for programmers to do interesting things.
+  However, it places a significant burden on the users
+  of functions that use NSE
+  because they cannot reason about what will happen
+  using a single, familiar computational model.
+  Instead, they have to carefully learn how each
+  function that uses NSE will actually behave.
+</p></div></div><script xmlns="">
+ /* From https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_collapsible_symbol  */
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  });
+}
+</script></body></html>
