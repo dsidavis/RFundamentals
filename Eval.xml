@@ -53,7 +53,7 @@ package:stats.
 <para>
   While we can use <r:func>search</r:func> to locate the function,
   let's introduce a function <r:func>getEnvChain</r:func>   in
-  <ulink url="showEnv.R"><file>showEnv.R</file></ulink>
+  <ulink url="showEnv.R"><filename>showEnv.R</filename></ulink>
   that shows the chain of environments generally, not just the search path.
 <r:code>
 source("showEnv.R")
@@ -216,7 +216,7 @@ We could also get the call frame with
 sys.frames()[[1]]
 </r:code>
 in this specific case, but this is more complex in more nested calls.
-So note that <r:expr>environment()</r:expr> and <r:func>formals()</r:func>
+So note that <r:expr>environment()</r:expr> and <r:func>formals</r:func>
 know which call frame and function being called they are currently working on.
 </para>
 
@@ -323,7 +323,7 @@ stack, i.e., the sequence of calls from one function to another, to another.
 <r:code>
 debug([)
 </r:code>  
-as that is a syntax error – <r/> is looking for a closing ].
+as that is a syntax error - <r/> is looking for a closing ].
 So we refer to the symbol [ with `[`, i.e.,
 <r:code>
 debug(`[`)
@@ -505,7 +505,7 @@ A namespace is a specific type of environment
 and relates to packages.
 This is the parent environment of the call frame
 in our call to <r:func>scatter.smooth</r:func>.
-And this generality is true for all call frames –
+And this generality is true for all call frames -
 the parent environment of a call frame
 is the environment of the function (definition)
 being called.

@@ -158,7 +158,7 @@ mf <- eval(mf, parent.frame())
 ]]></r:code>  
 This explicitly calls <r:func>eval</r:func>
 and specifies an environment in which to evaluate that call.
-This environment – computed as <r:expr>parent.frame()</r:expr> –
+This environment - computed as <r:expr>parent.frame()</r:expr> -
 controls where <r/> will look for variables in the call.
 <r:func>parent.frame</r:func> looks along the call stack,
 not the search path of this call frame.
@@ -216,39 +216,88 @@ So this call to evaluate will find <r:var>a</r:var> and <r:var>b</r:var>
 in the global environment.
 </para>
 
+<question>
+<para>
+  Where and how will <r/> find the variables <r:var>a</r:var>
+  and <r:var>b</r:var> referenced in the formula?
+<r:code>
+f = function() {
+  set.seed(12314)
+  a = runif(30)
+  b = pi * a + rnorm(30)  
+  lm(b ~ a)
+}
+f()
+</r:code>
+</para>
+<answer>
+  <para>
+<r:func>model.frame.default</r:func> will call <r:expr>eval(predvars, data, env)</r:expr>
+with <r:var>data</r:var> and <r:var>env</r:var> being the environment of the formula.
+This will be the call frame for the call to <r:func>f</r:func>.
+So <r/> will find the variables <r:var>a</r:var> and <r:var>b</r:var>
+in that call frame.    
+  </para>
+</answer>
+</question>
 
+
+<question>
 <para>
 What would happen in the following
 <r:code>
 f = function() lm(b ~ a)
 f()
 </r:code>  
-Where would <r/> find <r:var>b</r:var> and <r:var>a</r:var> and how?
+Where would <r/> find <r:var>b</r:var> and <r:var>a</r:var> and how/why?
 </para>
 
-<para>
-What about
+<answer>
+<para>  
+  This  looks simpler than the previous question
+  but is actually slightly more complicated, but 
+  builds on the rules we saw earlier.
+Again, <r:func>model.frame.default</r:func> will get to 
+<r:code><![CDATA[
+variables <- eval(predvars, data, env)
+]]></r:code>
+with <r:var>data</r:var> and <r:var>env</r:var> coming from the
+environment on the formula.
+That will be the call frame from the call to <r:func>f</r:func>.
+However, <r:var>a</r:var> and <r:var>b</r:var> are not in that call frame,
+whereas they were in the previous question.
+So the evaluation uses <r/>'s regular rules to search for the variables
+along the chain of environments.
+We can look at this chain with
 <r:code>
-f = function() {
-  a = runif(10)
-  b = pi * a + rnorm(10)  
-  lm(b ~ a)
-}
-f()
-</r:code>  
+names(getEnvChain(env))
+<r:output><![CDATA[
+ [1] "<0x7fd259232f08>"  "globalenv"         "package:stats"    
+ [4] "package:graphics"  "package:grDevices" "package:datasets" 
+ [7] "package:utils"     "package:methods"   "Autoloads"        
+[10] "<base>"            "emptyenv"         
+]]></r:output>
+</r:code>
+So we see the global environment is next on the chain after
+the call frame for <r:func>f</r:func>.
+This is, as we know, because the environment of <r:func></r:func>
+is the global environment since that is where <r:func>f</r:func>
+was defined. And the parent environment of a call frame is the environment
+of that function being called. (Don't confuse this with <r:func>sys.parent</r:func>
+which refers to call frames on the call stack.)
 </para>
-
-
+</answer>
+</question>
 
 <para>
-  Now, we will switch from finding the values for <r:var>a</r:var>
-  and <r:var>b</r:var> in the global environment
-  to providing them in a <r:class>data.frame</r:class>.
+Now, we will switch from finding the values for <r:var>a</r:var>
+and <r:var>b</r:var> in the global environment
+to providing them in a <r:class>data.frame</r:class>.
 <r:code>
 d = data.frame(a = a, b = b)
 coef(lm(b ~ a, d))
 </r:code>
-We actually have two instances of <r:var>a</r:var> –
+We actually have two instances of <r:var>a</r:var> -
 one in the global environment and one as an element in the
 <r:class>data.frame</r:class>.
 Which one did <r/> use?  It doesn't matter, in this case, since they are
@@ -309,7 +358,7 @@ in the global environment in which we made the call to <r:func>lm</r:func>.
 And certainly, the result we got are consistent with this.
 However, it is not the case. We are finding <r:var>w1</r:var>
 via a slightly different mechanism which happens to give the same
-result – in this case.
+result, but only in this case.
 </para>
 
 
