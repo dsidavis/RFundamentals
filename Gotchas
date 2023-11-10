@@ -1,0 +1,21 @@
+Backticks in names and backticks in expressions.
+
+v = c(`abc` = `xyz`)
+
+v = c(`abc` = "xyz")
+
+v[`def`] = "other"
+v['def'] = "other"
+
+
+See RSlate/funs.R
+
+
+Also,
+  x[ c("a", "a") ] = c(1, 2)
+versus
+  x = c(x, c(a = 1, a = 2))
+  x = c(x, structure(c(1, 2), names = rep("a", 2)))
+
+ params[rep( "filter_e882181c-a259-4154-bab0-60a33fbe435e_operand", length(deg)) ] = deg
+ params = c(params, structure(deg, names = rep( "filter_e882181c-a259-4154-bab0-60a33fbe435e_operand", length(deg))))
